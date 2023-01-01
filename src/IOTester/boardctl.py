@@ -55,7 +55,7 @@ class Command:
 last_red_value = 0
 last_green_value = 0
 
-
+@micropython.native
 def set_red_led(value):
     global last_red_value
     previous = last_red_value
@@ -63,7 +63,7 @@ def set_red_led(value):
     last_red_value = value
     return previous
 
-
+@micropython.native
 def set_green_led(value):
     global last_green_value
     previous = last_green_value
@@ -318,15 +318,11 @@ async def board_hw_init():
     else:
         await boardwifi.disable_wifi()
 
-    await asyncio.sleep_ms(0)
-
-    print('Bluetooth')
     if defaults[boardsettings.Settings.BLUETOOTH]:
         asyncio.create_task(boardbt.enable_bt_with_retry())
     else:
         await boardbt.disable_bt()
 
-    print('First command')
     first_command = Command(defaults[boardsettings.Settings.INITIAL_COMMAND_TYPE],
                             defaults[boardsettings.Settings.INITIAL_COMMAND_SETPOINT])
     return await execute(first_command)

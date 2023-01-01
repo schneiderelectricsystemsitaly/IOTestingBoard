@@ -52,7 +52,7 @@ def compute_all_r():
     gc.collect()
     return output
 
-
+@micropython.native
 def __find_best_r(desired_r, av_values):
     if len(av_values) == 0:
         raise Exception('Call compute_all_r first')
