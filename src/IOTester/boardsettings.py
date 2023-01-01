@@ -1,4 +1,5 @@
 import ujson
+import gc
 
 __settings = None
 
