@@ -1,7 +1,6 @@
 import gc
 
 import machine
-import time
 import uasyncio as asyncio
 from micropython import const
 
@@ -52,14 +51,18 @@ class Command:
 
         return f'Command type:{cdesc}, setpoint: {setpoint_desc}'
 
+
 last_red_value = 0
 last_green_value = 0
+
+
 def set_red_led(value):
     global last_red_value
     previous = last_red_value
     BOARD['RED_LED_DAC'].write(value)
     last_red_value = value
     return previous
+
 
 def set_green_led(value):
     global last_green_value
@@ -68,13 +71,14 @@ def set_green_led(value):
     last_green_value = value
     return previous
 
+
 async def r_test():
     boardstate.update_event_time()
     boardstate.update_testmode(False)
     boardstate.update_r_setpoint(R_MAX)
     __optocouplers_off()
     await set_relay_pos(True)
-    
+
     NB_TESTS = const(3)
     cpt = 1
     while cpt <= NB_TESTS:
@@ -82,18 +86,20 @@ async def r_test():
         series = cpt % 2 == 0
         __set_rseries(not series)
         for i in range(0, len(BOARD['RESISTORS'])):
-            #best_tuple = resistors.find_best_r_with_opt(BOARD['R_VALUES'][i], resistors.available_values, BOARD['R_SERIES'])
-            #__set_v_parallel(False)
-            #final_result = await __configure_for_r(best_tuple)
-            #print(BOARD['R_VALUES'][i], best_tuple)
+            # best_tuple = resistors.find_best_r_with_opt(BOARD['R_VALUES'][i], resistors.available_values, BOARD['R_SERIES'])
+            # __set_v_parallel(False)
+            # final_result = await __configure_for_r(best_tuple)
+            # print(BOARD['R_VALUES'][i], best_tuple)
             for j in range(0, len(BOARD['RESISTORS'])):
                 __set_r(j, i == j)
-            print('Resistor', i, ' is now ON, expected', BOARD['R_VALUES'][i] + BOARD['OPTOCOUPLER_R'] + (BOARD['R_SERIES'] if series else 0))
-            #read_val = float(input("Actual reading"))
-            #BOARD['R_VALUES'][i]=read_val - BOARD['OPTOCOUPLER_R']
-            #print('New value', BOARD['R_VALUES'][i])
+            print('Resistor', i, ' is now ON, expected',
+                  BOARD['R_VALUES'][i] + BOARD['OPTOCOUPLER_R'] + (BOARD['R_SERIES'] if series else 0))
+            # read_val = float(input("Actual reading"))
+            # BOARD['R_VALUES'][i]=read_val - BOARD['OPTOCOUPLER_R']
+            # print('New value', BOARD['R_VALUES'][i])
             await asyncio.sleep_ms(5000)
         cpt += 1
+
 
 async def execute(command):
     boardstate.update_event_time()
@@ -104,7 +110,6 @@ async def execute(command):
 
     # flash briefly the RED LED when executing commands
     async with exec_lock:
-
 
         if command.ctype == Command.invalid:
             print('Invalid command', command)
@@ -118,8 +123,9 @@ async def execute(command):
             boardstate.update_r_setpoint(command.setpoint)
             __optocouplers_off()  # Before to switch, configure for open circuit
             if await set_relay_pos(True, False):
-                if command.setpoint != R_OPEN: # Nothing to do if open circuit command
-                    best_tuple = resistors.find_best_r_with_opt(command.setpoint, resistors.available_values, BOARD['R_SERIES'])
+                if command.setpoint != R_OPEN:  # Nothing to do if open circuit command
+                    best_tuple = resistors.find_best_r_with_opt(command.setpoint, resistors.available_values,
+                                                                BOARD['R_SERIES'])
                     __set_v_parallel(command.ctype == Command.measure_with_load)
                     final_result = await __configure_for_r(best_tuple)
                 else:
@@ -134,12 +140,13 @@ async def execute(command):
             final_result = False
 
     print('Executed', command, 'result', final_result, 'state', boardstate.get_state())
-    
+
     # restore LED
     set_red_led(prev1)
     set_green_led(prev2)
 
     return final_result
+
 
 async def __configure_for_r(best_tuple):
     if boardstate.is_verbose():
@@ -281,12 +288,6 @@ async def toggle_vmeter_load():
     return await execute(comm)
 
 
-def get_defaults():
-    values = boardsettings.settings.get_settings()
-    gc.collect()
-    return values
-
-
 async def board_hw_init():
     __print_wakeup_reason()
     print(f'Machine reset cause: {machine.reset_cause()}')
@@ -304,7 +305,7 @@ async def board_hw_init():
     esp32.wake_on_ext0(pin=BOARD['WAKE_SW'], level=esp32.WAKEUP_ANY_HIGH)
 
     # Configuration
-    defaults = get_defaults()
+    defaults = boardsettings.get_settings()
 
     boardstate.update_meter_commands(defaults[boardsettings.Settings.METER_COMMANDS])
     __optocouplers_off()
@@ -401,7 +402,7 @@ async def light_sleep(delay):
     import gc
     gc.collect()
     __print_wakeup_reason()
-    defaults = get_defaults()
+    defaults = boardsettings.get_settings()
 
     if defaults[boardsettings.Settings.WIFI]:
         gc.collect()

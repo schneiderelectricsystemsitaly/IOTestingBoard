@@ -5,7 +5,6 @@ import aioble
 import bluetooth
 import uasyncio as asyncio
 from machine import freq
-from micropython import const
 
 import IOTester.boardbtcfg as boardbtcfg
 import IOTester.boardctl as boardctl
@@ -64,7 +63,7 @@ async def toggle_bluetooth():
 async def __bt_command_execute(command, setpoint):
     boardstate.update_event_time()
     print(time.localtime(), 'BT received', command, setpoint)
-    settings = boardsettings.settings
+    settings = boardsettings.get_settings()
 
     if command == boardbtcfg.COMMAND_ENABLE_WIFI:
         return await boardwifi.enable_wifi()
@@ -144,7 +143,7 @@ async def __bt_command_execute(command, setpoint):
         from machine import freq
         freq(80000000)
     elif command == boardbtcfg.COMMAND_CONFIGURE_METER_COMM:
-        settings.add_v_threshold(setpoint[0],setpoint[1],setpoint[2],setpoint[3])
+        settings.add_v_threshold(setpoint[0], setpoint[1], setpoint[2], setpoint[3])
         print('Applied v threshold', setpoint)
     else:
         print('Unrecognized BT command', command, setpoint)
@@ -316,7 +315,7 @@ def __get_notification_data():
     # 11- battery level (1 byte)
     state = boardstate.get_state()
     status_b1 = int(state.wifi) << 6 | int(state.relay) << 4 | int(state.bluetooth) << 1
-    
+
     if freq() == 240000000:
         i_freq = 3
     elif freq() == 160000000:
@@ -325,7 +324,7 @@ def __get_notification_data():
         i_freq = 1
     else:
         i_freq = 0
-        
+
     status_b2 = int(i_freq) << 5 | \
                 (0b1 if state.VERBOSE else 0b0) << 3 | \
                 (0b1 if state.test_mode else 0b0) << 2 | \

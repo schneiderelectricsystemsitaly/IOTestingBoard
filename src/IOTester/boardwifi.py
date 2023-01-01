@@ -3,9 +3,9 @@ import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
-import IOTester.boardctl as boardctl
 import IOTester.boardsettings as boardsettings
 import IOTester.boardstate as boardstate
+
 
 async def enable_webrepl():
     if boardstate.get_state().wifi != boardstate.WifiState.enabled:
@@ -15,11 +15,13 @@ async def enable_webrepl():
     webrepl.start()
     print('Enabled WEBREPL')
 
+
 def disable_webrepl():
     import webrepl
     webrepl.stop()
     print('Disabled WEBREPL')
-    
+
+
 async def enable_wifi():
     print(f'** Enabling Wifi')
     MAX_TRIES = const(30)
@@ -30,7 +32,7 @@ async def enable_wifi():
         sta_if.active(True)
     await asyncio.sleep_ms(250)
 
-    settings = boardctl.get_defaults()
+    settings = boardsettings.get_settings()
     if not sta_if.isconnected():
         sta_if.connect(settings[boardsettings.Settings.WIFI_NETWORK], settings[boardsettings.Settings.WIFI_PASSWORD])
 

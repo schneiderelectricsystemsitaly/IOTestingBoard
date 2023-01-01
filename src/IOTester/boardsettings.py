@@ -1,7 +1,7 @@
 import ujson
-import IOTester.boardctl as boardctl
 
-settings = None
+__settings = None
+
 
 class Settings:
     WIFI = 'WIFI'
@@ -13,7 +13,7 @@ class Settings:
     WIFI_PASSWORD = 'WIFI_PASSWORD'
     DEEPSLEEP_MIN = 'DEEPSLEEP_MIN'
     THRESHOLD = 'THRESHOLD'
-    
+
     def __init__(self, filename='saved_settings.hex'):
         print('Loading', filename)
 
@@ -54,27 +54,27 @@ class Settings:
             self.save_changes()
 
     def add_v_threshold(self, idx, voltage, ctype, setpoint):
-        if 0<=idx<16:
+        if 0 <= idx < 16:
             key = Settings.THRESHOLD + str(idx)
             if voltage == 0:
                 self.remove_key(key)
             else:
                 self.add_key(key, (voltage, ctype, setpoint))
-    
+
     def get_thresholds(self):
         output = []
-        for i in range(0,16):
+        for i in range(0, 16):
             val = self.get_value(Settings.THRESHOLD + str(i))
             if val is not None:
                 output.append(val)
         return val
-    
+
     def factory_defaults(self):
         self.add_key(Settings.WIFI, False)
         self.add_key(Settings.BLUETOOTH, True)
         self.add_key(Settings.METER_COMMANDS, True)
-        self.add_key(Settings.INITIAL_COMMAND_TYPE, 1) #bypass
-        self.add_key(Settings.INITIAL_COMMAND_SETPOINT, 0xFFF) #R_OPEN
+        self.add_key(Settings.INITIAL_COMMAND_TYPE, 1)  # bypass
+        self.add_key(Settings.INITIAL_COMMAND_SETPOINT, 0xFFF)  # R_OPEN
         self.add_key(Settings.WIFI_NETWORK, '')
         self.add_key(Settings.WIFI_PASSWORD, '')
         self.add_key(Settings.DEEPSLEEP_MIN, 15)  # 15 minutes
@@ -85,6 +85,14 @@ class Settings:
         self.add_v_threshold(4, 16, 2, 0)
         self.add_v_threshold(5, 18, 3, 550)
         self.add_v_threshold(6, 20, 1, 0xFFFF)
-        
+
     def get_settings(self):
         return self._db.copy()
+
+
+def get_settings():
+    global __settings
+    if __settings is None:
+        __settings = Settings()
+        gc.collect()
+    return __settings

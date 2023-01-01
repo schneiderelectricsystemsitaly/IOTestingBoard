@@ -62,6 +62,26 @@ class OTAUpdater:
         print('No new updates found...')
         return False
 
+    def is_greater(self, v1_str, v2_str):
+        if v1_str is None or v2_str is None:
+            return False
+        
+        try:
+            v1 = [x for x in v1_str.split('.')]
+            v2 = [x for x in v2_str.split('.')]
+            
+            if len(v1) >= len(v2):
+                for idx in range(0, len(v1)):
+                    if int(v1[idx]) > int(v2[idx]):
+                        return True
+                    if int(v1[idx]) < int(v2[idx]):
+                        return False
+                return False
+            else:
+                return v1_str > v2_str # fallback to string ordering
+        except:
+            return v1_str > v2_str # fallback to string ordering
+        
     def install_update_if_available(self) -> bool:
         """This method will immediately install the latest version if out-of-date.
         
@@ -75,7 +95,7 @@ class OTAUpdater:
         """
 
         (current_version, latest_version) = self._check_for_new_version()
-        if latest_version > current_version:
+        if self.is_greater(latest_version,current_version):
             print('Updating to version {}...'.format(latest_version))
             self._create_new_version_file(latest_version)
             self._download_new_version(latest_version)

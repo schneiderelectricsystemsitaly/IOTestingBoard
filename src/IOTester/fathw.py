@@ -6,9 +6,9 @@ from machine import freq
 from micropython import const
 
 import IOTester.boardctl as boardctl
+import IOTester.boardsettings as boardsettings
 import IOTester.boardstate as boardstate
 import IOTester.resistors as resistors
-import IOTester.boardsettings as boardsettings
 from .boardcfg import BOARD
 from .boardctl import Command
 
@@ -72,11 +72,11 @@ async def __animate_leds():
 
 async def __meter_commands_check():
     METER_CHECK_LOOP_SLEEP_MS = const(500)
-    
+
     while True:
         state = boardstate.get_state()
         # execute only if in correct mode with enabled meter commands
-        if state.meter_commands and not state.meter_parallel and state.relay == boardstate.RelayState.resistor: 
+        if state.meter_commands and not state.meter_parallel and state.relay == boardstate.RelayState.resistor:
             voltage = boardctl.get_vmeter()
             if voltage > 1:
                 commands = boardsettings.get_thresholds()
@@ -88,7 +88,6 @@ async def __meter_commands_check():
 
 
 async def __sleep_check():
-    from boardsettings import Settings
     CHECK_LOOP_SLEEP_MS = const(2000)
     IDLE_LIGHT_THRESHOLD_MS = const(60 * 1000)
     LIGHT_DURATION_MS = const(5000)
@@ -96,7 +95,7 @@ async def __sleep_check():
     while True:
         current_state = boardstate.get_state()
         settings = boardctl.get_defaults()
-        idle_delay_ms = settings[Settings.DEEPSLEEP_MIN] * 60 * 1000
+        idle_delay_ms = settings[boardsettings.Settings.DEEPSLEEP_MIN] * 60 * 1000
 
         if 0 < idle_delay_ms <= time.ticks_ms() - current_state.last_event:
             print(f'Going into deepsleep after {idle_delay_ms / 1000}s of last event.')
@@ -146,8 +145,7 @@ async def __test_loop():
 
 async def main():
     gc.collect()
-    boardsettings.settings = boardsettings.Settings()
-    
+
     # precompute possible R values
     resistors.compute_all_r()
 

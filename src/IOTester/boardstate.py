@@ -1,6 +1,9 @@
 import time
+
 import machine
+
 import IOTester.boardctl as boardctl
+
 
 class BluetoothState:
     unknown = 0
@@ -58,8 +61,8 @@ class BoardState:
             actual_desc = f'{self.actual_r} Ω'
 
         desc = f'Relay={self.relay}, Bluetooth={self.bluetooth}, Wifi={self.wifi} (IP:{self.ip_config}),' + \
-            f'setpoint_r={setpoint_desc}, actual_r={actual_desc}, last_result={self.last_command_result},' + \
-            f'err count={self.error_cpt}/{self.command_cpt} Battery={self.battery_percent}%'
+               f'setpoint_r={setpoint_desc}, actual_r={actual_desc}, last_result={self.last_command_result},' + \
+               f'err count={self.error_cpt}/{self.command_cpt} Battery={self.battery_percent}%'
 
         if self.error_cpt > 0:
             desc += f' last err msg={self.last_error}'

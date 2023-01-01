@@ -1,4 +1,5 @@
 import gc
+
 from IOTester.boardcfg import BOARD
 
 available_values = {}
