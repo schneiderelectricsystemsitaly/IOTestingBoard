@@ -146,7 +146,6 @@ class OTAUpdater:
         file_list = self.http_client.get(url)
         file_list_json = file_list.json()
         for file in file_list_json:
-            print(file)
             path = self.modulepath(self.new_version_dir + '/' + file['path'].replace(self.main_dir + '/', '').replace(self.github_src_dir, ''))
             if file['type'] == 'file':
                 gitPath = file['path']

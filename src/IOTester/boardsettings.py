@@ -1,7 +1,7 @@
 import ujson
+import IOTester.boardctl as boardctl
 
-import IOTester.boardctl
-
+settings = None
 
 class Settings:
     WIFI = 'WIFI'
@@ -88,6 +88,3 @@ class Settings:
         
     def get_settings(self):
         return self._db.copy()
-
-
-settings = Settings()

@@ -5,9 +5,10 @@ import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
-import IOTester.boardctl
-import IOTester.boardstate
-import IOTester.resistors
+import IOTester.boardctl as boardctl
+import IOTester.boardstate as boardstate
+import IOTester.resistors as resistors
+import IOTester.boardsettings as boardsettings
 from .boardcfg import BOARD
 from .boardctl import Command
 
@@ -145,7 +146,8 @@ async def __test_loop():
 
 async def main():
     gc.collect()
-
+    boardsettings.settings = boardsettings.Settings()
+    
     # precompute possible R values
     resistors.compute_all_r()
 

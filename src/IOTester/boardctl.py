@@ -5,11 +5,11 @@ import time
 import uasyncio as asyncio
 from micropython import const
 
-import IOTester.boardbt
-import IOTester.boardsettings
-import IOTester.boardstate
-import IOTester.boardwifi
-import IOTester.resistors
+import IOTester.boardbt as boardbt
+import IOTester.boardsettings as boardsettings
+import IOTester.boardstate as boardstate
+import IOTester.boardwifi as boardwifi
+import IOTester.resistors as resistors
 from .boardcfg import BOARD
 
 # special values for resistor settings

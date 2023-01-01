@@ -1,17 +1,32 @@
 import time
-import IOTester
 import secrets
 import ota_update
 import machine
+import network
 
 def download_and_install_update_if_available():
-    o = ota_update.OTAUpdater('https://github.com/PBrunot/IOTestingBoard', github_src_dir='src', main_dir='IOTester', headers={'Authorization': 'token {}'.format(secrets.GITHUB_TOKEN)})
-    if o.install_update_if_available_after_boot(secrets.WIFI_SSID, secrets.WIFI_PASSWORD):
-        machine.reset()
-    if o.check_for_update_to_install_during_next_reboot():
-        machine.reset()
+    sta_if = network.WLAN(network.STA_IF)
+    if not sta_if.isconnected():
+        print('connecting to network...')
+        sta_if.active(True)
+        sta_if.connect(secrets.WIFI_SSID, secrets.WIFI_PASSWORD)
+        cpt = 0
+        while not sta_if.isconnected() and cpt < 10:
+            time.sleep(1)
+            cpt += 1
+    
+    if sta_if.isconnected():        
+        print('network config:', sta_if.ifconfig())
+        o = ota_update.OTAUpdater('https://github.com/PBrunot/IOTestingBoard', github_src_dir='src', main_dir='IOTester', headers={'Authorization': 'token {}'.format(secrets.GITHUB_TOKEN)})
+        if o.install_update_if_available():
+            machine.reset()
+        else:
+            del(o)
+            gc.collect()
+    print('Update check complete')
         
 def start():
+    import IOTester
     IOTester.fathw.main()
 
 def boot():
@@ -19,6 +34,7 @@ def boot():
         download_and_install_update_if_available()
     except Exception as e:
         print('OTA Updater', repr(e))
+        raise e
     
     start()
 
