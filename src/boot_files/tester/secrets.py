@@ -1,0 +1,3 @@
+WIFI_SSID = ''
+WIFI_PASSWORD = '!'
+GITHUB_TOKEN = ''
