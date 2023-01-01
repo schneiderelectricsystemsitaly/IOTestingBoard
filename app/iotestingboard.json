@@ -1,0 +1,11 @@
+{
+    "urls": [
+      ["board.", "github:org/PBrunot/IOTestingBoard/app.py"],
+      ["mlx90640/utils.py", "github:org/micropython-mlx90640/mlx90640/utils.py"]
+    ],
+    "deps": [
+      ["uasyncio", "latest"],
+      ["aioble", "latest"]
+    ],
+    "version": "0.2"
+  }
