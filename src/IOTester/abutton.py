@@ -66,7 +66,7 @@ class Pushbutton:
     def __call__(self):
         return self.state
 
-    @micropython.native
+    #micropython.native
     async def buttoncheck(self):
         t_change = None
         supp = False

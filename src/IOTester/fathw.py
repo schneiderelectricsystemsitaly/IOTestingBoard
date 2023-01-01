@@ -19,7 +19,7 @@ def __is_client_connected():
     return boardstate.get_state().bluetooth == boardstate.BluetoothState.enabled_with_client or \
         boardstate.get_state().wifi == boardstate.WifiState.enabled
 
-@micropython.native
+#micropython.native
 async def __animate_leds():
     error = False
     cpt = 0
@@ -68,7 +68,7 @@ async def __animate_leds():
             boardstate.runtime_memory_info()
             print(boardstate.get_state())
 
-@micropython.native
+#micropython.native
 async def __meter_commands_check():
     METER_CHECK_LOOP_SLEEP_MS = const(500)
 
@@ -85,7 +85,7 @@ async def __meter_commands_check():
                         await boardctl.execute(comm)
         await asyncio.sleep_ms(METER_CHECK_LOOP_SLEEP_MS)
 
-@micropython.native
+#micropython.native
 async def __sleep_check():
     CHECK_LOOP_SLEEP_MS = const(2000)
     IDLE_LIGHT_THRESHOLD_MS = const(60 * 1000)

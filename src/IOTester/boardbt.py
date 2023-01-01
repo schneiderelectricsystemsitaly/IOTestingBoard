@@ -60,7 +60,7 @@ async def toggle_bluetooth():
         await disable_bt()
 
 
-@micropython.native
+#micropython.native
 async def __bt_command_execute(command, setpoint):
     boardstate.update_event_time()
     print(time.localtime(), 'BT received', command, setpoint)
@@ -307,7 +307,7 @@ async def __board_command_loop(board_command_char):
     print('\tBoard command task terminating.')
 
 
-@micropython.native
+#micropython.native
 def __get_notification_data():
     gc.collect()
     # 0 - WIFI b7 b6 RELAY b5 b4 BLUETOOTH b3 b2 b1 UNUSED b0
@@ -345,7 +345,7 @@ def __get_notification_data():
     return values
 
 
-@micropython.native
+#micropython.native
 def notify_change():
     global __status_characteristic
     # Skip if not BT active

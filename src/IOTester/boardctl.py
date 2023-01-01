@@ -10,7 +10,7 @@ import IOTester.boardstate as boardstate
 import IOTester.boardwifi as boardwifi
 import IOTester.resistors as resistors
 from .boardcfg import BOARD
-import time
+
 
 # special values for resistor settings
 # R_OPEN = open opto-couplers resistance >10 MΩ
@@ -99,7 +99,7 @@ async def r_test():
             await asyncio.sleep_ms(5000)
         cpt += 1
 
-@micropython.native
+#micropython.native
 async def execute(command):
     boardstate.update_event_time()
     final_result = False
@@ -145,7 +145,7 @@ async def execute(command):
     return final_result
 
 
-@micropython.native
+#micropython.native
 def __configure_for_r(best_tuple):
     if boardstate.is_verbose():
         print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]}")
@@ -161,7 +161,7 @@ def __configure_for_r(best_tuple):
     boardstate.update_r_actual(best_tuple[0])
     return True
 
-@micropython.native
+#micropython.native
 def __set_digital_pin(pin_name, req_value):
     if req_value:
         BOARD[pin_name].on()
@@ -190,7 +190,7 @@ def __set_v_parallel(req_value):
         boardstate.update_v_parallel_state(req_value)
     return result
 
-@micropython.native
+#micropython.native
 def __set_r(idx, req_value):
     assert (0 <= idx < len(BOARD['RESISTORS']))
     if req_value:
@@ -255,7 +255,7 @@ async def set_relay_pos(is_set, force=False):
     boardstate.update_last_result(True, True)
     return True
 
-@micropython.native
+#micropython.native
 async def toggle_relay():
     print("** Toggle relay called")
     boardstate.update_event_time()
@@ -413,7 +413,7 @@ async def light_sleep(delay):
     else:
         await boardbt.disable_bt()
 
-@micropython.native
+#micropython.native
 def __optocouplers_off():
     # switch off optocouplers
     for i in range(0, len(BOARD['RESISTORS'])):
