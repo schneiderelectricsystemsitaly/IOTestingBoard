@@ -4,19 +4,13 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-import settings.boardsettings as boardsettings
 import IOTester.boardstate as boardstate
 import IOTester.boardwifi as boardwifi
 import IOTester.resistors as resistors
 import IOTester.state
-from .boardcfg import BOARD
+import settings.boardsettings as boardsettings
+from .boardcfg import BOARD, R_OPEN, R_MAX
 from .command import Command
-
-# special values for resistor settings
-# R_OPEN = open opto-couplers resistance >10 MΩ
-# R_MAX = the maximum value closed circuit obtainable by resistor network
-R_OPEN = const(0xFFFF)
-R_MAX = const(0xFFFE)
 
 last_red_value = 0
 last_green_value = 0

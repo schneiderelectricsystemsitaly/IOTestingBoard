@@ -48,3 +48,9 @@ assert (len(BOARD['RESISTORS']) == len(BOARD['R_VALUES']))
 # Set orange during startup
 BOARD['RED_LED_DAC'].write(160)
 BOARD['GREEN_LED_DAC'].write(190)
+
+# special values for resistor settings
+# R_OPEN = open opto-couplers resistance >10 MΩ
+# R_MAX = the maximum value closed circuit obtainable by resistor network
+R_OPEN = const(0xFFFF)
+R_MAX = const(0xFFFE)

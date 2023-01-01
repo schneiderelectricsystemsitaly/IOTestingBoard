@@ -7,8 +7,8 @@ import uasyncio as asyncio
 from machine import freq
 
 import IOTester.boardbtcfg as boardbtcfg
-from .boardctl import (execute, light_sleep, deep_sleep, r_test, get_battery_percent)
 from settings.boardsettings import (get_settings, Settings)
+from .boardctl import (execute, light_sleep, deep_sleep, r_test, get_battery_percent)
 from .boardstate import (get_state, update_bt_state, update_event_time, update_last_result,
                          update_meter_commands, set_verbose, is_verbose, set_battery, set_notify_callback)
 from .boardwifi import (enable_wifi, disable_wifi, enable_webrepl, disable_webrepl)

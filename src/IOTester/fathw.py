@@ -6,14 +6,14 @@ from machine import freq
 from micropython import const
 
 import IOTester.state
-from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
-                       light_sleep, R_MAX, R_OPEN, board_hw_init)
 from settings.boardsettings import get_settings, Settings
+from .boardcfg import BOARD, R_OPEN, R_MAX
+from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
+                       light_sleep, board_hw_init)
 from .boardstate import get_state, runtime_memory_info, update_testmode, update_last_result
-from .state import WifiState, BluetoothState
-from .resistors import compute_all_r
-from .boardcfg import BOARD
 from .command import Command
+from .resistors import compute_all_r
+from .state import WifiState, BluetoothState
 
 
 # FUNCTIONS
