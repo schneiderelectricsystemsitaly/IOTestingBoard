@@ -59,6 +59,7 @@ async def toggle_bluetooth():
     else:
         await disable_bt()
 
+
 @micropython.native
 async def __bt_command_execute(command, setpoint):
     boardstate.update_event_time()
@@ -204,6 +205,8 @@ async def __peripheral_task():
             print("Too many clients")
             await asyncio.sleep_ms(1000)
 
+        await asyncio.sleep_ms(100)
+
     print('\tAdvertising task terminating')
 
 
@@ -303,6 +306,7 @@ async def __board_command_loop(board_command_char):
             pass
     print('\tBoard command task terminating.')
 
+
 @micropython.native
 def __get_notification_data():
     gc.collect()
@@ -339,6 +343,7 @@ def __get_notification_data():
     values.extend(int(state.error_cpt).to_bytes(1, "little"))
     values.extend(int(state.battery_percent).to_bytes(1, "little"))
     return values
+
 
 @micropython.native
 def notify_change():
@@ -422,3 +427,4 @@ async def __enable_bt():
     print('** Bluetooth enabled')
     await asyncio.sleep(0)
     return True
+

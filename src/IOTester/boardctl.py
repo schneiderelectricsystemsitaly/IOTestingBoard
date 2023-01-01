@@ -10,14 +10,13 @@ import IOTester.boardstate as boardstate
 import IOTester.boardwifi as boardwifi
 import IOTester.resistors as resistors
 from .boardcfg import BOARD
+import time
 
 # special values for resistor settings
 # R_OPEN = open opto-couplers resistance >10 MΩ
 # R_MAX = the maximum value closed circuit obtainable by resistor network
 R_OPEN = const(0xFFFF)
 R_MAX = const(0xFF00)
-
-exec_lock = asyncio.Lock()
 
 
 class Command:
@@ -55,7 +54,7 @@ class Command:
 last_red_value = 0
 last_green_value = 0
 
-@micropython.native
+
 def set_red_led(value):
     global last_red_value
     previous = last_red_value
@@ -63,7 +62,7 @@ def set_red_led(value):
     last_red_value = value
     return previous
 
-@micropython.native
+
 def set_green_led(value):
     global last_green_value
     previous = last_green_value
@@ -88,7 +87,7 @@ async def r_test():
         for i in range(0, len(BOARD['RESISTORS'])):
             # best_tuple = resistors.find_best_r_with_opt(BOARD['R_VALUES'][i], resistors.available_values, BOARD['R_SERIES'])
             # __set_v_parallel(False)
-            # final_result = await __configure_for_r(best_tuple)
+            # final_result = __configure_for_r(best_tuple)
             # print(BOARD['R_VALUES'][i], best_tuple)
             for j in range(0, len(BOARD['RESISTORS'])):
                 __set_r(j, i == j)
@@ -100,44 +99,42 @@ async def r_test():
             await asyncio.sleep_ms(5000)
         cpt += 1
 
-
+@micropython.native
 async def execute(command):
     boardstate.update_event_time()
     final_result = False
 
+    # flash briefly the RED LED when executing commands
     prev1 = set_red_led(220)
     prev2 = set_green_led(250)
 
-    # flash briefly the RED LED when executing commands
-    async with exec_lock:
-
-        if command.ctype == Command.invalid:
-            print('Invalid command', command)
-        elif command.ctype == Command.bypass:
-            boardstate.update_testmode(False)
-            boardstate.update_r_setpoint(R_MAX)
-            __optocouplers_off()
-            final_result = await set_relay_pos(False, False)
-        elif command.ctype == Command.generate_r or command.ctype == Command.measure_with_load:
-            boardstate.update_testmode(False)
-            boardstate.update_r_setpoint(command.setpoint)
-            __optocouplers_off()  # Before to switch, configure for open circuit
-            if await set_relay_pos(True, False):
-                if command.setpoint != R_OPEN:  # Nothing to do if open circuit command
-                    best_tuple = resistors.find_best_r_with_opt(command.setpoint, resistors.available_values,
-                                                                BOARD['R_SERIES'])
-                    __set_v_parallel(command.ctype == Command.measure_with_load)
-                    final_result = await __configure_for_r(best_tuple)
-                else:
-                    final_result = True
+    if command.ctype == Command.invalid:
+        print('Invalid command', command)
+    elif command.ctype == Command.bypass:
+        boardstate.update_testmode(False)
+        boardstate.update_r_setpoint(R_MAX)
+        __optocouplers_off()
+        final_result = await set_relay_pos(False, False)
+    elif command.ctype == Command.generate_r or command.ctype == Command.measure_with_load:
+        boardstate.update_testmode(False)
+        boardstate.update_r_setpoint(command.setpoint)
+        __optocouplers_off()  # Before to switch, configure for open circuit
+        if await set_relay_pos(True, False):
+            if command.setpoint != R_OPEN:  # Nothing to do if open circuit command
+                best_tuple = resistors.find_best_r_with_opt(command.setpoint, resistors.available_values,
+                                                            BOARD['R_SERIES'])
+                __set_v_parallel(command.ctype == Command.measure_with_load)
+                final_result = __configure_for_r(best_tuple)
             else:
-                final_result = False
-        elif command.ctype == Command.test_mode:
-            __optocouplers_off()
-            boardstate.update_testmode(True)
-            final_result = True
+                final_result = True
         else:
             final_result = False
+    elif command.ctype == Command.test_mode:
+        __optocouplers_off()
+        boardstate.update_testmode(True)
+        final_result = True
+    else:
+        final_result = False
 
     print('Executed', command, 'result', final_result, 'state', boardstate.get_state())
 
@@ -147,8 +144,9 @@ async def execute(command):
 
     return final_result
 
+
 @micropython.native
-async def __configure_for_r(best_tuple):
+def __configure_for_r(best_tuple):
     if boardstate.is_verbose():
         print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]}")
     series_r = best_tuple[2] == 0
@@ -161,7 +159,6 @@ async def __configure_for_r(best_tuple):
             return False
 
     boardstate.update_r_actual(best_tuple[0])
-    await asyncio.sleep_ms(0)
     return True
 
 @micropython.native
@@ -182,11 +179,11 @@ def __set_digital_pin(pin_name, req_value):
     boardstate.update_last_result(True)
     return True
 
-@micropython.native
+
 def __set_rseries(req_value):
     return __set_digital_pin('SERIESR_CMD', req_value)
 
-@micropython.native
+
 def __set_v_parallel(req_value):
     result = __set_digital_pin('VMETER_EN', req_value)
     if result:
@@ -213,7 +210,7 @@ def __set_r(idx, req_value):
     boardstate.update_last_result(True)
     return True
 
-@micropython.native
+
 async def set_relay_pos(is_set, force=False):
     RELAY_ACTION_TIME_MS = const(5)
     current_state = boardstate.get_state().relay
@@ -258,7 +255,7 @@ async def set_relay_pos(is_set, force=False):
     boardstate.update_last_result(True, True)
     return True
 
-
+@micropython.native
 async def toggle_relay():
     print("** Toggle relay called")
     boardstate.update_event_time()
@@ -450,3 +447,4 @@ async def deep_sleep():
     boardstate.update_event_time()
 
     machine.deepsleep(2000000000)
+
