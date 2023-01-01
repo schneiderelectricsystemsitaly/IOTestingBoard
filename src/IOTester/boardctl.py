@@ -9,47 +9,16 @@ import IOTester.boardsettings as boardsettings
 import IOTester.boardstate as boardstate
 import IOTester.boardwifi as boardwifi
 import IOTester.resistors as resistors
+from .boardbt import __get_notification_data
 from .boardcfg import BOARD
-
+from .boardstate import get_state, BluetoothState
+from .command import Command
 
 # special values for resistor settings
 # R_OPEN = open opto-couplers resistance >10 MΩ
 # R_MAX = the maximum value closed circuit obtainable by resistor network
 R_OPEN = const(0xFFFF)
-R_MAX = const(0xFF00)
-
-
-class Command:
-    invalid = 0
-    bypass = 1
-    generate_r = 2
-    measure_with_load = 3
-    test_mode = 4
-
-    def __init__(self, ctype, setpoint):
-        self.ctype = ctype
-        self.setpoint = setpoint
-
-    def __str__(self):
-        cdesc = 'invalid'
-        if self.ctype == Command.bypass:
-            cdesc = 'bypass'
-        elif self.ctype == Command.generate_r:
-            cdesc = 'resistor'
-        elif self.ctype == Command.measure_with_load:
-            cdesc = 'voltmeter with load'
-        elif self.ctype == Command.test_mode:
-            cdesc = 'test'
-
-        if self.setpoint == R_MAX:
-            setpoint_desc = "R_MAX Ω"
-        elif self.setpoint == R_OPEN:
-            setpoint_desc = "OPEN"
-        else:
-            setpoint_desc = f'{self.setpoint} Ω'
-
-        return f'Command type:{cdesc}, setpoint: {setpoint_desc}'
-
+R_MAX = const(0xFFFE)
 
 last_red_value = 0
 last_green_value = 0
@@ -99,7 +68,8 @@ async def r_test():
             await asyncio.sleep_ms(5000)
         cpt += 1
 
-#micropython.native
+
+# micropython.native
 async def execute(command):
     boardstate.update_event_time()
     final_result = False
@@ -145,7 +115,7 @@ async def execute(command):
     return final_result
 
 
-#micropython.native
+# micropython.native
 def __configure_for_r(best_tuple):
     if boardstate.is_verbose():
         print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]}")
@@ -161,7 +131,8 @@ def __configure_for_r(best_tuple):
     boardstate.update_r_actual(best_tuple[0])
     return True
 
-#micropython.native
+
+# micropython.native
 def __set_digital_pin(pin_name, req_value):
     if req_value:
         BOARD[pin_name].on()
@@ -190,7 +161,8 @@ def __set_v_parallel(req_value):
         boardstate.update_v_parallel_state(req_value)
     return result
 
-#micropython.native
+
+# micropython.native
 def __set_r(idx, req_value):
     assert (0 <= idx < len(BOARD['RESISTORS']))
     if req_value:
@@ -255,7 +227,8 @@ async def set_relay_pos(is_set, force=False):
     boardstate.update_last_result(True, True)
     return True
 
-#micropython.native
+
+# micropython.native
 async def toggle_relay():
     print("** Toggle relay called")
     boardstate.update_event_time()
@@ -413,7 +386,8 @@ async def light_sleep(delay):
     else:
         await boardbt.disable_bt()
 
-#micropython.native
+
+# micropython.native
 def __optocouplers_off():
     # switch off optocouplers
     for i in range(0, len(BOARD['RESISTORS'])):
@@ -448,3 +422,18 @@ async def deep_sleep():
 
     machine.deepsleep(2000000000)
 
+
+def notify_change():
+    global __status_characteristic
+    # Skip if not BT active
+    if get_state().bluetooth not in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
+        return True
+    try:
+        # Check interface is initialized
+        if __status_characteristic:
+            data = __get_notification_data()
+            __status_characteristic.write(data, True)
+        return True
+    except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
+        print('notify_change', repr(e))
+        return False

@@ -3,12 +3,12 @@ import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
-import IOTester.boardsettings as boardsettings
-import IOTester.boardstate as boardstate
+from .boardsettings import (get_settings, Settings)
+from .boardstate import (get_state, WifiState, update_wifi_state, update_event_time)
 
 
 async def enable_webrepl():
-    if boardstate.get_state().wifi != boardstate.WifiState.enabled:
+    if get_state().wifi != WifiState.enabled:
         await enable_wifi()
     freq(240000000)  # Wifi and REPL require more CPU
     import webrepl
@@ -32,11 +32,11 @@ async def enable_wifi():
         sta_if.active(True)
     await asyncio.sleep_ms(250)
 
-    settings = boardsettings.get_settings()
+    settings = get_settings()
     if not sta_if.isconnected():
-        sta_if.connect(settings[boardsettings.Settings.WIFI_NETWORK], settings[boardsettings.Settings.WIFI_PASSWORD])
+        sta_if.connect(settings[Settings.WIFI_NETWORK], settings[Settings.WIFI_PASSWORD])
 
-    boardstate.update_wifi_state(boardstate.WifiState.enabling)
+    update_wifi_state(WifiState.enabling)
     cpt = 0
     while not sta_if.isconnected():
         await asyncio.sleep_ms(500)
@@ -45,25 +45,25 @@ async def enable_wifi():
             break
     if sta_if.isconnected():
         print('Wifi connected', sta_if.ifconfig())
-        boardstate.update_wifi_state(boardstate.WifiState.enabled)
+        update_wifi_state(WifiState.enabled)
         return True
     else:
         print('Failure to connect wifi')
         sta_if.active(False)
-        boardstate.update_wifi_state(boardstate.WifiState.disabled)
+        update_wifi_state(WifiState.disabled)
         return False
 
 
 async def disable_wifi():
     print('** Disabling Wifi')
     cpt = 0
-    while boardstate.get_state().wifi == boardstate.WifiState.enabling and cpt < 31:
+    while get_state().wifi == WifiState.enabling and cpt < 31:
         await asyncio.sleep_ms(500)
         cpt += 1
     sta_if = network.WLAN(network.STA_IF)
     sta_if.active(False)
     await asyncio.sleep_ms(100)
-    boardstate.update_wifi_state(boardstate.WifiState.disabled)
+    update_wifi_state(WifiState.disabled)
     print('** Disabled Wifi ')
     freq(80000000)  # go back to low frequency
     return True
@@ -71,11 +71,11 @@ async def disable_wifi():
 
 # callback from button
 async def toggle_wifi():
-    boardstate.update_event_time()
-    wifi_state = boardstate.get_state().wifi
-    if wifi_state in [boardstate.WifiState.disabled, boardstate.WifiState.unknown]:
+    update_event_time()
+    wifi_state = get_state().wifi
+    if wifi_state in [WifiState.disabled, WifiState.unknown]:
         return await enable_wifi()
-    elif wifi_state == boardstate.WifiState.enabled:
+    elif wifi_state == WifiState.enabled:
         return await disable_wifi()
     else:  # enabling
         print(f'Action already in progress (wifi_state:{wifi_state})')

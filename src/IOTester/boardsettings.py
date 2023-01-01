@@ -1,5 +1,6 @@
-import ujson
 import gc
+
+import ujson
 
 __settings = None
 
@@ -92,6 +93,7 @@ class Settings:
 
     def __setitem__(self, key, value):
         return self.add_key(key, value)
+
 
 def get_settings():
     global __settings

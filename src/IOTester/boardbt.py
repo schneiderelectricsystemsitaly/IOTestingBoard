@@ -7,11 +7,12 @@ import uasyncio as asyncio
 from machine import freq
 
 import IOTester.boardbtcfg as boardbtcfg
-import IOTester.boardctl as boardctl
-import IOTester.boardsettings as boardsettings
-import IOTester.boardstate as boardstate
-import IOTester.boardwifi as boardwifi
-from .boardsettings import Settings
+from .boardctl import (execute, light_sleep, deep_sleep, r_test, get_battery_percent)
+from .boardsettings import (get_settings, Settings)
+from .boardstate import (get_state, BluetoothState, update_bt_state, update_event_time, update_last_result,
+                         update_meter_commands, set_verbose, is_verbose, set_battery)
+from .boardwifi import (enable_wifi, disable_wifi, enable_webrepl, disable_webrepl)
+from .command import Command
 
 __task_adv = None
 __task_status = None
@@ -36,77 +37,77 @@ def launch(func, tup_args):
 
 
 async def enable_bt_with_retry():
-    print('** Bluetooth enabling...', boardstate.get_state().bluetooth)
-    boardstate.update_bt_state(boardstate.BluetoothState.enabling)
+    print('** Bluetooth enabling...', get_state().bluetooth)
+    update_bt_state(BluetoothState.enabling)
     gc.collect()
-    while not boardstate.get_state().bluetooth in [boardstate.BluetoothState.disabling,
-                                                   boardstate.BluetoothState.disabled,
-                                                   boardstate.BluetoothState.enabled,
-                                                   boardstate.BluetoothState.enabled_with_client]:
+    while not get_state().bluetooth in [BluetoothState.disabling,
+                                        BluetoothState.disabled,
+                                        BluetoothState.enabled,
+                                        BluetoothState.enabled_with_client]:
         if not await __enable_bt():
-            boardstate.update_bt_state(boardstate.BluetoothState.failed)
+            update_bt_state(BluetoothState.failed)
             print('** Failed to enable BT, will retry...')
             await asyncio.sleep_ms(5000)
 
 
 async def toggle_bluetooth():
     print("** Toggle bluetooth called")
-    boardstate.update_event_time()
-    bt_state = boardstate.get_state().bluetooth
-    if (bt_state in [boardstate.BluetoothState.disabled, boardstate.BluetoothState.unknown,
-                     boardstate.BluetoothState.failed]):
+    update_event_time()
+    bt_state = get_state().bluetooth
+    if (bt_state in [BluetoothState.disabled, BluetoothState.unknown,
+                     BluetoothState.failed]):
         asyncio.create_task(enable_bt_with_retry())
     else:
         await disable_bt()
 
 
-#micropython.native
+# micropython.native
 async def __bt_command_execute(command, setpoint):
-    boardstate.update_event_time()
+    update_event_time()
     print(time.localtime(), 'BT received', command, setpoint)
-    settings = boardsettings.get_settings()
+    settings = get_settings()
 
     if command == boardbtcfg.COMMAND_ENABLE_WIFI:
-        return await boardwifi.enable_wifi()
+        return await enable_wifi()
     elif command == boardbtcfg.COMMAND_DISABLE_WIFI:
-        return await boardwifi.disable_wifi()
+        return await disable_wifi()
     elif command == boardbtcfg.COMMAND_ENABLE_WEBREPL:
-        await boardwifi.enable_webrepl()
+        await enable_webrepl()
     elif command == boardbtcfg.COMMAND_DISABLE_WEBREPL:
-        boardwifi.disable_webrepl()
+        disable_webrepl()
     elif command == boardbtcfg.COMMAND_BREAK:
         import sys
         sys.exit(0)
     elif command == boardbtcfg.COMMAND_MODE_METER:
-        comm = boardctl.Command(boardctl.Command.bypass, 0xFFFF)
-        result = await boardctl.execute(comm)
-        boardstate.update_last_result(result, True, f'BT {comm}')
+        comm = Command(Command.bypass, 0xFFFF)
+        result = await execute(comm)
+        update_last_result(result, True, f'BT {comm}')
     elif command == boardbtcfg.COMMAND_MODE_RESISTORS:
         if setpoint is not None:
-            comm = boardctl.Command(boardctl.Command.generate_r, setpoint)
-            result = await boardctl.execute(comm)
-            boardstate.update_last_result(result, True, f'BT {comm}')
+            comm = Command(Command.generate_r, setpoint)
+            result = await execute(comm)
+            update_last_result(result, True, f'BT {comm}')
     elif command == boardbtcfg.COMMAND_MODE_V_LOAD:
         if setpoint is not None:
-            comm = boardctl.Command(boardctl.Command.measure_with_load, setpoint)
-            result = await boardctl.execute(comm)
-            boardstate.update_last_result(result, True, f'BT {comm}')
+            comm = Command(Command.measure_with_load, setpoint)
+            result = await execute(comm)
+            update_last_result(result, True, f'BT {comm}')
     elif command == boardbtcfg.COMMAND_REBOOT:
         import machine
         machine.reset()
     elif command == boardbtcfg.COMMAND_RUN_TEST:
-        comm = boardctl.Command(boardctl.Command.test_mode, 0)
-        result = await boardctl.execute(comm)
-        boardstate.update_last_result(result, True, f'BT {comm}')
+        comm = Command(Command.test_mode, 0)
+        result = await execute(comm)
+        update_last_result(result, True, f'BT {comm}')
     elif command == boardbtcfg.COMMAND_LIGHT_SLEEP:
-        await boardctl.light_sleep(10000)
+        await light_sleep(10000)
     elif command == boardbtcfg.COMMAND_DEEP_SLEEP:
-        await boardctl.deep_sleep()
+        await deep_sleep()
     elif command == boardbtcfg.COMMAND_METER_COMMANDS:
         if setpoint is not None:
-            boardstate.update_meter_commands(True if setpoint else False)
+            update_meter_commands(True if setpoint else False)
     elif command == boardbtcfg.COMMAND_SET_INITIAL_METER_COMM:
-        settings.add_key(boardsettings.Settings.METER_COMMANDS, True if setpoint else False)
+        settings.add_key(Settings.METER_COMMANDS, True if setpoint else False)
         print('Saved INITIAL METER COMMANDS to ', setpoint)
     elif command == boardbtcfg.COMMAND_SET_WIFI_NETWORK:
         if setpoint is not None:
@@ -127,7 +128,7 @@ async def __bt_command_execute(command, setpoint):
             settings.add_key(Settings.DEEPSLEEP_MIN, setpoint)
             print('Set deepsleep delay to ', setpoint)
     elif command == boardbtcfg.COMMAND_SET_VERBOSE:
-        boardstate.set_verbose(True if setpoint else False)
+        set_verbose(True if setpoint else False)
         print('Saved VERBOSE to ', setpoint)
     elif command == boardbtcfg.COMMAND_SET_INITIAL_COMMAND_TYPE:
         settings.add_key(Settings.INITIAL_COMMAND_TYPE, setpoint)
@@ -136,7 +137,7 @@ async def __bt_command_execute(command, setpoint):
         settings.add_key(Settings.INITIAL_COMMAND_SETPOINT, setpoint)
         print('Saved INITIAL SETPOINT to ', setpoint)
     elif command == boardbtcfg.COMMAND_R_TEST:
-        await boardctl.r_test()
+        await r_test()
     elif command == boardbtcfg.COMMAND_CPU_MAX:
         from machine import freq
         freq(240000000)
@@ -158,7 +159,7 @@ async def __client_task(connection):
         return
 
     print(f"BT connection #{len(__clients)} task: from ", connection.device)
-    boardstate.update_bt_state(boardstate.BluetoothState.enabled_with_client)
+    update_bt_state(BluetoothState.enabled_with_client)
     try:
         await connection.disconnected(timeout_ms=None)
     except Exception as e:
@@ -167,22 +168,22 @@ async def __client_task(connection):
 
     __clients.remove(asyncio.current_task())
     if len(__clients) == 0:
-        boardstate.update_bt_state(boardstate.BluetoothState.enabled)
+        update_bt_state(BluetoothState.enabled)
     else:
-        boardstate.update_bt_state(boardstate.BluetoothState.enabled_with_client)
+        update_bt_state(BluetoothState.enabled_with_client)
 
 
 async def __peripheral_task():
     global __bt_stop_flag, __clients
-    boardstate.update_bt_state(boardstate.BluetoothState.enabled)
+    update_bt_state(BluetoothState.enabled)
     while not __bt_stop_flag:
-        if boardstate.is_verbose():
+        if is_verbose():
             print("BT advertising task starting...")
 
         if len(__clients) == 0:
-            boardstate.update_bt_state(boardstate.BluetoothState.enabled)
+            update_bt_state(BluetoothState.enabled)
         else:
-            boardstate.update_bt_state(boardstate.BluetoothState.enabled_with_client)
+            update_bt_state(BluetoothState.enabled_with_client)
 
         while len(__clients) <= 3 and not __bt_stop_flag:
             try:
@@ -214,7 +215,7 @@ async def disable_bt():
     global __bt_stop_flag, __task_adv, __task_status, __task_commands, __clients, __status_characteristic
     import bluetooth
     __bt_stop_flag = True
-    boardstate.update_bt_state(boardstate.BluetoothState.disabling)
+    update_bt_state(BluetoothState.disabling)
     aioble.stop()
     bluetooth.BLE().active(False)
     await asyncio.sleep_ms(20)
@@ -244,13 +245,13 @@ async def disable_bt():
 
     await asyncio.sleep_ms(100)
     print('** Bluetooth disabled')
-    boardstate.update_bt_state(boardstate.BluetoothState.disabled)
+    update_bt_state(BluetoothState.disabled)
     gc.collect()
 
 
 async def __board_command_loop(board_command_char):
     global __bt_stop_flag
-    if boardstate.is_verbose():
+    if is_verbose():
         print('Board command task starting...')
     while not __bt_stop_flag:
         try:
@@ -307,7 +308,7 @@ async def __board_command_loop(board_command_char):
     print('\tBoard command task terminating.')
 
 
-#micropython.native
+# micropython.native
 def __get_notification_data():
     gc.collect()
     # 0 - WIFI b7 b6 RELAY b5 b4 BLUETOOTH b3 b2 b1 UNUSED b0
@@ -317,7 +318,7 @@ def __get_notification_data():
     # 6 - free memory (4 bytes)
     # 10- error count (1 byte)
     # 11- battery level (1 byte)
-    state = boardstate.get_state()
+    state = get_state()
     status_b1 = int(state.wifi) << 6 | int(state.relay) << 4 | int(state.bluetooth) << 1
 
     if freq() == 240000000:
@@ -345,27 +346,9 @@ def __get_notification_data():
     return values
 
 
-#micropython.native
-def notify_change():
-    global __status_characteristic
-    # Skip if not BT active
-    if boardstate.get_state().bluetooth not in [boardstate.BluetoothState.enabled_with_client,
-                                                boardstate.BluetoothState.enabled]:
-        return True
-    try:
-        # Check interface is initialized
-        if __status_characteristic:
-            data = __get_notification_data()
-            __status_characteristic.write(data, True)
-        return True
-    except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
-        print('notify_change', repr(e))
-        return False
-
-
 async def __board_status_loop(bsc):
     global __bt_stop_flag
-    if boardstate.is_verbose():
+    if is_verbose():
         print('Board status task starting...')
     while not __bt_stop_flag:
         try:
@@ -379,12 +362,12 @@ async def __board_status_loop(bsc):
 
 async def __battery_loop(battery_char):
     global __bt_stop_flag
-    if boardstate.is_verbose():
+    if is_verbose():
         print('Board battery task starting...')
     while not __bt_stop_flag:
         try:
-            percent = await boardctl.get_battery_percent()
-            boardstate.set_battery(percent)
+            percent = await get_battery_percent()
+            set_battery(percent)
             battery_char.write(percent.to_bytes(1, "little"), True)
             await asyncio.sleep_ms(30000)
         except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
@@ -396,7 +379,7 @@ async def __battery_loop(battery_char):
 async def __enable_bt():
     global __bt_stop_flag, __task_adv, __task_status, __task_commands, __task_battery, __status_characteristic
 
-    boardstate.update_bt_state(boardstate.BluetoothState.enabling)
+    update_bt_state(BluetoothState.enabling)
     try:
         bluetooth.BLE().active(True)
     except Exception as e:
@@ -427,4 +410,3 @@ async def __enable_bt():
     print('** Bluetooth enabled')
     await asyncio.sleep(0)
     return True
-

@@ -1,7 +1,5 @@
 import gc
 
-import micropython
-
 from IOTester.boardcfg import BOARD
 
 available_values = {}
@@ -23,7 +21,7 @@ def __parallel(subset, r_values):
     return int(1.0 / result)
 
 
-#micropython.native
+# micropython.native
 def compute_all_r():
     global available_values
     r_values = BOARD['R_VALUES']
@@ -52,7 +50,8 @@ def compute_all_r():
     gc.collect()
     return output
 
-#micropython.native
+
+# micropython.native
 def __find_best_r(desired_r, av_values):
     if len(av_values) == 0:
         raise Exception('Call compute_all_r first')
