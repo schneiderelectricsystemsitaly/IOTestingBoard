@@ -9,7 +9,6 @@ import IOTester.boardstate as boardstate
 import IOTester.boardwifi as boardwifi
 import IOTester.resistors as resistors
 import IOTester.state
-from .boardbt import (toggle_bluetooth, enable_bt_with_retry, disable_bt)
 from .boardcfg import BOARD
 from .command import Command
 
@@ -258,6 +257,7 @@ async def toggle_vmeter_load():
 
 
 async def board_hw_init():
+    from .boardbt import (toggle_bluetooth, enable_bt_with_retry, disable_bt)
     __print_wakeup_reason()
     print(f'Machine reset cause: {machine.reset_cause()}')
 
@@ -355,6 +355,7 @@ async def get_vbat():
 
 
 async def light_sleep(delay):
+    from .boardbt import enable_bt_with_retry, disable_bt
     import network
     sta_if = network.WLAN(network.STA_IF)
     print(f'Lightsleep for {delay} ms.')
@@ -399,6 +400,7 @@ def __optocouplers_off():
 
 
 async def deep_sleep():
+    from .boardbt import disable_bt
     await disable_bt()
     await boardwifi.disable_wifi()
 
