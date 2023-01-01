@@ -150,10 +150,10 @@ async def main():
     # precompute possible R values
     resistors.compute_all_r()
 
-    await boardctl.board_hw_init()
-
     # lower CPU to 80 MHz to reduce power consumption
     freq(80000000)
+
+    await boardctl.board_hw_init()
 
     t1 = asyncio.create_task(__animate_leds())
     t2 = asyncio.create_task(__test_loop())
