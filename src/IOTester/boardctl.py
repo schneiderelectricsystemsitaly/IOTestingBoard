@@ -100,7 +100,7 @@ async def r_test():
             await asyncio.sleep_ms(5000)
         cpt += 1
 
-@micropython.native
+
 async def execute(command):
     boardstate.update_event_time()
     final_result = False
