@@ -4,7 +4,8 @@ from machine import freq
 from micropython import const
 
 from .boardsettings import (get_settings, Settings)
-from .boardstate import (get_state, WifiState, update_wifi_state, update_event_time)
+from .boardstate import (get_state, update_wifi_state, update_event_time)
+from .state import WifiState
 
 
 async def enable_webrepl():

@@ -9,10 +9,11 @@ from machine import freq
 import IOTester.boardbtcfg as boardbtcfg
 from .boardctl import (execute, light_sleep, deep_sleep, r_test, get_battery_percent)
 from .boardsettings import (get_settings, Settings)
-from .boardstate import (get_state, BluetoothState, update_bt_state, update_event_time, update_last_result,
-                         update_meter_commands, set_verbose, is_verbose, set_battery)
+from .boardstate import (get_state, update_bt_state, update_event_time, update_last_result,
+                         update_meter_commands, set_verbose, is_verbose, set_battery, set_notify_callback)
 from .boardwifi import (enable_wifi, disable_wifi, enable_webrepl, disable_webrepl)
 from .command import Command
+from .state import BluetoothState
 
 __task_adv = None
 __task_status = None
@@ -24,6 +25,22 @@ type_gen = type((lambda: (yield))())  # Generator type
 
 __bt_stop_flag = False
 __status_characteristic = None
+
+
+def notify_change():
+    global __status_characteristic
+    # Skip if not BT active
+    if get_state().bluetooth not in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
+        return True
+    try:
+        # Check interface is initialized
+        if __status_characteristic:
+            data = __get_notification_data()
+            __status_characteristic.write(data, True)
+        return True
+    except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
+        print('notify_change', repr(e))
+        return False
 
 
 # If a callback is passed, run it and return.
@@ -40,6 +57,9 @@ async def enable_bt_with_retry():
     print('** Bluetooth enabling...', get_state().bluetooth)
     update_bt_state(BluetoothState.enabling)
     gc.collect()
+
+    set_notify_callback(notify_change)
+
     while not get_state().bluetooth in [BluetoothState.disabling,
                                         BluetoothState.disabled,
                                         BluetoothState.enabled,

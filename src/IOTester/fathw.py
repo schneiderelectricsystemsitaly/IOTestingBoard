@@ -5,25 +5,28 @@ import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
-import IOTester.boardctl as boardctl
-import IOTester.boardsettings as boardsettings
-import IOTester.boardstate as boardstate
-import IOTester.resistors as resistors
+import IOTester.state
+from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
+                       light_sleep, R_MAX, R_OPEN, board_hw_init)
+from .boardsettings import get_settings, Settings
+from .boardstate import get_state, runtime_memory_info, update_testmode, update_last_result
+from .state import WifiState, BluetoothState
+from .resistors import compute_all_r
 from .boardcfg import BOARD
 from .command import Command
 
 
 # FUNCTIONS
 def __is_client_connected():
-    return boardstate.get_state().bluetooth == boardstate.BluetoothState.enabled_with_client or \
-        boardstate.get_state().wifi == boardstate.WifiState.enabled
+    return get_state().bluetooth == BluetoothState.enabled_with_client or \
+        get_state().wifi == WifiState.enabled
 
 
 # micropython.native
 async def __animate_leds():
     error = False
     cpt = 0
-    current_state = boardstate.get_state()
+    current_state = get_state()
     meter_pattern = [0]  # don't blink
     parallel_pattern = [0, 0, 0, 185, 0, 185, 0, 0, 0]  # 2 fast blinks
     resistor_pattern = [0, 0, 0, 185, 185, 185, 0, 0, 0]  # 1 slow blink
@@ -31,9 +34,9 @@ async def __animate_leds():
 
     while True:
         green_val = 0
-        if current_state.relay == boardstate.RelayState.meter:
+        if current_state.relay == IOTester.state.RelayState.meter:
             green_val = meter_pattern[cpt % len(meter_pattern)]
-        elif current_state.relay == boardstate.RelayState.resistor:
+        elif current_state.relay == IOTester.state.RelayState.resistor:
             if current_state.meter_parallel:
                 green_val = parallel_pattern[cpt % len(parallel_pattern)]
             else:
@@ -52,18 +55,18 @@ async def __animate_leds():
         if green_val > 0 and red_val == 0 and current_state.test_mode and False:
             red_val = 155
 
-        boardctl.set_green_led(green_val)
-        boardctl.set_red_led(red_val)
+        set_green_led(green_val)
+        set_red_led(red_val)
 
-        network_active = current_state.bluetooth == boardstate.BluetoothState.enabled_with_client or \
-                         current_state.wifi == boardstate.WifiState.enabled
+        network_active = current_state.bluetooth == IOTester.state.BluetoothState.enabled_with_client or \
+                         current_state.wifi == IOTester.state.WifiState.enabled
         BOARD['BUILTIN_LED'].value((cpt % 2 == 0) if network_active else True)  # led state is inverted on board
 
         await asyncio.sleep_ms(250)
         cpt += 1
         if cpt % 200 == 0:
-            boardstate.runtime_memory_info()
-            print(boardstate.get_state())
+            runtime_memory_info()
+            print(get_state())
 
 
 # micropython.native
@@ -71,16 +74,16 @@ async def __meter_commands_check():
     METER_CHECK_LOOP_SLEEP_MS = const(500)
 
     while True:
-        state = boardstate.get_state()
+        state = get_state()
         # execute only if in correct mode with enabled meter commands
-        if state.meter_commands and not state.meter_parallel and state.relay == boardstate.RelayState.resistor:
-            voltage = boardctl.get_vmeter()
+        if state.meter_commands and not state.meter_parallel and state.relay == IOTester.state.RelayState.resistor:
+            voltage = get_vmeter()
             if voltage > 1:
-                commands = boardsettings.get_thresholds()
+                commands = get_settings().get_thresholds()
                 for val in commands:
                     if voltage == commands[0]:
                         comm = Command(commands[1], commands[2])
-                        await boardctl.execute(comm)
+                        await execute(comm)
         await asyncio.sleep_ms(METER_CHECK_LOOP_SLEEP_MS)
 
 
@@ -91,30 +94,30 @@ async def __sleep_check():
     LIGHT_DURATION_MS = const(5000)
 
     while True:
-        current_state = boardstate.get_state()
-        settings = boardsettings.get_settings()
-        idle_delay_ms = settings[boardsettings.Settings.DEEPSLEEP_MIN] * 60 * 1000
+        current_state = get_state()
+        settings = get_settings()
+        idle_delay_ms = settings[Settings.DEEPSLEEP_MIN] * 60 * 1000
 
         if 0 < idle_delay_ms <= time.ticks_ms() - current_state.last_event:
             print(f'Going into deepsleep after {idle_delay_ms / 1000}s of last event.')
             current_state.last_event = time.ticks_ms()
-            await boardctl.deep_sleep()
+            await deep_sleep()
         if not __is_client_connected() and False:
             if time.ticks_ms() - current_state.last_event >= IDLE_LIGHT_THRESHOLD_MS:
                 current_state.last_event = time.ticks_ms()
-                await boardctl.light_sleep(LIGHT_DURATION_MS)
+                await light_sleep(LIGHT_DURATION_MS)
         await asyncio.sleep_ms(CHECK_LOOP_SLEEP_MS)
 
 
 async def __test_loop():
     test_cycle = list(range(0, 12000, 250))
-    test_cycle.append(boardctl.R_MAX)
-    test_cycle.append(boardctl.R_OPEN)
+    test_cycle.append(R_MAX)
+    test_cycle.append(R_OPEN)
     cpt = 0
     LOOP_SLEEP_MS = 5000
     ctype = Command.generate_r
     while True:
-        current_state = boardstate.get_state()
+        current_state = get_state()
         if current_state.test_mode:
             chosen_r = test_cycle[cpt % len(test_cycle)]
             command = Command(ctype, chosen_r)
@@ -123,20 +126,15 @@ async def __test_loop():
             if cpt % len(test_cycle) == len(test_cycle) - 1:
                 ctype = Command.measure_with_load if ctype == Command.generate_r else Command.generate_r
 
-            result = await boardctl.execute(command)
+            result = await execute(command)
 
-            boardstate.update_testmode(True)
-            boardstate.update_last_result(result, True)
+            update_testmode(True)
+            update_last_result(result, True)
 
-            if result and boardstate.get_state().setpoint_r != command.setpoint:
-                print('Different setpoints', boardstate.get_state().setpoint_r, command.setpoint)
-                boardstate.update_last_result(result, True, f'Setpoints are different')
+            if result and get_state().setpoint_r != command.setpoint:
+                print('Different setpoints', get_state().setpoint_r, command.setpoint)
+                update_last_result(result, True, f'Setpoints are different')
             cpt += 1
-
-        if boardstate.is_verbose():
-            vbat = await boardctl.get_vbat()
-            perc_bat = await boardctl.get_battery_percent()
-            print(current_state, f"Vsense={boardctl.get_vmeter()} V", f"Vbat={vbat:.2f} V ({perc_bat} %)")
 
         await asyncio.sleep_ms(LOOP_SLEEP_MS)
 
@@ -147,12 +145,12 @@ async def main():
     gc.collect()
 
     # precompute possible R values
-    resistors.compute_all_r()
+    compute_all_r()
 
     # lower CPU to 80 MHz to reduce power consumption
     freq(80000000)
 
-    await boardctl.board_hw_init()
+    await board_hw_init()
 
     t1 = asyncio.create_task(__animate_leds())
     t2 = asyncio.create_task(__test_loop())

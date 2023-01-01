@@ -4,14 +4,13 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-import IOTester.boardbt as boardbt
 import IOTester.boardsettings as boardsettings
 import IOTester.boardstate as boardstate
 import IOTester.boardwifi as boardwifi
 import IOTester.resistors as resistors
-from .boardbt import __get_notification_data
+import IOTester.state
+from .boardbt import (toggle_bluetooth, enable_bt_with_retry, disable_bt)
 from .boardcfg import BOARD
-from .boardstate import get_state, BluetoothState
 from .command import Command
 
 # special values for resistor settings
@@ -187,12 +186,12 @@ async def set_relay_pos(is_set, force=False):
     RELAY_ACTION_TIME_MS = const(5)
     current_state = boardstate.get_state().relay
 
-    if is_set and current_state == boardstate.RelayState.resistor and not force:
+    if is_set and current_state == IOTester.state.RelayState.resistor and not force:
         if boardstate.is_verbose():
             print('Skipping relay SET command, already in position')
         return True  # already in set position
 
-    if not is_set and current_state == boardstate.RelayState.meter and not force:
+    if not is_set and current_state == IOTester.state.RelayState.meter and not force:
         if boardstate.is_verbose():
             print('Skipping relay RESET command, already in position')
         return True  # already in reset position
@@ -206,7 +205,7 @@ async def set_relay_pos(is_set, force=False):
             boardstate.update_last_result(False, True, f'Relay SET')
             return False
         __set_digital_pin('KSET_CMD', False)
-        boardstate.update_relay_state(boardstate.RelayState.resistor)
+        boardstate.update_relay_state(IOTester.state.RelayState.resistor)
     else:
         __set_digital_pin('KSET_CMD', False)
         __set_digital_pin('KRESET_CMD', True)
@@ -216,7 +215,7 @@ async def set_relay_pos(is_set, force=False):
             boardstate.update_last_result(False, True, f'Relay RESET')
             return False
         __set_digital_pin('KRESET_CMD', False)
-        boardstate.update_relay_state(boardstate.RelayState.meter)
+        boardstate.update_relay_state(IOTester.state.RelayState.meter)
 
     if boardstate.is_verbose():
         if is_set:
@@ -233,7 +232,7 @@ async def toggle_relay():
     print("** Toggle relay called")
     boardstate.update_event_time()
     boardstate.update_testmode(False)
-    if boardstate.get_state().relay == boardstate.RelayState.meter:
+    if boardstate.get_state().relay == IOTester.state.RelayState.meter:
         comm = Command(Command.generate_r, R_OPEN)
         if not await execute(comm):
             print('Failure to SET relay')
@@ -268,7 +267,7 @@ async def board_hw_init():
 
     BOARD['PUSHBUTTON'].long_func(toggle_vmeter_load)
     BOARD['PUSHBUTTON'].release_func(toggle_relay)
-    BOARD['PUSHBUTTON'].double_func(boardbt.toggle_bluetooth)
+    BOARD['PUSHBUTTON'].double_func(toggle_bluetooth)
 
     # Configure deep-sleep wakeup on switch
     import esp32
@@ -289,9 +288,9 @@ async def board_hw_init():
         await boardwifi.disable_wifi()
 
     if defaults[boardsettings.Settings.BLUETOOTH]:
-        asyncio.create_task(boardbt.enable_bt_with_retry())
+        asyncio.create_task(enable_bt_with_retry())
     else:
-        await boardbt.disable_bt()
+        await disable_bt()
 
     first_command = Command(defaults[boardsettings.Settings.INITIAL_COMMAND_TYPE],
                             defaults[boardsettings.Settings.INITIAL_COMMAND_SETPOINT])
@@ -361,7 +360,7 @@ async def light_sleep(delay):
     print(f'Lightsleep for {delay} ms.')
 
     sta_if.active(False)
-    await boardbt.disable_bt()
+    await disable_bt()
     await asyncio.sleep_ms(100)
 
     machine.lightsleep(delay)
@@ -381,10 +380,10 @@ async def light_sleep(delay):
         await boardwifi.disable_wifi()
 
     if defaults[boardsettings.Settings.BLUETOOTH]:
-        asyncio.create_task(boardbt.enable_bt_with_retry())
+        asyncio.create_task(enable_bt_with_retry())
         await asyncio.sleep_ms(0)
     else:
-        await boardbt.disable_bt()
+        await disable_bt()
 
 
 # micropython.native
@@ -400,7 +399,7 @@ def __optocouplers_off():
 
 
 async def deep_sleep():
-    await boardbt.disable_bt()
+    await disable_bt()
     await boardwifi.disable_wifi()
 
     import esp32
@@ -421,19 +420,3 @@ async def deep_sleep():
     boardstate.update_event_time()
 
     machine.deepsleep(2000000000)
-
-
-def notify_change():
-    global __status_characteristic
-    # Skip if not BT active
-    if get_state().bluetooth not in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
-        return True
-    try:
-        # Check interface is initialized
-        if __status_characteristic:
-            data = __get_notification_data()
-            __status_characteristic.write(data, True)
-        return True
-    except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
-        print('notify_change', repr(e))
-        return False
