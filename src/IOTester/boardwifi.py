@@ -3,9 +3,9 @@ import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
-import boardctl
-import boardsettings
-import boardstate
+import IOTester.boardctl as boardctl
+import IOTester.boardsettings as boardsettings
+import IOTester.boardstate as boardstate
 
 async def enable_webrepl():
     if boardstate.get_state().wifi != boardstate.WifiState.enabled:

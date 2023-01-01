@@ -1,6 +1,6 @@
 import time
 import machine
-import boardctl
+import IOTester.boardctl as boardctl
 
 class BluetoothState:
     unknown = 0
@@ -76,7 +76,7 @@ def set_battery(percent):
 
 
 def update_meter_commands(allowed):
-    from boardbt import notify_change
+    from IOTester.boardbt import notify_change
     if __state.meter_commands != allowed:
         notify_change()
     __state.meter_commands = allowed
@@ -88,7 +88,7 @@ def update_event_time():
 
 
 def update_testmode(test_mode):
-    from boardbt import notify_change
+    from IOTester.boardbt import notify_change
     if __state.test_mode != test_mode:
         notify_change()
 
@@ -104,7 +104,7 @@ def update_bt_state(new_state):
 
 
 def update_wifi_state(new_state):
-    from boardbt import notify_change
+    from IOTester.boardbt import notify_change
     __state.wifi = new_state
 
     if new_state == WifiState.enabled:
@@ -119,7 +119,7 @@ def update_wifi_state(new_state):
 
 
 def update_relay_state(new_relay):
-    from boardbt import notify_change
+    from IOTester.boardbt import notify_change
     if __state.relay != new_relay:
         notify_change()
     __state.relay = new_relay
@@ -144,7 +144,7 @@ def update_r_setpoint(new_r):
 
 
 def update_last_result(b_value, notify=False, msg=''):
-    from boardbt import notify_change
+    from IOTester.boardbt import notify_change
     __state.last_command_result = b_value
     __state.last_event = time.ticks_ms()
     if not b_value:

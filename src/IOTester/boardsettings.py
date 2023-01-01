@@ -1,7 +1,6 @@
 import ujson
-from micropython import const
 
-import boardctl
+import IOTester.boardctl
 
 
 class Settings:

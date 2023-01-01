@@ -7,12 +7,12 @@ import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
-import boardbtcfg
-import boardctl
-import boardsettings
-import boardstate
-import boardwifi
-from boardsettings import Settings
+import IOTester.boardbtcfg
+import IOTester.boardctl
+import IOTester.boardsettings
+import IOTester.boardstate
+import IOTester.boardwifi
+from .boardsettings import Settings
 
 __task_adv = None
 __task_status = None

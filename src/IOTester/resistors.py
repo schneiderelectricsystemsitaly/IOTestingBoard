@@ -1,5 +1,5 @@
 import gc
-from boardcfg import BOARD
+from IOTester.boardcfg import BOARD
 
 available_values = {}
 
@@ -64,7 +64,6 @@ def __find_best_r(desired_r, av_values):
 
 
 def find_best_r_with_opt(desired_r, av_values, opt_r):
-    global BOARD
     option1 = __find_best_r(desired_r - BOARD['OPTOCOUPLER_R'], av_values)
     option2 = __find_best_r(desired_r - opt_r - BOARD['OPTOCOUPLER_R'], av_values)
     if abs(option1[0] - desired_r) < abs(option2[0] - desired_r + opt_r):

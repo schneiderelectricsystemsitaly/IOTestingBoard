@@ -5,11 +5,11 @@ import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
-import boardctl
-import boardstate
-import resistors
-from boardcfg import BOARD
-from boardctl import Command
+import IOTester.boardctl
+import IOTester.boardstate
+import IOTester.resistors
+from .boardcfg import BOARD
+from .boardctl import Command
 
 print("Starting IOTesting fathw module...")
 

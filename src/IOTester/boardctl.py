@@ -5,12 +5,12 @@ import time
 import uasyncio as asyncio
 from micropython import const
 
-import boardbt
-import boardsettings
-import boardstate
-import boardwifi
-import resistors
-from boardcfg import BOARD
+import IOTester.boardbt
+import IOTester.boardsettings
+import IOTester.boardstate
+import IOTester.boardwifi
+import IOTester.resistors
+from .boardcfg import BOARD
 
 # special values for resistor settings
 # R_OPEN = open opto-couplers resistance >10 MΩ
