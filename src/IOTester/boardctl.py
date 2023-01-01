@@ -55,7 +55,7 @@ class Command:
 last_red_value = 0
 last_green_value = 0
 
-
+@micropython.native
 def set_red_led(value):
     global last_red_value
     previous = last_red_value
@@ -63,7 +63,7 @@ def set_red_led(value):
     last_red_value = value
     return previous
 
-
+@micropython.native
 def set_green_led(value):
     global last_green_value
     previous = last_green_value
@@ -100,7 +100,7 @@ async def r_test():
             await asyncio.sleep_ms(5000)
         cpt += 1
 
-
+@micropython.native
 async def execute(command):
     boardstate.update_event_time()
     final_result = False
@@ -147,7 +147,7 @@ async def execute(command):
 
     return final_result
 
-
+@micropython.native
 async def __configure_for_r(best_tuple):
     if boardstate.is_verbose():
         print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]}")
@@ -164,7 +164,7 @@ async def __configure_for_r(best_tuple):
     await asyncio.sleep_ms(0)
     return True
 
-
+@micropython.native
 def __set_digital_pin(pin_name, req_value):
     if req_value:
         BOARD[pin_name].on()
@@ -182,18 +182,18 @@ def __set_digital_pin(pin_name, req_value):
     boardstate.update_last_result(True)
     return True
 
-
+@micropython.native
 def __set_rseries(req_value):
     return __set_digital_pin('SERIESR_CMD', req_value)
 
-
+@micropython.native
 def __set_v_parallel(req_value):
     result = __set_digital_pin('VMETER_EN', req_value)
     if result:
         boardstate.update_v_parallel_state(req_value)
     return result
 
-
+@micropython.native
 def __set_r(idx, req_value):
     assert (0 <= idx < len(BOARD['RESISTORS']))
     if req_value:
@@ -213,7 +213,7 @@ def __set_r(idx, req_value):
     boardstate.update_last_result(True)
     return True
 
-
+@micropython.native
 async def set_relay_pos(is_set, force=False):
     RELAY_ACTION_TIME_MS = const(5)
     current_state = boardstate.get_state().relay
@@ -258,7 +258,7 @@ async def set_relay_pos(is_set, force=False):
     boardstate.update_last_result(True, True)
     return True
 
-
+@micropython.native
 async def toggle_relay():
     print("** Toggle relay called")
     boardstate.update_event_time()
@@ -416,7 +416,7 @@ async def light_sleep(delay):
     else:
         await boardbt.disable_bt()
 
-
+@micropython.native
 def __optocouplers_off():
     # switch off optocouplers
     for i in range(0, len(BOARD['RESISTORS'])):

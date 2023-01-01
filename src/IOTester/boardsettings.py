@@ -87,9 +87,11 @@ class Settings:
         self.add_v_threshold(5, 18, 3, 550)
         self.add_v_threshold(6, 20, 1, 0xFFFF)
 
-    def get_settings(self):
-        return self._db.copy()
+    def __getitem__(self, key):
+        return self.get_value(key)
 
+    def __setitem__(self, key, value):
+        return self.add_key(key, value)
 
 def get_settings():
     global __settings

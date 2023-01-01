@@ -1,6 +1,7 @@
 import gc
 import time
 
+import micropython
 import uasyncio as asyncio
 from machine import freq
 from micropython import const
@@ -12,15 +13,13 @@ import IOTester.resistors as resistors
 from .boardcfg import BOARD
 from .boardctl import Command
 
-print("Starting IOTesting fathw module...")
-
 
 # FUNCTIONS
 def __is_client_connected():
     return boardstate.get_state().bluetooth == boardstate.BluetoothState.enabled_with_client or \
         boardstate.get_state().wifi == boardstate.WifiState.enabled
 
-
+@micropython.native
 async def __animate_leds():
     error = False
     cpt = 0
@@ -69,7 +68,7 @@ async def __animate_leds():
             boardstate.runtime_memory_info()
             print(boardstate.get_state())
 
-
+@micropython.native
 async def __meter_commands_check():
     METER_CHECK_LOOP_SLEEP_MS = const(500)
 
@@ -86,7 +85,7 @@ async def __meter_commands_check():
                         await boardctl.execute(comm)
         await asyncio.sleep_ms(METER_CHECK_LOOP_SLEEP_MS)
 
-
+@micropython.native
 async def __sleep_check():
     CHECK_LOOP_SLEEP_MS = const(2000)
     IDLE_LIGHT_THRESHOLD_MS = const(60 * 1000)
@@ -94,7 +93,7 @@ async def __sleep_check():
 
     while True:
         current_state = boardstate.get_state()
-        settings = boardctl.get_defaults()
+        settings = boardsettings.get_settings()
         idle_delay_ms = settings[boardsettings.Settings.DEEPSLEEP_MIN] * 60 * 1000
 
         if 0 < idle_delay_ms <= time.ticks_ms() - current_state.last_event:
@@ -144,6 +143,8 @@ async def __test_loop():
 
 
 async def main():
+    print("Starting IOTesting  module...")
+
     gc.collect()
 
     # precompute possible R values
@@ -161,6 +162,3 @@ async def main():
 
     print('Ready...')
     await asyncio.gather(t1, t2, t3, t4)
-
-
-asyncio.run(main())

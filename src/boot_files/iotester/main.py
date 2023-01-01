@@ -3,6 +3,8 @@ import secrets
 import ota_update
 import machine
 import network
+import uasyncio as asyncio
+
 
 def download_and_install_update_if_available():
     sta_if = network.WLAN(network.STA_IF)
@@ -14,20 +16,24 @@ def download_and_install_update_if_available():
         while not sta_if.isconnected() and cpt < 10:
             time.sleep(1)
             cpt += 1
-    
-    if sta_if.isconnected():        
+
+    if sta_if.isconnected():
         print('network config:', sta_if.ifconfig())
-        o = ota_update.OTAUpdater('https://github.com/PBrunot/IOTestingBoard', github_src_dir='src', main_dir='IOTester', headers={'Authorization': 'token {}'.format(secrets.GITHUB_TOKEN)})
+        o = ota_update.OTAUpdater('https://github.com/PBrunot/IOTestingBoard', github_src_dir='src',
+                                  main_dir='IOTester', secrets_file='saved_settings.hex',
+                                  headers={'Authorization': 'token {}'.format(secrets.GITHUB_TOKEN)})
         if o.install_update_if_available():
             machine.reset()
         else:
-            del(o)
+            del (o)
             gc.collect()
     print('Update check complete')
-        
+
+
 def start():
     import IOTester
-    IOTester.fathw.main()
+    asyncio.run(IOTester.fathw.main())
+
 
 def boot():
     try:
@@ -35,7 +41,8 @@ def boot():
     except Exception as e:
         print('OTA Updater', repr(e))
         raise e
-    
+
     start()
+
 
 boot()
