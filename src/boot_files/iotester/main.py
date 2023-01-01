@@ -5,7 +5,7 @@ import ota_update
 import machine
 import network
 import uasyncio as asyncio
-import IOTester.boardsettings as boardsettings
+import settings.boardsettings as boardsettings
 
 
 def download_and_install_update_if_available():
@@ -15,7 +15,8 @@ def download_and_install_update_if_available():
         if not sta_if.isconnected():
             print('connecting to network...')
             sta_if.active(True)
-            sta_if.connect(settings[boardsettings.Settings.WIFI_NETWORK], settings[boardsettings.Settings.WIFI_PASSWORD])
+            sta_if.connect(settings[boardsettings.Settings.WIFI_NETWORK], settings[
+                boardsettings.Settings.WIFI_PASSWORD])
             cpt = 0
             while not sta_if.isconnected() and cpt < 10:
                 time.sleep(1)
@@ -45,7 +46,7 @@ def boot():
         download_and_install_update_if_available()
     except Exception as e:
         print('OTA Updater', repr(e))
-        raise e
+        #raise e
 
     start()
 

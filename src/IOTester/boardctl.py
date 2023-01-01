@@ -4,7 +4,7 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-import IOTester.boardsettings as boardsettings
+import settings.boardsettings as boardsettings
 import IOTester.boardstate as boardstate
 import IOTester.boardwifi as boardwifi
 import IOTester.resistors as resistors

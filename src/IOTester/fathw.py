@@ -8,7 +8,7 @@ from micropython import const
 import IOTester.state
 from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
                        light_sleep, R_MAX, R_OPEN, board_hw_init)
-from .boardsettings import get_settings, Settings
+from settings.boardsettings import get_settings, Settings
 from .boardstate import get_state, runtime_memory_info, update_testmode, update_last_result
 from .state import WifiState, BluetoothState
 from .resistors import compute_all_r
