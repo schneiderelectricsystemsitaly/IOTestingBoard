@@ -1,6 +1,6 @@
 import gc
-
 import ujson
+gc.collect()
 
 __settings = None
 

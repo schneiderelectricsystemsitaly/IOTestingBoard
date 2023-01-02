@@ -1,5 +1,4 @@
 import time
-
 import machine
 
 from .state import BluetoothState, WifiState, BoardState
