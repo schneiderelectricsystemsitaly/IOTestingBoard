@@ -5,17 +5,16 @@ import network
 gc.collect()
 
 def download_and_install_update_if_available():
-    import settings.boardsettings as boardsettings
+    from settings.boardsettings import get_settings, Settings
     gc.collect()
 
     sta_if = network.WLAN(network.STA_IF)
-    settings = boardsettings.get_settings()
-    if settings[boardsettings.Settings.OTA] and settings[boardsettings.Settings.WIFI]: # if wifi is enabled
+    settings = get_settings()
+    if settings[Settings.OTA] and settings[Settings.WIFI]: # if wifi is enabled
         if not sta_if.isconnected():
             print('connecting to network...')
             sta_if.active(True)
-            sta_if.connect(settings[boardsettings.Settings.WIFI_NETWORK], settings[
-                boardsettings.Settings.WIFI_PASSWORD])
+            sta_if.connect(settings[Settings.WIFI_NETWORK], settings[Settings.WIFI_PASSWORD])
             cpt = 0
             while not sta_if.isconnected() and cpt < 10:
                 time.sleep(1)
@@ -27,7 +26,7 @@ def download_and_install_update_if_available():
             print('network config:', sta_if.ifconfig())
             o = ota_update.OTAUpdater('https://github.com/PBrunot/IOTestingBoard', github_src_dir='src',
                                       main_dir='IOTester',
-                                      headers={'Authorization': 'token {}'.format(secrets.GITHUB_TOKEN)})
+                                      headers={'Authorization': 'token {}'.format(settings[Settings.GITHUB_TOKEN])})
             if o.install_update_if_available():
                 machine.reset()
             else:
