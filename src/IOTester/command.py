@@ -13,15 +13,15 @@ class Command:
         self.setpoint = setpoint
 
     def __str__(self):
-        cdesc = 'invalid'
+        c_desc = 'invalid'
         if self.ctype == Command.bypass:
-            cdesc = 'bypass'
+            c_desc = 'bypass'
         elif self.ctype == Command.generate_r:
-            cdesc = 'resistor'
+            c_desc = 'resistor'
         elif self.ctype == Command.measure_with_load:
-            cdesc = 'voltmeter with load'
+            c_desc = 'voltmeter with load'
         elif self.ctype == Command.test_mode:
-            cdesc = 'test'
+            c_desc = 'test'
 
         if self.setpoint == R_MAX:
             setpoint_desc = "R_MAX Ω"
@@ -30,4 +30,4 @@ class Command:
         else:
             setpoint_desc = f'{self.setpoint} Ω'
 
-        return f'Command type:{cdesc}, setpoint: {setpoint_desc}'
+        return f'Command type:{c_desc}, setpoint: {setpoint_desc}'

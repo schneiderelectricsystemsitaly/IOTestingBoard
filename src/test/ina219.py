@@ -1,5 +1,5 @@
 """MicroPython library for the INA219 sensor.
-
+From Github INA219
 This library supports the INA219 sensor from Texas Instruments with
 MicroPython using the I2C bus.
 """

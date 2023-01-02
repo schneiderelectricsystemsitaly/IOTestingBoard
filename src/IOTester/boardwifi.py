@@ -1,5 +1,6 @@
 import network
 import uasyncio as asyncio
+
 from machine import freq
 from micropython import const
 
@@ -38,12 +39,12 @@ async def enable_wifi():
 
     update_wifi_state(WifiState.enabling)
 
-    MAX_TRIES = const(30)
+    _MAX_TRIES = const(30)
     cpt = 0
     while not sta_if.isconnected():
         await asyncio.sleep_ms(500)
         cpt += 1
-        if cpt > MAX_TRIES:
+        if cpt > _MAX_TRIES:
             break
 
     if sta_if.isconnected():
@@ -83,4 +84,3 @@ async def toggle_wifi():
     else:  # enabling
         print(f'Action already in progress (wifi_state:{wifi_state})')
     return False
-

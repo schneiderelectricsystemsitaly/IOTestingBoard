@@ -6,7 +6,7 @@
 # Created on 2019-10-19 
 
 __updated__ = "2019-10-19"
-__version__ = "0.1"
+__version__ = "0.2"
 
 import time
 
@@ -27,7 +27,7 @@ def launch(func, tup_args):
 
 class Pushbutton:
     debounce_ms = 35
-    long_press_ms = 1000
+    long_press_ms = 5000
     double_click_ms = 400
 
     def __init__(self, pin, suppress=False):

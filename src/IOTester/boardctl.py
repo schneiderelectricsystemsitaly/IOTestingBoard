@@ -4,11 +4,12 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-from . import boardstate
-from . import boardwifi
-from . import resistors
-from . import state
-from . import boardsettings
+from .boardstate import get_state, update_meter_commands, update_r_actual, update_testmode, update_v_parallel_state, is_verbose, update_event_time, \
+    update_last_result, update_r_setpoint, update_relay_state
+from .boardwifi import disable_wifi, enable_wifi
+from .resistors import find_best_r_with_opt, k_divider
+from .state import RelayState
+from .boardsettings import Settings, get_settings
 from .boardcfg import BOARD, R_OPEN, R_MAX
 from .command import Command
 
@@ -33,9 +34,9 @@ def set_green_led(value):
 
 
 async def r_test():
-    boardstate.update_event_time()
-    boardstate.update_testmode(False)
-    boardstate.update_r_setpoint(R_MAX)
+    update_event_time()
+    update_testmode(False)
+    update_r_setpoint(R_MAX)
     __optocouplers_off()
     await set_relay_pos(True)
 
@@ -63,7 +64,7 @@ async def r_test():
 
 # micropython.native
 async def execute(command):
-    boardstate.update_event_time()
+    update_event_time()
     final_result = False
 
     # flash briefly the RED LED when executing commands
@@ -73,17 +74,17 @@ async def execute(command):
     if command.ctype == Command.invalid:
         print('Invalid command', command)
     elif command.ctype == Command.bypass:
-        boardstate.update_testmode(False)
-        boardstate.update_r_setpoint(R_MAX)
+        update_testmode(False)
+        update_r_setpoint(R_MAX)
         __optocouplers_off()
         final_result = await set_relay_pos(False, False)
     elif command.ctype == Command.generate_r or command.ctype == Command.measure_with_load:
-        boardstate.update_testmode(False)
-        boardstate.update_r_setpoint(command.setpoint)
+        update_testmode(False)
+        update_r_setpoint(command.setpoint)
         __optocouplers_off()  # Before to switch, configure for open circuit
         if await set_relay_pos(True, False):
             if command.setpoint != R_OPEN:  # Nothing to do if open circuit command
-                best_tuple = resistors.find_best_r_with_opt(command.setpoint)
+                best_tuple = find_best_r_with_opt(command.setpoint)
                 __set_v_parallel(command.ctype == Command.measure_with_load)
                 final_result = __configure_for_r(best_tuple)
             else:
@@ -92,12 +93,12 @@ async def execute(command):
             final_result = False
     elif command.ctype == Command.test_mode:
         __optocouplers_off()
-        boardstate.update_testmode(True)
+        update_testmode(True)
         final_result = True
     else:
         final_result = False
 
-    print('Executed', command, 'result', final_result, 'state', boardstate.get_state())
+    print('Executed', command, 'result', final_result, 'state', get_state())
 
     # restore LED
     set_red_led(prev1)
@@ -108,7 +109,7 @@ async def execute(command):
 
 # micropython.native
 def __configure_for_r(best_tuple):
-    if boardstate.is_verbose():
+    if is_verbose():
         print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]}")
     series_r = best_tuple[2] == 0
 
@@ -119,7 +120,7 @@ def __configure_for_r(best_tuple):
         if not __set_r(i, i in best_tuple[1]):
             return False
 
-    boardstate.update_r_actual(best_tuple[0])
+    update_r_actual(best_tuple[0])
     return True
 
 
@@ -132,13 +133,13 @@ def __set_digital_pin(pin_name, req_value):
 
     if BOARD[pin_name].value() ^ req_value:
         print(f'Failure to set', pin_name, req_value)
-        boardstate.update_last_result(False, False, f'Pin {pin_name} to {req_value}')
+        update_last_result(False, False, f'Pin {pin_name} to {req_value}')
         return False
 
-    if boardstate.is_verbose():
+    if is_verbose():
         print(f"{pin_name} set to", "1" if req_value else "0")
 
-    boardstate.update_last_result(True)
+    update_last_result(True)
     return True
 
 
@@ -149,7 +150,7 @@ def __set_rseries(req_value):
 def __set_v_parallel(req_value):
     result = __set_digital_pin('VMETER_EN', req_value)
     if result:
-        boardstate.update_v_parallel_state(req_value)
+        update_v_parallel_state(req_value)
     return result
 
 
@@ -164,27 +165,29 @@ def __set_r(idx, req_value):
     # check that the value of the pin and the setpoint are equal
     if BOARD['RESISTORS'][idx].value() ^ req_value:
         print('Failure to set resistor', idx)
-        boardstate.update_last_result(False, False, f'Resistor {idx} to {req_value}')
+        update_last_result(False, False, f'Resistor {idx} to {req_value}')
         return False
 
-    if boardstate.is_verbose():
+    if is_verbose():
         print(f"Resistor {idx} is", "enabled" if req_value else "disabled")
 
-    boardstate.update_last_result(True)
+    update_last_result(True)
     return True
 
 
 async def set_relay_pos(is_set, force=False):
-    RELAY_ACTION_TIME_MS = const(5)
-    current_state = boardstate.get_state().relay
+    # See hongfa HFD2 datasheet, for latching status to be retained command must
+    # be 5 times the nominal set time : 4.5 ms x 5 -> 22 ms
+    RELAY_ACTION_TIME_MS = const(22)
+    current_state = get_state().relay
 
-    if is_set and current_state == state.RelayState.resistor and not force:
-        if boardstate.is_verbose():
+    if is_set and current_state == RelayState.resistor and not force:
+        if is_verbose():
             print('Skipping relay SET command, already in position')
         return True  # already in set position
 
-    if not is_set and current_state == state.RelayState.meter and not force:
-        if boardstate.is_verbose():
+    if not is_set and current_state == RelayState.meter and not force:
+        if is_verbose():
             print('Skipping relay RESET command, already in position')
         return True  # already in reset position
 
@@ -194,47 +197,47 @@ async def set_relay_pos(is_set, force=False):
         await asyncio.sleep_ms(RELAY_ACTION_TIME_MS)
         if not BOARD['KSET_CMD'].value():
             print("*** Cannot drive SET command")
-            boardstate.update_last_result(False, True, f'Relay SET')
+            update_last_result(False, True, f'Relay SET')
             return False
         __set_digital_pin('KSET_CMD', False)
-        boardstate.update_relay_state(state.RelayState.resistor)
+        update_relay_state(RelayState.resistor)
     else:
         __set_digital_pin('KSET_CMD', False)
         __set_digital_pin('KRESET_CMD', True)
         await asyncio.sleep_ms(RELAY_ACTION_TIME_MS)
         if not BOARD['KRESET_CMD'].value():
             print("*** Cannot drive RESET command")
-            boardstate.update_last_result(False, True, f'Relay RESET')
+            update_last_result(False, True, f'Relay RESET')
             return False
         __set_digital_pin('KRESET_CMD', False)
-        boardstate.update_relay_state(state.RelayState.meter)
+        update_relay_state(RelayState.meter)
 
-    if boardstate.is_verbose():
+    if is_verbose():
         if is_set:
             print("Relay in SET position")
         else:
             print("Relay in RESET position")
 
-    boardstate.update_last_result(True, True)
+    update_last_result(True, True)
     return True
 
 
 # micropython.native
 async def toggle_relay():
     print("** Toggle relay called")
-    boardstate.update_event_time()
-    boardstate.update_testmode(False)
-    if boardstate.get_state().relay == state.RelayState.meter:
+    update_event_time()
+    update_testmode(False)
+    if get_state().relay == RelayState.meter:
         comm = Command(Command.generate_r, R_OPEN)
         if not await execute(comm):
             print('Failure to SET relay')
-            boardstate.update_last_result(False, True, f'Relay SET')
+            update_last_result(False, True, f'Relay SET')
             return False
     else:
         comm = Command(Command.bypass, R_OPEN)
         if not await execute(comm):
             print('Failure to RESET relay')
-            boardstate.update_last_result(False, True, f'Relay RESET')
+            update_last_result(False, True, f'Relay RESET')
             return False
 
     return True
@@ -243,8 +246,8 @@ async def toggle_relay():
 # callback from button
 async def toggle_vmeter_load():
     print("** toggle_vmeter_load called")
-    boardstate.update_event_time()
-    boardstate.update_testmode(False)
+    update_event_time()
+    update_testmode(False)
     comm = Command(Command.measure_with_load, 500)
     return await execute(comm)
 
@@ -258,35 +261,35 @@ async def board_hw_init():
     __set_digital_pin('KSET_CMD', False)
     __set_digital_pin('KRESET_CMD', False)
 
-    BOARD['PUSHBUTTON'].long_func(toggle_vmeter_load)
+    BOARD['PUSHBUTTON'].long_func(toggle_bluetooth)
     BOARD['PUSHBUTTON'].release_func(toggle_relay)
-    BOARD['PUSHBUTTON'].double_func(toggle_bluetooth)
+    BOARD['PUSHBUTTON'].double_func(toggle_vmeter_load)
 
     # Configure deep-sleep wakeup on switch
     import esp32
     esp32.wake_on_ext0(pin=BOARD['WAKE_SW'], level=esp32.WAKEUP_ANY_HIGH)
 
     # Configuration
-    defaults = boardsettings.get_settings()
+    defaults = get_settings()
 
-    boardstate.update_meter_commands(defaults[boardsettings.Settings.METER_COMMANDS_ENABLED])
+    update_meter_commands(defaults[Settings.METER_COMMANDS_ENABLED])
     __optocouplers_off()
     # Set Relay in meter position
     await set_relay_pos(False, True)
 
-    if defaults[boardsettings.Settings.WIFI_ENABLED]:
+    if defaults[Settings.WIFI_ENABLED]:
         gc.collect()
-        await boardwifi.enable_wifi()
+        await enable_wifi()
     else:
-        await boardwifi.disable_wifi()
+        await disable_wifi()
 
-    if defaults[boardsettings.Settings.BLUETOOTH_ENABLED]:
+    if defaults[Settings.BLUETOOTH_ENABLED]:
         asyncio.create_task(enable_bt_with_retry())
     else:
         await disable_bt()
 
-    first_command = Command(defaults[boardsettings.Settings.INITIAL_COMMAND_TYPE],
-                            defaults[boardsettings.Settings.INITIAL_COMMAND_SETPOINT])
+    first_command = Command(defaults[Settings.INITIAL_COMMAND_TYPE],
+                            defaults[Settings.INITIAL_COMMAND_SETPOINT])
     return await execute(first_command)
 
 
@@ -312,15 +315,15 @@ def __print_wakeup_reason():
         print(f'Wakeup was not caused by deep sleep: {wakeup_reason}')
 
 
-def get_vmeter():
+async def get_vmeter():
     import time
     value = 0
     for i in range(0, 5):
         value += BOARD['VSENSE_ADC'].read_uv()
-        time.sleep_ms(1)
+        await asyncio.sleep_ms(1)
     value = value / 5
     # precision of ADC insufficient for decimal points anyway
-    return round((value - 42000) / resistors.k_divider(BOARD['R1'], BOARD['R2']) / 1000000.0)
+    return round((value - 42000) / k_divider(BOARD['R1'], BOARD['R2']) / 1000000.0)
 
 
 async def get_battery_percent():
@@ -360,20 +363,20 @@ async def light_sleep(delay):
     machine.lightsleep(delay)
 
     print('Woke up from light sleep')
-    boardstate.update_event_time()
+    update_event_time()
 
     import gc
     gc.collect()
     __print_wakeup_reason()
-    defaults = boardsettings.get_settings()
+    defaults = get_settings()
 
-    if defaults[boardsettings.Settings.WIFI_ENABLED]:
+    if defaults[Settings.WIFI_ENABLED]:
         gc.collect()
-        await boardwifi.enable_wifi()
+        await enable_wifi()
     else:
-        await boardwifi.disable_wifi()
+        await disable_wifi()
 
-    if defaults[boardsettings.Settings.BLUETOOTH_ENABLED]:
+    if defaults[Settings.BLUETOOTH_ENABLED]:
         asyncio.create_task(enable_bt_with_retry())
         await asyncio.sleep_ms(0)
     else:
@@ -388,14 +391,14 @@ def __optocouplers_off():
 
     __set_rseries(False)
     __set_v_parallel(False)
-    boardstate.update_v_parallel_state(False)
-    boardstate.update_r_actual(R_OPEN)
+    update_v_parallel_state(False)
+    update_r_actual(R_OPEN)
 
 
 async def deep_sleep():
     from .boardbt import disable_bt
     await disable_bt()
-    await boardwifi.disable_wifi()
+    await disable_wifi()
 
     import esp32
     # LED pins must be held low
@@ -412,6 +415,6 @@ async def deep_sleep():
     BOARD['BUILTIN_LED'].on()  # inverted on board
 
     print('Outputs disabled')
-    boardstate.update_event_time()
+    update_event_time()
 
     machine.deepsleep(2000000000)

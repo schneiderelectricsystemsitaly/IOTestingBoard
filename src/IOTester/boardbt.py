@@ -4,7 +4,7 @@ import time
 import aioble
 import bluetooth
 import uasyncio as asyncio
-import micropython
+from micropython import const
 
 from machine import freq
 
@@ -23,6 +23,7 @@ __clients = []
 __bt_stop_flag = False
 __status_characteristic = None
 
+_MAX_CLIENTS = const(3)
 
 def notify_change():
     global __status_characteristic
@@ -110,16 +111,16 @@ async def __peripheral_task():
         else:
             update_bt_state(BluetoothState.enabled_with_client)
 
-        while len(__clients) <= 3 and not __bt_stop_flag:
+        while len(__clients) <= _MAX_CLIENTS and not __bt_stop_flag:
             try:
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
                     name=device_name,
-                    services=[boardbtcfg.MODBUS_SERVICE_UUID],
+                    services=[boardbtcfg.MODBUS_SERVICE_UUID, boardbtcfg.BATTERY_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)
                 __clients.append(asyncio.create_task(__client_task(connection)))
-                await asyncio.sleep_ms(100)
+                await asyncio.sleep_ms(200)
             except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
                 print(time.localtime(), f"peripheral_task: error while connected to BT device: {repr(e)}")
                 break
@@ -127,11 +128,11 @@ async def __peripheral_task():
                 print(time.localtime(), f"peripheral_task: {repr(e)}")
                 break
 
-        if len(__clients) == 3:
+        if len(__clients) == _MAX_CLIENTS:
             print("Too many clients")
             await asyncio.sleep_ms(1000)
-
-        await asyncio.sleep_ms(100)
+        else:
+            await asyncio.sleep_ms(200)
 
     print('\tAdvertising task terminating')
 
@@ -144,7 +145,7 @@ async def disable_bt():
     bluetooth.BLE().active(False)
     await asyncio.sleep_ms(20)
 
-    for t in [__task_adv, __task_status, __task_commands]:
+    for t in (__task_adv, __task_status, __task_commands):
         if t is not None:
             try:
                 t.cancel()
