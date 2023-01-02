@@ -17,6 +17,7 @@ Python project for smart boards extending the features of calibrators during aut
 # Usage
 ## Bluetooth interface
 * The following commands are exposed through bluetooth 
+
 | Command description | Command byte | Arguments | Notes |
 |---|---|---|---|
 | COMMAND_ENABLE_WIFI | 1 | None | Activates the wifi interface, sets CPU to 160 MHz |
@@ -45,6 +46,7 @@ Python project for smart boards extending the features of calibrators during aut
 | COMMAND_SET_CPU | 0x18 | uint8, 0/1/2 | Sets the frequency of the CPU to 0:80MHz, 1:160MHz, 2:240MHz |
 | COMMAND_SET_OTA | 0x19 | uint8, 0/1 | Allows over-the-air update from github repository (persisted). COMMAND_SET_INITIAL_WIFI must be enabled too. |
 | COMMAND_CONFIGURE_METER_COMM | 0x19 | uint8, 0-15 index, uint8 voltage level, uint8 command type, uint16 LE R value | Sets the threshold #idx: if Volts value is read and METER_COMMANDS are enabled, executes command with the setpoint |
+
 ## Commands by generator
 ## Manual switching
 
