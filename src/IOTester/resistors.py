@@ -21,7 +21,7 @@ def __parallel(subset, r_values):
     return int(1.0 / result)
 
 
-# micropython.native
+@ micropython.native
 def compute_all_r():
     global available_values
     r_values = BOARD['R_VALUES']
@@ -40,7 +40,7 @@ def compute_all_r():
             rval = __parallel(subset, r_values)
             if rval not in output:
                 output[rval] = subset.copy()
-            # favor longer combinations
+            # favor longer combinations to improve maximum W and % precision
             elif len(subset) > len(output[rval]):
                 output[rval] = subset.copy()
             if i % 32 == 0:
@@ -56,7 +56,7 @@ def __find_best_r(desired_r, av_values):
     if len(av_values) == 0:
         raise Exception('Call compute_all_r first')
 
-    best = list(av_values.keys())[0]
+    best = 999999
     best_gap = abs(desired_r - best)
     for idx in av_values.keys():
         gap = abs(desired_r - idx)
@@ -66,10 +66,11 @@ def __find_best_r(desired_r, av_values):
     return best, av_values[best], 0
 
 
-def find_best_r_with_opt(desired_r, av_values, opt_r):
-    option1 = __find_best_r(desired_r - BOARD['OPTOCOUPLER_R'], av_values)
-    option2 = __find_best_r(desired_r - opt_r - BOARD['OPTOCOUPLER_R'], av_values)
-    if abs(option1[0] - desired_r) < abs(option2[0] - desired_r + opt_r):
+def find_best_r_with_opt(desired_r):
+    global available_values
+    option1 = __find_best_r(desired_r - BOARD['OPTOCOUPLER_R'], available_values)
+    option2 = __find_best_r(desired_r - BOARD['R_SERIES'] - BOARD['OPTOCOUPLER_R'], available_values)
+    if abs(option1[0] - desired_r) < abs(option2[0] - desired_r + BOARD['R_SERIES']):
         return option1[0] + BOARD['OPTOCOUPLER_R'], option1[1], 0
     else:
-        return option2[0] + opt_r + BOARD['OPTOCOUPLER_R'], option2[1], 1
+        return option2[0] + BOARD['R_SERIES'] + BOARD['OPTOCOUPLER_R'], option2[1], 1

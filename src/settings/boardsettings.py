@@ -28,7 +28,6 @@ class Settings:
         try:
             _f = open(filename, "r+b")
             self._db = ujson.load(_f)
-            print('Loaded', self._db)
         except OSError:
             print('Creating default settings file')
             self.factory_defaults()

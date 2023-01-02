@@ -83,8 +83,7 @@ async def execute(command):
         __optocouplers_off()  # Before to switch, configure for open circuit
         if await set_relay_pos(True, False):
             if command.setpoint != R_OPEN:  # Nothing to do if open circuit command
-                best_tuple = resistors.find_best_r_with_opt(command.setpoint, resistors.available_values,
-                                                            BOARD['R_SERIES'])
+                best_tuple = resistors.find_best_r_with_opt(command.setpoint)
                 __set_v_parallel(command.ctype == Command.measure_with_load)
                 final_result = __configure_for_r(best_tuple)
             else:

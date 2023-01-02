@@ -28,16 +28,16 @@ BOARD['GREEN_LED_DAC'] = DAC(BOARD['GREEN_LED'], bits=8, buffering=False, hold=F
 
 # RESISTOR NETWORK CONFIGURATION
 # Mapping to pins through optocouplers (DRIVE_1 required to drive the optocoupler LED)
-BOARD['RESISTORS'] = [Pin(19, Pin.OUT, drive=Pin.DRIVE_1),
+BOARD['RESISTORS'] = (Pin(19, Pin.OUT, drive=Pin.DRIVE_1),
                       Pin(21, Pin.OUT, drive=Pin.DRIVE_1),
                       Pin(22, Pin.OUT, drive=Pin.DRIVE_1),
                       Pin(23, Pin.OUT, drive=Pin.DRIVE_1),
                       Pin(4, Pin.OUT, drive=Pin.DRIVE_1),
                       Pin(16, Pin.OUT, drive=Pin.DRIVE_1),
                       Pin(13, Pin.OUT, drive=Pin.DRIVE_1),
-                      Pin(12, Pin.OUT, drive=Pin.DRIVE_1)]
+                      Pin(12, Pin.OUT, drive=Pin.DRIVE_1))
 BOARD['OPTOCOUPLER_R'] = 33
-BOARD['R_VALUES'] = [0.9, 221.4, 1033.9, 2222, 5550, 7502, 8225, 11027]
+BOARD['R_VALUES'] = const((0.9, 221.4, 1033.9, 2222, 5550, 7502, 8225, 11027))
 BOARD['R_SERIES'] = const(2550 - 33)
 
 # Resistor divider for Vsense 
