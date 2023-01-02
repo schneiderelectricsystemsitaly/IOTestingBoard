@@ -89,13 +89,14 @@ class Settings:
         self.add_key(Settings.WIFI_NETWORK, '')
         self.add_key(Settings.WIFI_PASSWORD, '')
         self.add_key(Settings.DEEPSLEEP_MIN, 15)  # 15 minutes
-        self.add_v_threshold(0, 8, 2, 1100)
+        self.add_v_threshold(0, 8, 2, 1000)
         self.add_v_threshold(1, 10, 2, 4690)
         self.add_v_threshold(2, 12, 2, 7180)
         self.add_v_threshold(3, 14, 2, 11000)
         self.add_v_threshold(4, 16, 2, 0)
-        self.add_v_threshold(5, 18, 3, 550)
-        self.add_v_threshold(6, 20, 1, 0xFFFF)
+        self.add_v_threshold(5, 18, 2, 0xFFFE)
+        self.add_v_threshold(6, 20, 3, 550)
+        self.add_v_threshold(7, 22, 1, 0xFFFF)
         self.add_key(Settings.OTA, False)
         self.add_key(Settings.GITHUB_TOKEN, '')
 

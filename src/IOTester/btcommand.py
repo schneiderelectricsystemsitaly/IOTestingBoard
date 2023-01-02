@@ -76,6 +76,7 @@ async def __bt_command_execute(command, setpoint):
         elif command == boardbtcfg.COMMAND_DISABLE_WIFI:
             return await disable_wifi()
         elif command == boardbtcfg.COMMAND_ENABLE_WEBREPL:
+            await enable_wifi()
             await enable_webrepl()
         elif command == boardbtcfg.COMMAND_DISABLE_WEBREPL:
             disable_webrepl()
