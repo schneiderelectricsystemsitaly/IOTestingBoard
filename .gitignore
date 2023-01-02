@@ -127,3 +127,4 @@ dmypy.json
 .pyre/
 src/.idea
 src/boot_files/iotester/secrets.py
+.idea/

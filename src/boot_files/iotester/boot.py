@@ -2,6 +2,9 @@
 # import esp
 # esp.osdebug(None)
 from machine import wake_reason, reset_cause, Pin, DAC, freq
+from time import sleep_ms
+
+gc.collect()
 from micropython import mem_info
 
 freq(160000000)
@@ -19,5 +22,9 @@ mem_info()
 print('Free: {} allocated: {}'.format(gc.mem_free(), gc.mem_alloc()))
 print('--------------------------------')
 
-print('3s delay, Ctrl+C now if needed...')
-time.sleep(3)
+print('Running OTA & main.py in 3s, Ctrl+C to stop now...')
+cpt = 0
+while cpt < 30:
+    sleep_ms(100)
+    cpt += 1
+del cpt

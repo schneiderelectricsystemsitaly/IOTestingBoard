@@ -1,17 +1,16 @@
 import gc
 import time
-import secrets
-import ota_update
 import machine
 import network
-import uasyncio as asyncio
-import settings.boardsettings as boardsettings
-
+gc.collect()
 
 def download_and_install_update_if_available():
+    import settings.boardsettings as boardsettings
+    gc.collect()
+
     sta_if = network.WLAN(network.STA_IF)
     settings = boardsettings.get_settings()
-    if settings[boardsettings.Settings.WIFI]: # if wifi is enabled
+    if settings[boardsettings.Settings.OTA] and settings[boardsettings.Settings.WIFI]: # if wifi is enabled
         if not sta_if.isconnected():
             print('connecting to network...')
             sta_if.active(True)
@@ -23,6 +22,8 @@ def download_and_install_update_if_available():
                 cpt += 1
 
         if sta_if.isconnected():
+            import ota_update
+            gc.collect()
             print('network config:', sta_if.ifconfig())
             o = ota_update.OTAUpdater('https://github.com/PBrunot/IOTestingBoard', github_src_dir='src',
                                       main_dir='IOTester',
@@ -31,13 +32,18 @@ def download_and_install_update_if_available():
                 machine.reset()
             else:
                 del o
+                del ota_update
                 gc.collect()
         print('Update check complete')
     else:
         print('Wifi OTA update disabled')
 
 def start():
+    import uasyncio as asyncio
     import IOTester
+    gc.collect()
+    from micropython import mem_info
+    mem_info()
     asyncio.run(IOTester.fathw.main())
 
 
@@ -52,3 +58,4 @@ def boot():
 
 
 boot()
+

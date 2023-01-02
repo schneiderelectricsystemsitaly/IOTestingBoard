@@ -15,6 +15,7 @@ class Settings:
     WIFI_PASSWORD = 'WIFI_PASSWORD'
     DEEPSLEEP_MIN = 'DEEPSLEEP_MIN'
     THRESHOLD = 'THRESHOLD'
+    OTA = 'OTA'
 
     def __init__(self, filename='saved_settings.hex'):
         print('Loading', filename)
@@ -65,6 +66,7 @@ class Settings:
 
     def get_thresholds(self):
         output = []
+        val = None
         for i in range(0, 16):
             val = self.get_value(Settings.THRESHOLD + str(i))
             if val is not None:
@@ -87,6 +89,7 @@ class Settings:
         self.add_v_threshold(4, 16, 2, 0)
         self.add_v_threshold(5, 18, 3, 550)
         self.add_v_threshold(6, 20, 1, 0xFFFF)
+        self.add_key(Settings.OTA, False)
 
     def __getitem__(self, key):
         return self.get_value(key)
