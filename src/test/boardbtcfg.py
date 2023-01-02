@@ -9,7 +9,7 @@ BATTERY_SERVICE_UUID = UUID(0x180F)
 BATTERY_CHAR_UUID = UUID(0x2A19)
 
 GENERIC_REMOTE_CONTROL = const(384)
-DEVICE_NAME = "IOTesting board" # used in case no settings is found in persisted file
+DEVICE_NAME = "IOTesting board"  # used in case no settings is found in persisted file
 ADV_INTERVAL_MS = 300_000  # https://www.beaconzone.co.uk/ibeaconadvertisinginterval
 
 COMMAND_ENABLE_WIFI = const(0x01)

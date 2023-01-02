@@ -1,5 +1,6 @@
 import network
 import uasyncio as asyncio
+
 from machine import freq
 from micropython import const
 
@@ -83,4 +84,3 @@ async def toggle_wifi():
     else:  # enabling
         print(f'Action already in progress (wifi_state:{wifi_state})')
     return False
-

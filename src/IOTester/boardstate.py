@@ -1,10 +1,11 @@
 import time
-
 import machine
 
 from .state import BluetoothState, WifiState, BoardState
 
 __state = BoardState()
+
+# call back for bluetooth notifications
 __fun_notify = lambda *args, **kwargs: None
 
 
@@ -83,7 +84,7 @@ def update_last_result(b_value, notify=False, msg=''):
     if not b_value:
         __state.error_cpt += 1
         print('*** ERROR ***', msg)
-        __state.last_error = msg
+        __state.last_error_msg = msg
     __state.command_cpt += 1
     if notify:
         __fun_notify()

@@ -59,4 +59,3 @@ class PowerMonitor:
 
     def reset(self):
         self.summary = {}
-

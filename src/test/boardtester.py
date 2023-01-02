@@ -137,4 +137,3 @@ class BoardTester:
 
         self.running = False
         print('Completed all test suites')
-

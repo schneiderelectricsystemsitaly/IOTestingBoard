@@ -1,3 +1,4 @@
+# Represents a single test to be run
 class TestCase:
 
     def __init__(self, command_packet, check_function=None, expected_value=None, timeout_ms=6000, delay_ms=0):

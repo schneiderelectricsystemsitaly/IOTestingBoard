@@ -75,5 +75,3 @@ async def main():
             write_neopixel((64, 0, 0))
             STOP_FLAG = True
             await asyncio.sleep_ms(500)
-
-

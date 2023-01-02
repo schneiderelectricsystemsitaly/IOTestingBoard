@@ -312,12 +312,12 @@ def __print_wakeup_reason():
         print(f'Wakeup was not caused by deep sleep: {wakeup_reason}')
 
 
-def get_vmeter():
+async def get_vmeter():
     import time
     value = 0
     for i in range(0, 5):
         value += BOARD['VSENSE_ADC'].read_uv()
-        time.sleep_ms(1)
+        await asyncio.sleep_ms(1)
     value = value / 5
     # precision of ADC insufficient for decimal points anyway
     return round((value - 42000) / resistors.k_divider(BOARD['R1'], BOARD['R2']) / 1000000.0)
