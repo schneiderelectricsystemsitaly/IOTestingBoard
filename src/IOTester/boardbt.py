@@ -144,7 +144,7 @@ async def disable_bt():
     bluetooth.BLE().active(False)
     await asyncio.sleep_ms(20)
 
-    for t in [__task_adv, __task_status, __task_commands]:
+    for t in (__task_adv, __task_status, __task_commands):
         if t is not None:
             try:
                 t.cancel()

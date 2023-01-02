@@ -6,7 +6,7 @@
 # Created on 2019-10-19 
 
 __updated__ = "2019-10-19"
-__version__ = "0.1"
+__version__ = "0.2"
 
 import time
 

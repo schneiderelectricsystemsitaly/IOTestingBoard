@@ -77,7 +77,7 @@ async def __meter_commands_check():
         state = get_state()
         # execute only if in correct mode with enabled meter commands
         if state.meter_commands and not state.meter_parallel and state.relay == IOTester.state.RelayState.resistor:
-            voltage = get_vmeter()
+            voltage = await get_vmeter()
             if voltage > 1:
                 commands = get_settings().get_thresholds()
                 for val in commands:

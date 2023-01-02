@@ -43,7 +43,7 @@ class BoardState:
         self.command_cpt = 0
         self.VERBOSE = False
         self.battery_percent = 0
-        self.last_error = ''
+        self.last_error_msg = ''
 
     def __str__(self):
         if self.setpoint_r == R_OPEN:
@@ -63,6 +63,6 @@ class BoardState:
                f'err count={self.error_cpt}/{self.command_cpt} Battery={self.battery_percent}%'
 
         if self.error_cpt > 0:
-            desc += f' last err msg={self.last_error}'
+            desc += f' last err msg={self.last_error_msg}'
 
         return desc

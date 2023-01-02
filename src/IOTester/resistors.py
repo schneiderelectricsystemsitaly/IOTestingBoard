@@ -21,7 +21,7 @@ def __parallel(subset, r_values):
     return int(1.0 / result)
 
 
-@ micropython.native
+@micropython.native
 def compute_all_r():
     global available_values
     r_values = BOARD['R_VALUES']

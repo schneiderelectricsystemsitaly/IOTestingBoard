@@ -83,4 +83,3 @@ async def toggle_wifi():
     else:  # enabling
         print(f'Action already in progress (wifi_state:{wifi_state})')
     return False
-
