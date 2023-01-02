@@ -34,6 +34,10 @@ class Settings:
             print('Error while loading', filename, repr(e))
             self.factory_defaults()
 
+        # add new settings defaults after this point
+        if Settings.OTA not in self._db:
+            self.add_key(Settings.OTA, True)
+
     def save_changes(self):
 
         _f = open(self._filename, "wb")
