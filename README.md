@@ -73,9 +73,10 @@ pip install esptool
 | SET_INITIAL_TYPE | 0x15 | uint8, see command types | Defines the initial command after boot (persisted) |
 | SET_INITIAL_SETPOINT | 0x16 | uint16 LE, R value | Defines the initial command setpoint after boot (persisted) |
 | R_TEST | 0x17 | None | For internal testing only, generates R values |
-| SET_CPU | 0x18 | uint8, 0/1/2 | Sets the frequency of the CPU to 0:80MHz, 1:160MHz, 2:240MHz |
+| SET_CPU | 0x18 | uint8, 0/1/2 | Sets the frequency of the CPU to 0:80MHz, 1:160MHz, 2:240MHz with immediate effect |
 | SET_OTA | 0x19 | uint8, 0/1 | Allows over-the-air update from github repository (persisted). SET_INITIAL_WIFI must be enabled too. |
 | CONFIGURE_METER_COMM | 0x20 | * uint8: 0-15 index<br/>* uint8: 0-24 voltage<br/>* uint8: command type<br/>* uint16 LE: R value | Sets the threshold #idx: if Volts value is read and METER_COMMANDS are enabled, executes command with the setpoint |
+| BLUETOOTH_NAME | 0x21 | utf8 string | Sets the bluetooth broadcast name (persisted). Requires reboot. |
 
 ## Commands by generator
 * When the board is RESISTORS mode AND commands by meter are enabled (see COMMAND_METER_COMMANDS, COMMAND_SET_INITIAL_METER_COMM), it will interpret voltage accross input terminals as commands.
