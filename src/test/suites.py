@@ -123,11 +123,17 @@ class TestSuiteBTCommands(TestSuite):
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_OTA, 0, 1), delay_ms=1000))
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_INITIAL_BLUETOOTH, 1, 1)))
 
+        # Change bluetooth device name
         arr = int(boardbtcfg.COMMAND_SET_BLUETOOTH_NAME).to_bytes(1, 'little')
         rnd = random.Random()
         rnd_int = rnd.randint(1, 100)
         arr += (f"IOTesting {rnd_int}").encode('utf8')
 
+        test_list.append(TestCase(arr, delay_ms=1000))
+
+        # Restore default name
+        arr = int(boardbtcfg.COMMAND_SET_BLUETOOTH_NAME).to_bytes(1, 'little')
+        arr += "IOTesting board".encode('utf8')
         test_list.append(TestCase(arr, delay_ms=1000))
 
         return test_list

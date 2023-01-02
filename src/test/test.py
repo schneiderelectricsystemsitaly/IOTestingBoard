@@ -50,16 +50,16 @@ async def main():
     pm = PowerMonitor(Pin(10), Pin(8))
     bt = BoardTester(BluetoothClient())
     log = Logger(bt, pm)
-    test_suites = [TestSuiteReboot('Reboot', 1, pm),
-                   TestSuiteBTCommands('BT Commands', 1),
-                   TestSuiteNoWifi80('NoWifi CPU 80 Mhz', 10, pm),
-                   TestSuiteNoWifiCpu160('NoWifi CPU 160 Mhz', 10, pm),
-                   TestSuiteNoWifiCpu240('NoWifi CPU 240 Mhz', 10, pm),
-                   TestSuiteReboot('Reboot', 1, pm),
-                   TestSuiteWifi('Wifi', 10, pm),
-                   TestSuiteWifiREPL('Wifi+REPL', 10, pm),
-                   TestSuiteReboot('Reboot', 1, pm),
-                   TestSuiteSlow('Slow testing', 1, pm)]
+    test_suites = [suites.TestSuiteReboot('Reboot', 1, pm),
+                   suites.TestSuiteBTCommands('BT Commands', 1),
+                   suites.TestSuiteNoWifi80('NoWifi CPU 80 Mhz', 10, pm),
+                   suites.TestSuiteNoWifiCpu160('NoWifi CPU 160 Mhz', 10, pm),
+                   suites.TestSuiteNoWifiCpu240('NoWifi CPU 240 Mhz', 10, pm),
+                   suites.TestSuiteReboot('Reboot', 1, pm),
+                   suites.TestSuiteWifi('Wifi', 10, pm),
+                   suites.TestSuiteWifiREPL('Wifi+REPL', 10, pm),
+                   suites.TestSuiteReboot('Reboot', 1, pm),
+                   suites.TestSuiteSlow('Slow testing', 1, pm)]
 
     while True:
         STOP_FLAG = False
