@@ -80,7 +80,7 @@ class BoardTester:
             cpt_wait += 1
             await asyncio.sleep_ms(50)
 
-        print(time.localtime(), f'*** timeout waiting for {str(fun_chk}} == {chk_value}')
+        print(time.localtime(), f'*** timeout waiting for {str(fun_chk)} == {chk_value}')
         return False
 
     async def run_test(self, tc: TestCase, ts: TestSuite):
@@ -136,3 +136,4 @@ class BoardTester:
 
         self.running = False
         print('Completed all test suites')
+

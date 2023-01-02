@@ -86,3 +86,23 @@ class TestSuiteWifiREPL(TestSuite):
         self.add_base_tests(test_list)
 
         return test_list
+
+
+class TestSuiteBTCommands(TestSuite):
+
+    def get_testcases(self):
+        test_list = []
+        values = ((0, '80 Mhz'), (1, '160 MHz'), (2, '240 MHz'))
+        for kv in values:
+            test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, kv[0], 1), TestCase.chk_freq, kv[1]))
+
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_R_TEST, 1, 1), delay_ms=5000))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_R_TEST, 0, 1), delay_ms=5000))
+
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_OTA, 1, 1), delay_ms=1000))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_OTA, 0, 1), delay_ms=1000))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_INITIAL_BLUETOOTH, 1, 1)))
+
+        self.add_base_tests(test_list)
+
+        return test_list

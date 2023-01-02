@@ -65,3 +65,11 @@ class TestCase:
         if 'Result' not in status:
             return False
         return status['Result']
+
+    @classmethod
+    def chk_freq(cls, status, expected_value):
+        if status is None:
+            return False
+        if 'Freq' not in status:
+            return False
+        return status['Freq'] == expected_value
