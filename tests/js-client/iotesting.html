@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Owon B41T+ with web bluetooth example</title>
+    <script src="./dist/bt-owon-bt.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js" type="module"></script>
+</head>
+
+<body onload="setInterval(refreshStatus, 450)">
+    <style>
+        .output {
+            background-color: #f0f0f0;
+            border-radius: 0.75em;
+            display: block;
+            margin: 0.5em;
+            padding: 0.5em;
+        }
+
+        .status {
+            background-color: #b0b0b0;
+            border-radius: 0.75em;
+            display: block;
+            margin: 0.5em;
+            padding: 0.5em;
+        }
+
+        #status {
+            margin: .5em 0;
+            font-style: italic;
+        }
+
+        #log {
+            margin: .5em 0;
+            white-space: pre-wrap;
+        }
+
+        #status:empty,
+        #log:empty,
+        #content:empty {
+            display: none;
+        }
+
+        .highlight {
+            border-radius: 0.75em;
+            border: 1px solid #f0f0f0;
+            display: block;
+            margin: 0.5em;
+            overflow-x: auto;
+            padding: 0.5em;
+        }
+
+        code {
+            font-family: Inconsolata, Consolas, monospace;
+        }
+    </style>
+    <h1>IOTesting<br /></h1>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <p>
+                    This webpage uses Web-Bluetooth to control an IOTesting board.
+                    A Bluetooth Low-energy interface is required in your device.
+                <ul>
+                    <li>Then click Connect and select "IOTesting"
+                </ul>
+                </p>
+                <br />
+                Status:<div id="status" class="status">?</div><br />
+                <button id="btnStart" class="btn btn-primary">START</button>
+                <button id="btnStop" class="btn btn-primary">STOP</button>
+                &nbsp;
+                <button id="btnDebugLog" class="btn btn-info">LOG (Debug)</button>
+                <br /><br />
+                <strong>Latest data:</strong>
+                <div id="measure" class="output"></div>
+            </div>
+            <div class="col">
+                <img src="iotesting.png" />
+            </div>
+            <div class="col">
+                <strong>Statistics:</strong>
+                <div id="stats" class="output"></div>
+                Logs (see Developer Tools console):
+                <ul>
+                    <li>To adjust: OwonBT.SetLogLevel(value 0..5) where 0=TRACE, 5=SILENT</li>
+                    <li>To enable packet logging into application local storage : OwonBT.SetPacketLog(true)</li>
+                </ul>
+                <br />
+                With auto-range function active, the meter may send invalid data (wrong scale) if the measure is taken
+                in
+                the middle of the range update. To have consistent results, disable the auto range.
+            </div>
+        </div>
+    </div>
+   
+    <script language="javascript">
+        chartData = [];
+        lastData = null;
+        previousData = null;
+        /* HELPERS */
+        function time(text) {
+            log('[' + new Date().toJSON().substr(11, 8) + '] ' + text);
+        }
+        var init = 0;
+
+        async function refreshStatus() {
+            var new_sample = false;
+            document.getElementById("status").innerHTML = OwonBT.btState.state;
+            document.getElementById("stats").innerHTML = JSON.stringify(OwonBT.btState.stats).replaceAll(',', '<br/>');
+            if (OwonBT.btState.formattedResponse != '') {
+                document.getElementById("measure").innerHTML = OwonBT.btState.formattedResponse + "<br/><small>(" + OwonBT.btState.parsedResponse.DateTime + ")</small>";
+                lastData = OwonBT.btState.parsedResponse;
+                if (previousData == null || lastData["Timestamp"] != previousData["Timestamp"]) {
+                    if (previousData == null || previousData["Function"] != lastData["Function"]) {
+                        chartData = []; // Reset the chart on function change
+                    }
+                    previousData = lastData;
+                    new_sample = true;
+                }
+            } else {
+                document.getElementById("measure").innerHTML = "No data available";
+                lastData = null;
+            }
+
+            if (lastData != null && previousData != null && new_sample) {
+                chartData.push({
+                    "Value": lastData["Overload"] ? NaN : lastData["Value"],
+                    "Timestamp": lastData["Timestamp"].getTime(),
+                    "Function": lastData["Function description"]
+                });
+
+                if (chartData.length > 75) {
+                    chartData.shift();
+                }
+                await updateGraph(chartData);
+            }
+
+        }
+        document.getElementById("btnStart").onclick = async () => { await OwonBT.Start() };
+        document.getElementById("btnStop").onclick = async () => { await OwonBT.Stop() };
+        document.getElementById("btnDebugLog").onclick = async () => { await OwonBT.SetLogLevel(1) };
+    </script>
+
+</body>
+
+</html>

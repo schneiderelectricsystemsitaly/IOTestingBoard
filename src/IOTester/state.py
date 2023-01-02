@@ -1,7 +1,6 @@
 import time
 
-from IOTester.boardcfg import R_MAX
-from IOTester.boardcfg import R_OPEN
+from .boardcfg import R_MAX, R_OPEN
 
 
 class BluetoothState:

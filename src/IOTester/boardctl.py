@@ -4,11 +4,11 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-import IOTester.boardstate as boardstate
-import IOTester.boardwifi as boardwifi
-import IOTester.resistors as resistors
-import IOTester.state
-import settings.boardsettings as boardsettings
+from . import boardstate
+from . import boardwifi
+from . import resistors
+from . import state
+from . import boardsettings
 from .boardcfg import BOARD, R_OPEN, R_MAX
 from .command import Command
 
@@ -179,12 +179,12 @@ async def set_relay_pos(is_set, force=False):
     RELAY_ACTION_TIME_MS = const(5)
     current_state = boardstate.get_state().relay
 
-    if is_set and current_state == IOTester.state.RelayState.resistor and not force:
+    if is_set and current_state == state.RelayState.resistor and not force:
         if boardstate.is_verbose():
             print('Skipping relay SET command, already in position')
         return True  # already in set position
 
-    if not is_set and current_state == IOTester.state.RelayState.meter and not force:
+    if not is_set and current_state == state.RelayState.meter and not force:
         if boardstate.is_verbose():
             print('Skipping relay RESET command, already in position')
         return True  # already in reset position
@@ -198,7 +198,7 @@ async def set_relay_pos(is_set, force=False):
             boardstate.update_last_result(False, True, f'Relay SET')
             return False
         __set_digital_pin('KSET_CMD', False)
-        boardstate.update_relay_state(IOTester.state.RelayState.resistor)
+        boardstate.update_relay_state(state.RelayState.resistor)
     else:
         __set_digital_pin('KSET_CMD', False)
         __set_digital_pin('KRESET_CMD', True)
@@ -208,7 +208,7 @@ async def set_relay_pos(is_set, force=False):
             boardstate.update_last_result(False, True, f'Relay RESET')
             return False
         __set_digital_pin('KRESET_CMD', False)
-        boardstate.update_relay_state(IOTester.state.RelayState.meter)
+        boardstate.update_relay_state(state.RelayState.meter)
 
     if boardstate.is_verbose():
         if is_set:
@@ -225,7 +225,7 @@ async def toggle_relay():
     print("** Toggle relay called")
     boardstate.update_event_time()
     boardstate.update_testmode(False)
-    if boardstate.get_state().relay == IOTester.state.RelayState.meter:
+    if boardstate.get_state().relay == state.RelayState.meter:
         comm = Command(Command.generate_r, R_OPEN)
         if not await execute(comm):
             print('Failure to SET relay')
@@ -270,18 +270,18 @@ async def board_hw_init():
     # Configuration
     defaults = boardsettings.get_settings()
 
-    boardstate.update_meter_commands(defaults[boardsettings.Settings.METER_COMMANDS])
+    boardstate.update_meter_commands(defaults[boardsettings.Settings.METER_COMMANDS_ENABLED])
     __optocouplers_off()
     # Set Relay in meter position
     await set_relay_pos(False, True)
 
-    if defaults[boardsettings.Settings.WIFI]:
+    if defaults[boardsettings.Settings.WIFI_ENABLED]:
         gc.collect()
         await boardwifi.enable_wifi()
     else:
         await boardwifi.disable_wifi()
 
-    if defaults[boardsettings.Settings.BLUETOOTH]:
+    if defaults[boardsettings.Settings.BLUETOOTH_ENABLED]:
         asyncio.create_task(enable_bt_with_retry())
     else:
         await disable_bt()
@@ -368,13 +368,13 @@ async def light_sleep(delay):
     __print_wakeup_reason()
     defaults = boardsettings.get_settings()
 
-    if defaults[boardsettings.Settings.WIFI]:
+    if defaults[boardsettings.Settings.WIFI_ENABLED]:
         gc.collect()
         await boardwifi.enable_wifi()
     else:
         await boardwifi.disable_wifi()
 
-    if defaults[boardsettings.Settings.BLUETOOTH]:
+    if defaults[boardsettings.Settings.BLUETOOTH_ENABLED]:
         asyncio.create_task(enable_bt_with_retry())
         await asyncio.sleep_ms(0)
     else:

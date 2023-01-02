@@ -6,17 +6,43 @@
 * ![Modes (1)](https://user-images.githubusercontent.com/6236243/210256338-45ba53c8-014f-437a-9ad8-10c911cf99e3.png)
 
 # Requirements
-## Hardware
+
+## Hardware requirements
 * ESP32 board with Micropython 1.19 (I used LOLIN D32 https://www.wemos.cc/en/latest/d32/d32.html)
-* PCB with other components for R generation (see hardware folder and BOM)
-## Software
-* Micropython 1.19
-* uasyncio
-* aioble (bluetooth low energy)
-## IDE
-* Pycharms with Micropython plugin
-* pip install micropython-esp32-stubs
-* Thonny IDE is also helpful for file management
+* PCB with other components for R generation (see below for hardware folder and BOM)
+
+## Firmware requirements
+* Micropython 1.19 (used v1.19.1 for ESP32 standard firmware from https://micropython.org/download/esp32/ )
+* uasyncio v3, from REPL:
+
+```shell
+upip.install('micropython-uasyncio')
+```
+
+* aioble (copied manually from micropython-lib / bluetooth)
+* ota_update (forked from https://github.com/rdehuyss/micropython-ota-updater with bugfix for semantic versioning comparison bug)
+
+## Development environment
+* Python 3.8
+* Pycharms Community Edition (https://www.jetbrains.com/pycharm/ )
+* Micropython plugin for PyCharms, add the latest stubs from Micropython 1.19 on ESP32 as follows:
+
+```shell
+pip install micropython-esp32-stubs
+```
+** See also https://themachineshop.uk/getting-started-with-the-pi-pico-and-pycharm/
+
+* Thonny IDE is also helpful for file management ( https://thonny.org/ )
+* Ampy installed for batch file copy from command line
+
+```shell
+pip install adafruit-ampy
+```
+* Espressif esptool for firmware download to the board
+
+```shell
+pip install esptool
+```
 
 # Usage
 ## Bluetooth interface
@@ -109,5 +135,6 @@
 # TODO
 ## Planned
 * Pogo pin to simplify contact with terminal boards
+* Surface Mounted Components design instead of through hole assembly
 ## Not planned
 * Encryption on flash

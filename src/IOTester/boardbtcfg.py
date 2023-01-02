@@ -9,7 +9,7 @@ BATTERY_SERVICE_UUID = UUID(0x180F)
 BATTERY_CHAR_UUID = UUID(0x2A19)
 
 GENERIC_REMOTE_CONTROL = const(384)
-DEVICE_NAME = "IOTesting board"
+DEVICE_NAME = "IOTesting board" # used in case no settings is found in persisted file
 ADV_INTERVAL_MS = 300_000  # https://www.beaconzone.co.uk/ibeaconadvertisinginterval
 
 COMMAND_ENABLE_WIFI = const(0x01)
@@ -39,3 +39,4 @@ COMMAND_SET_CPU = const(0x18)  # + 1 byte (0-80 MHz 1-160 MHz 2- 240 MHz)
 COMMAND_SET_OTA = const(0x19)  # + 1 byte false(0) / true (!=0)
 # + 1 byte idx (0-16) + 1 byte Voltage (0-24V) + 1 byte command type + 2 bytes value (little indian unsigned)
 COMMAND_CONFIGURE_METER_COMM = const(0x20)
+COMMAND_SET_BLUETOOTH_NAME = const(0x21)  # + UTF-8 string

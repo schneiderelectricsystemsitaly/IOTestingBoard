@@ -10,7 +10,7 @@ def download_and_install_update_if_available():
 
     sta_if = network.WLAN(network.STA_IF)
     settings = get_settings()
-    if settings[Settings.OTA] and settings[Settings.WIFI]: # if wifi is enabled
+    if settings[Settings.OTA] and settings[Settings.WIFI_ENABLED]: # if wifi is enabled
         if not sta_if.isconnected():
             print('connecting to network...')
             sta_if.active(True)

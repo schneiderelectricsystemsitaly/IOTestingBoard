@@ -171,3 +171,48 @@ Duration: [ 301 ] s, Total tests [ 570 ], Failures [ 0 ], Testing speed [ 1.9 te
 		Energy measured (mWh): 32.9 	Duration (s): 301.1
 		Peak current (mA): 195
 
+(2023, 1, 2, 19, 12, 46, 0, 2) --------------------------------------------------------------------------------
+*** Testsuite [Slow testing] #iterations [1] ***
+Duration: [ 1570 ] s, Total tests [ 58 ], Failures [ 0 ], Testing speed [ 0.0 tests/s]
+	Device last status:
+		 Test mode : True
+		 Bluetooth : 3
+		 Wifi : 1
+		 Relay : 2
+		 R act : 1219
+		 Board err : 0
+		 Parallel : False
+		 Freq : 80 MHz
+		 Mem : 43072
+		 Verbose : True
+		 Result : True
+		 R setpoint : 1250
+		 Battery : 100
+		 BT test err : 0
+	Energy details:
+		1h projected Energy (mWh): 274
+		Energy measured (mWh): 119.5 	Duration (s): 1570.7
+		Peak current (mA): 123
+(2023, 1, 2, 19, 39, 4, 0, 2) --------------------------------------------------------------------------------
+*** Testsuite [Slow testing] #iterations [1] ***
+Duration: [ 1575 ] s, Total tests [ 58 ], Failures [ 0 ], Testing speed [ 0.0 tests/s]
+	Device last status:
+		 Test mode : True
+		 Bluetooth : 3
+		 Wifi : 1
+		 Relay : 2
+		 R act : 3064
+		 Board err : 0
+		 Parallel : False
+		 Freq : 80 MHz
+		 Mem : 42976
+		 Verbose : True
+		 Result : True
+		 R setpoint : 3000
+		 Battery : 100
+		 BT test err : 0
+	Energy details:
+		1h projected Energy (mWh): 281
+		Energy measured (mWh): 122.9 	Duration (s): 1575.3
+		Peak current (mA): 126
+

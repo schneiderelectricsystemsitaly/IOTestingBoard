@@ -13,6 +13,7 @@ from .boardctl import (get_battery_percent)
 from .boardstate import (get_state, update_bt_state, update_event_time, is_verbose, set_battery, set_notify_callback)
 from .btcommand import parse_command_packet
 from .state import BluetoothState
+from .boardsettings import get_settings, Settings
 
 __task_adv = None
 __task_status = None
@@ -92,6 +93,14 @@ async def __client_task(connection):
 async def __peripheral_task():
     global __bt_stop_flag, __clients
     update_bt_state(BluetoothState.enabled)
+
+    # Get the device name from persisted file
+    curr_settings = get_settings()
+    device_name = curr_settings[Settings.BLUETOOTH_NAME]
+    if device_name is None:
+        device_name = boardbtcfg.DEVICE_NAME
+        curr_settings.add_key(Settings.BLUETOOTH_NAME, device_name)
+
     while not __bt_stop_flag:
         if is_verbose():
             print("BT advertising task starting...")
@@ -105,7 +114,7 @@ async def __peripheral_task():
             try:
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
-                    name=boardbtcfg.DEVICE_NAME,
+                    name=device_name,
                     services=[boardbtcfg.MODBUS_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)

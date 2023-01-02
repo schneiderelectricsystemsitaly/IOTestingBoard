@@ -1,4 +1,4 @@
-from IOTester.boardcfg import R_OPEN, R_MAX
+from .boardcfg import R_OPEN, R_MAX
 
 
 class Command:

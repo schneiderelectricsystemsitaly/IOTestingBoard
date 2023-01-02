@@ -3,7 +3,7 @@ import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
-from settings.boardsettings import (get_settings, Settings)
+from .boardsettings import (get_settings, Settings)
 from .boardstate import (get_state, update_wifi_state, update_event_time)
 from .state import WifiState
 

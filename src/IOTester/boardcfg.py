@@ -1,7 +1,7 @@
 from machine import Pin, ADC, DAC
 from micropython import const
 
-from IOTester.abutton import Pushbutton
+from .abutton import Pushbutton
 
 BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),
          'KRESET_CMD': Pin(33, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),

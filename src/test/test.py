@@ -31,7 +31,7 @@ from .bluetoothclient import BluetoothClient
 from .boardtester import BoardTester
 from .logger import Logger
 from .powermonitor import PowerMonitor
-from .suites import TestSuiteReboot, TestSuiteNoWifi80, TestSuiteNoWifiCpu160, TestSuiteNoWifiCpu240, TestSuiteWifi, TestSuiteWifiREPL, TestSuiteBTCommands
+from . import suites
 
 
 async def main():
@@ -57,7 +57,9 @@ async def main():
                    TestSuiteNoWifiCpu240('NoWifi CPU 240 Mhz', 10, pm),
                    TestSuiteReboot('Reboot', 1, pm),
                    TestSuiteWifi('Wifi', 10, pm),
-                   TestSuiteWifiREPL('Wifi+REPL', 10, pm)]
+                   TestSuiteWifiREPL('Wifi+REPL', 10, pm),
+                   TestSuiteReboot('Reboot', 1, pm),
+                   TestSuiteSlow('Slow testing', 1, pm)]
 
     while True:
         STOP_FLAG = False
@@ -73,4 +75,5 @@ async def main():
             write_neopixel((64, 0, 0))
             STOP_FLAG = True
             await asyncio.sleep_ms(500)
+
 

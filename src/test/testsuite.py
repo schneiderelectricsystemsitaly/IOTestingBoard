@@ -26,31 +26,43 @@ class TestSuite:
         return ret_val
 
     @staticmethod
-    def add_base_tests(test_list):
+    def add_base_tests(test_list, additional_delay_ms = 0):
 
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER), TestCase.chk_relay, 1))
-
-        for r in range(0, 11000, 500):
-            test_list.append(
-                TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, r, 2), TestCase.chk_setpoint, r))
-        test_list.append(
-            TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, TestSuite.R_OPEN, 2), TestCase.chk_setpoint, TestSuite.R_OPEN))
-        test_list.append(
-            TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, TestSuite.R_MAX, 2), TestCase.chk_setpoint, TestSuite.R_MAX))
-
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER), TestCase.chk_relay, 1))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
+                                  TestCase.chk_relay, 1, delay_ms= additional_delay_ms))
 
         for r in range(0, 11000, 500):
             test_list.append(
-                TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, r, 2), TestCase.chk_setpoint, r))
-        test_list.append(
-            TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, TestSuite.R_OPEN, 2), TestCase.chk_setpoint, TestSuite.R_OPEN))
-        test_list.append(
-            TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, TestSuite.R_MAX, 2), TestCase.chk_setpoint, TestSuite.R_MAX))
+                TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, r, 2), TestCase.chk_setpoint, r,
+                         delay_ms=additional_delay_ms))
 
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER), TestCase.chk_relay, 1))
+        test_list.append(
+            TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, TestSuite.R_OPEN, 2),
+                     TestCase.chk_setpoint, TestSuite.R_OPEN, delay_ms= additional_delay_ms))
+        test_list.append(
+            TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, TestSuite.R_MAX, 2),
+                     TestCase.chk_setpoint, TestSuite.R_MAX, delay_ms= additional_delay_ms))
+
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
+                                  TestCase.chk_relay, 1, delay_ms= additional_delay_ms))
+
+        for r in range(0, 11000, 500):
+            test_list.append(
+                TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, r, 2),
+                         TestCase.chk_setpoint, r, delay_ms=additional_delay_ms))
+        test_list.append(
+            TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, TestSuite.R_OPEN, 2),
+                     TestCase.chk_setpoint, TestSuite.R_OPEN, delay_ms= additional_delay_ms))
+        test_list.append(
+            TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, TestSuite.R_MAX, 2),
+                     TestCase.chk_setpoint, TestSuite.R_MAX, delay_ms= additional_delay_ms))
+
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
+                                  TestCase.chk_relay, 1, delay_ms= additional_delay_ms))
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 1, 1), TestCase.chk_result))
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_RUN_TEST), TestCase.chk_result, delay_ms=15000))
+
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_RUN_TEST),
+                                  TestCase.chk_result, delay_ms=additional_delay_ms))
         # Check free memory at the end of the test
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY))

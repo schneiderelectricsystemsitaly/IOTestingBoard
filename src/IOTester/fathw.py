@@ -6,7 +6,7 @@ from machine import freq
 from micropython import const
 
 import IOTester.state
-from settings.boardsettings import get_settings, Settings
+from .boardsettings import get_settings, Settings
 from .boardcfg import BOARD, R_OPEN, R_MAX
 from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
                        light_sleep, board_hw_init)
