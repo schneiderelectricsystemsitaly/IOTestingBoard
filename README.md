@@ -45,9 +45,22 @@ Python project for smart boards extending the features of calibrators during aut
 | COMMAND_R_TEST | 0x17 | None | For internal testing only, generates R values |
 | COMMAND_SET_CPU | 0x18 | uint8, 0/1/2 | Sets the frequency of the CPU to 0:80MHz, 1:160MHz, 2:240MHz |
 | COMMAND_SET_OTA | 0x19 | uint8, 0/1 | Allows over-the-air update from github repository (persisted). COMMAND_SET_INITIAL_WIFI must be enabled too. |
-| COMMAND_CONFIGURE_METER_COMM | 0x19 | uint8, 0-15 index, uint8 voltage level, uint8 command type, uint16 LE R value | Sets the threshold #idx: if Volts value is read and METER_COMMANDS are enabled, executes command with the setpoint |
+| COMMAND_CONFIGURE_METER_COMM | 0x19 | uint8: 0-15 index, uint8: 0-24 voltage, uint8: command type, uint16 LE: R value | Sets the threshold #idx: if Volts value is read and METER_COMMANDS are enabled, executes command with the setpoint |
 
 ## Commands by generator
+* When the board is RESISTORS mode AND commands by meter are enabled (see COMMAND_METER_COMMANDS, COMMAND_SET_INITIAL_METER_COMM), it will interpret voltage accross input terminals as commands. The default values for the thresholds are as follows:
+
+| Threshold | Voltage (V) | Command | Notes |
+|---|---|---|---|
+| 0 | 8 | Resistor, 1k1 |
+| 0 | 10 | Resistor, 4k69 |
+| 0 | 12 | Resistor, 7k18 |
+| 0 | 14 | Resistor, 11k |
+| 0 | 16 | Resistor, short | Actual value <40 ohms
+| 0 | 18 | Resistor, open | Actual value >50Mohms
+| 0 | 20 | Voltmeter with load of 550 | User will need to press back the switch button to allow other commands
+| 0 | 22 | Bypass mode | User will need to press back the switch button to allow other commands
+
 ## Manual switching
 
 # Special
