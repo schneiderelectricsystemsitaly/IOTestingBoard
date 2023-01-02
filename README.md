@@ -48,11 +48,12 @@ Python project for smart boards extending the features of calibrators during aut
 | COMMAND_CONFIGURE_METER_COMM | 0x19 | uint8: 0-15 index, uint8: 0-24 voltage, uint8: command type, uint16 LE: R value | Sets the threshold #idx: if Volts value is read and METER_COMMANDS are enabled, executes command with the setpoint |
 
 ## Commands by generator
-* When the board is RESISTORS mode AND commands by meter are enabled (see COMMAND_METER_COMMANDS, COMMAND_SET_INITIAL_METER_COMM), it will interpret voltage accross input terminals as commands. The default values for the thresholds are as follows:
+* When the board is RESISTORS mode AND commands by meter are enabled (see COMMAND_METER_COMMANDS, COMMAND_SET_INITIAL_METER_COMM), it will interpret voltage accross input terminals as commands.
+* The default values for the thresholds are as follows:
 
 | Threshold | Voltage (V) | Command | Notes |
 |---|---|---|---|
-| 0 | 8 | Resistor, 1k1 |
+| 0 | 8 | Resistor, 1k |
 | 0 | 10 | Resistor, 4k69 |
 | 0 | 12 | Resistor, 7k18 |
 | 0 | 14 | Resistor, 11k |
@@ -61,7 +62,20 @@ Python project for smart boards extending the features of calibrators during aut
 | 0 | 20 | Voltmeter with load of 550 | User will need to press back the switch button to allow other commands
 | 0 | 22 | Bypass mode | User will need to press back the switch button to allow other commands
 
+## Command types
+* The following command types uint8 are recognized
+
+| Command type | Description |
+|---|---|
+| 1 | bypass mode (input terminals directly connected to output terminals) |
+| 2 | resistor mode (input terminals isolated, R value accross output terminals) |
+| 3 | V with load (input terminals paralled to R value accross output terminals) |
+| 4 | test mode (alternates resistor and V with load modes, with stepped R values) |
+
 ## Manual switching
+* User can switch betweem modes by pressing a button on the board.
+* Short press : switch to bypass mode if in (resistors, V with load) mode or to resistors modes if in bypass mode
+* Long press : switch to bypass mode if in (resistors, V with load) mode or to V with load modes if in bypass mode
 
 # Special
 ## OTA support
