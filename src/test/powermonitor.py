@@ -9,7 +9,7 @@ from .test import STOP_FLAG
 
 
 class PowerMonitor:
-    SHUNT_OHMS = 0.1
+    SHUNT_OHMS = const(0.1)
 
     def __init__(self, sda, sdc):
         i2c = SoftI2C(sda, sdc)
@@ -17,7 +17,7 @@ class PowerMonitor:
             raise Exception("I2C INA219 not found")
 
         self.ina = INA219(PowerMonitor.SHUNT_OHMS, i2c, log_level=logging.INFO)
-        self.ina.configure(voltage_range=INA219.RANGE_16V, bus_adc=INA219.ADC_128SAMP, shunt_adc=INA219.ADC_128SAMP, \
+        self.ina.configure(voltage_range=INA219.RANGE_16V, bus_adc=INA219.ADC_128SAMP, shunt_adc=INA219.ADC_128SAMP,
                            gain=INA219.GAIN_2_80MV)
         self.summary = {}
         self.last_values = {}
@@ -59,4 +59,3 @@ class PowerMonitor:
 
     def reset(self):
         self.summary = {}
-

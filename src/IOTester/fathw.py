@@ -2,7 +2,6 @@ import gc
 import time
 
 import uasyncio as asyncio
-from machine import freq
 from micropython import const
 
 import IOTester.state
@@ -28,9 +27,9 @@ async def __animate_leds():
     cpt = 0
     current_state = get_state()
     meter_pattern = [0]  # don't blink
-    parallel_pattern = [0, 0, 0, 185, 0, 185, 0, 0, 0]  # 2 fast blinks
-    resistor_pattern = [0, 0, 0, 185, 185, 185, 0, 0, 0]  # 1 slow blink
-    error_pattern = [190, 190, 0, 0]
+    _parallel_pattern = const((0, 0, 0, 185, 0, 185, 0, 0, 0))  # 2 fast blinks
+    _resistor_pattern = const((0, 0, 0, 185, 185, 185, 0, 0, 0))  # 1 slow blink
+    _error_pattern = const((190, 190, 0, 0))
 
     while True:
         green_val = 0
@@ -38,16 +37,16 @@ async def __animate_leds():
             green_val = meter_pattern[cpt % len(meter_pattern)]
         elif current_state.relay == IOTester.state.RelayState.resistor:
             if current_state.meter_parallel:
-                green_val = parallel_pattern[cpt % len(parallel_pattern)]
+                green_val = _parallel_pattern[cpt % len(_parallel_pattern)]
             else:
-                green_val = resistor_pattern[cpt % len(resistor_pattern)]
+                green_val = _resistor_pattern[cpt % len(_resistor_pattern)]
         else:
             error = True
 
         error |= not current_state.last_command_result
 
         if error:
-            red_val = error_pattern[cpt % len(error_pattern)]
+            red_val = _error_pattern[cpt % len(_error_pattern)]
         else:
             red_val = 0
 
@@ -71,27 +70,27 @@ async def __animate_leds():
 
 # micropython.native
 async def __meter_commands_check():
-    METER_CHECK_LOOP_SLEEP_MS = const(500)
+    _METER_CHECK_LOOP_SLEEP_MS = const(500)
 
     while True:
         state = get_state()
         # execute only if in correct mode with enabled meter commands
         if state.meter_commands and not state.meter_parallel and state.relay == IOTester.state.RelayState.resistor:
-            voltage = get_vmeter()
+            voltage = await get_vmeter()
             if voltage > 1:
                 commands = get_settings().get_thresholds()
                 for val in commands:
                     if voltage == commands[0]:
                         comm = Command(commands[1], commands[2])
                         await execute(comm)
-        await asyncio.sleep_ms(METER_CHECK_LOOP_SLEEP_MS)
+        await asyncio.sleep_ms(_METER_CHECK_LOOP_SLEEP_MS)
 
 
 # micropython.native
 async def __sleep_check():
-    CHECK_LOOP_SLEEP_MS = const(2000)
-    IDLE_LIGHT_THRESHOLD_MS = const(60 * 1000)
-    LIGHT_DURATION_MS = const(5000)
+    _CHECK_LOOP_SLEEP_MS = const(2000)
+    _IDLE_LIGHT_THRESHOLD_MS = const(60 * 1000)
+    _LIGHT_DURATION_MS = const(5000)
 
     while True:
         current_state = get_state()
@@ -103,10 +102,10 @@ async def __sleep_check():
             current_state.last_event = time.ticks_ms()
             await deep_sleep()
         if not __is_client_connected() and False:
-            if time.ticks_ms() - current_state.last_event >= IDLE_LIGHT_THRESHOLD_MS:
+            if time.ticks_ms() - current_state.last_event >= _IDLE_LIGHT_THRESHOLD_MS:
                 current_state.last_event = time.ticks_ms()
-                await light_sleep(LIGHT_DURATION_MS)
-        await asyncio.sleep_ms(CHECK_LOOP_SLEEP_MS)
+                await light_sleep(_LIGHT_DURATION_MS)
+        await asyncio.sleep_ms(_CHECK_LOOP_SLEEP_MS)
 
 
 async def __test_loop():
@@ -114,7 +113,7 @@ async def __test_loop():
     test_cycle.append(R_MAX)
     test_cycle.append(R_OPEN)
     cpt = 0
-    LOOP_SLEEP_MS = 5000
+    _LOOP_SLEEP_MS = const(4000)
     ctype = Command.generate_r
     while True:
         current_state = get_state()
@@ -127,16 +126,17 @@ async def __test_loop():
                 ctype = Command.measure_with_load if ctype == Command.generate_r else Command.generate_r
 
             result = await execute(command)
-
-            update_testmode(True)
-            update_last_result(result, True)
+            # execute resets test mode
+            update_testmode(True, False)
 
             if result and get_state().setpoint_r != command.setpoint:
                 print('Different setpoints', get_state().setpoint_r, command.setpoint)
-                update_last_result(result, True, f'Setpoints are different')
+                update_last_result(False, True, 'Setpoints are different')
+            else:
+                update_last_result(result, True, 'Test')
             cpt += 1
 
-        await asyncio.sleep_ms(LOOP_SLEEP_MS)
+        await asyncio.sleep_ms(_LOOP_SLEEP_MS)
 
 
 async def main():
@@ -146,9 +146,6 @@ async def main():
 
     # precompute possible R values
     compute_all_r()
-
-    # lower CPU to 80 MHz to reduce power consumption
-    freq(80000000)
 
     await board_hw_init()
 

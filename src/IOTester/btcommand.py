@@ -23,37 +23,37 @@ def launch(func, tup_args):
 
 async def parse_command_packet(command):
     command_word = command[0]
-    if command_word in [boardbtcfg.COMMAND_MODE_RESISTORS,
+    if command_word in (boardbtcfg.COMMAND_MODE_RESISTORS,
                         boardbtcfg.COMMAND_MODE_V_LOAD,
                         boardbtcfg.COMMAND_SET_DEEPSLEEP_MIN,
-                        boardbtcfg.COMMAND_SET_INITIAL_COMMAND_SETPOINT]:
+                        boardbtcfg.COMMAND_SET_INITIAL_COMMAND_SETPOINT):
         if len(command) == 3:
             setpoint = int.from_bytes(command[1:3], "little")
             launch(__bt_command_execute, (command_word, setpoint))
         else:
             print('Invalid R/V_LOAD/INITIAL_COMMAND command')
-    elif command_word in [boardbtcfg.COMMAND_SET_WIFI_NETWORK,
+    elif command_word in (boardbtcfg.COMMAND_SET_WIFI_NETWORK,
                           boardbtcfg.COMMAND_SET_WIFI_PASSWORD,
-                          boardbtcfg.COMMAND_SET_BLUETOOTH_NAME]:
+                          boardbtcfg.COMMAND_SET_BLUETOOTH_NAME):
         setpoint = command[1:].decode('utf8')
         launch(__bt_command_execute, (command_word, setpoint))
-    elif command_word in [boardbtcfg.COMMAND_SET_INITIAL_METER_COMM,
+    elif command_word in (boardbtcfg.COMMAND_SET_INITIAL_METER_COMM,
                           boardbtcfg.COMMAND_SET_INITIAL_BLUETOOTH,
                           boardbtcfg.COMMAND_SET_INITIAL_WIFI,
                           boardbtcfg.COMMAND_SET_VERBOSE,
                           boardbtcfg.COMMAND_METER_COMMANDS,
-                          boardbtcfg.COMMAND_SET_OTA]:
+                          boardbtcfg.COMMAND_SET_OTA):
         if len(command) == 2:
             launch(__bt_command_execute, (command_word, command[1:] != b'\x00'))
         else:
             print('Invalid SET_INITIAL command', 'len', len(command))
-    elif command_word in [boardbtcfg.COMMAND_SET_INITIAL_COMMAND_TYPE,
-                          boardbtcfg.COMMAND_SET_CPU]:
+    elif command_word in (boardbtcfg.COMMAND_SET_INITIAL_COMMAND_TYPE,
+                          boardbtcfg.COMMAND_SET_CPU):
         if len(command) == 2:
             launch(__bt_command_execute, (command_word, int.from_bytes(command[1:], "little")))
         else:
             print('Invalid SET_INITIAL_COMMAND_TYPE/COMMAND_SET_CPU command', 'len', len(command))
-    elif command_word in [boardbtcfg.COMMAND_CONFIGURE_METER_COMM]:
+    elif command_word == boardbtcfg.COMMAND_CONFIGURE_METER_COMM:
         if len(command) == 6:
             idx = int.from_bytes(command[1:2], "little")
             voltage = int.from_bytes(command[2:3], "little")

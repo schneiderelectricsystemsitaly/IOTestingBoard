@@ -1,6 +1,6 @@
 import gc
-
 import ujson
+gc.collect()
 
 __settings = None
 
@@ -42,6 +42,7 @@ class Settings:
             self.add_key(Settings.GITHUB_TOKEN, '')
         if Settings.BLUETOOTH_NAME not in self._db:
             self.add_key(Settings.BLUETOOTH_NAME, 'IOTesting')
+
     def save_changes(self):
 
         _f = open(self._filename, "wb")

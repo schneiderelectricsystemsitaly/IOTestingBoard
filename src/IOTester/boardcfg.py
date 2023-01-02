@@ -1,6 +1,5 @@
 from machine import Pin, ADC, DAC
 from micropython import const
-
 from .abutton import Pushbutton
 
 BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),
@@ -41,8 +40,8 @@ BOARD['R_VALUES'] = const((0.9, 221.4, 1033.9, 2222, 5550, 7502, 8225, 11027))
 BOARD['R_SERIES'] = const(2550 - 33)
 
 # Resistor divider for Vsense 
-BOARD['R1'] = 148000
-BOARD['R2'] = 8200
+BOARD['R1'] = const(148000)
+BOARD['R2'] = const(8200)
 assert (len(BOARD['RESISTORS']) == len(BOARD['R_VALUES']))
 
 # Set orange during startup

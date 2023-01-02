@@ -7,12 +7,19 @@ class OTAUpdater:
     optimized for low power usage.
     """
 
-    def __init__(self, github_repo, github_src_dir='', module='', main_dir='main', new_version_dir='next', secrets_file=None, headers={}):
+    def __init__(self, github_repo, github_src_dir='', module='', main_dir='main', new_version_dir='next', secrets_file=None, headers={}, github_src_main_dir=None):
         self.http_client = HttpClient(headers=headers)
         self.github_repo = github_repo.rstrip('/').replace('https://github.com/', '')
         self.github_src_dir = '' if len(github_src_dir) < 1 else github_src_dir.rstrip('/') + '/'
         self.module = module.rstrip('/')
         self.main_dir = main_dir
+
+        # Allows overrides of remote github directory
+        if github_src_main_dir is None:
+            self.github_src_main_dir = self.main_dir
+        else:
+            self.github_src_main_dir = github_src_main_dir
+
         self.new_version_dir = new_version_dir
         self.secrets_file = secrets_file
 
@@ -161,12 +168,12 @@ class OTAUpdater:
         print('Version {} downloaded to {}'.format(version, self.modulepath(self.new_version_dir)))
 
     def _download_all_files(self, version, sub_dir=''):
-        url = 'https://api.github.com/repos/{}/contents{}{}{}?ref=refs/tags/{}'.format(self.github_repo, self.github_src_dir, self.main_dir, sub_dir, version)
+        url = 'https://api.github.com/repos/{}/contents{}{}{}?ref=refs/tags/{}'.format(self.github_repo, self.github_src_dir, self.github_src_main_dir, sub_dir, version)
         gc.collect() 
         file_list = self.http_client.get(url)
         file_list_json = file_list.json()
         for file in file_list_json:
-            path = self.modulepath(self.new_version_dir + '/' + file['path'].replace(self.main_dir + '/', '').replace(self.github_src_dir, ''))
+            path = self.modulepath(self.new_version_dir + '/' + file['path'].replace(self.github_src_main_dir + '/', '').replace(self.github_src_dir, ''))
             if file['type'] == 'file':
                 gitPath = file['path']
                 print('\tDownloading: ', gitPath, 'to', path)

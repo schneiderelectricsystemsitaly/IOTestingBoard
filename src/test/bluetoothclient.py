@@ -19,24 +19,20 @@ class BluetoothClient:
         self.command_char = None
         self.connection = None
         self.bt_errors = 0
-        self.running_tasks = []
         self.should_reinit = False
+        self.task_status = None
 
     def __terminate_tasks(self):
-        for task in self.running_tasks:
-            if task is not None:
-                try:
-                    task.cancel()
-                    task = None
-                except:
-                    pass
-        self.running_tasks = []
         self.board_service = None
         self.board_service = None
         self.status_char = None
         self.command_char = None
         self.connection = None
         self.status_value = None
+        self.status_value = None
+        if self.task_status is not None:
+            self.task_status.cancel()
+
         self.task_status = None
         self.should_reinit = False
         gc.collect()
@@ -56,7 +52,6 @@ class BluetoothClient:
         print('Status loop terminating')
 
     async def connect(self):
-
         self.__terminate_tasks()
         BLE().active(True)
         device = None
@@ -107,14 +102,14 @@ class BluetoothClient:
         return None
 
     async def write_command(self, command: bytearray):
-        TIMEOUT_MS = const(1000)
+        _TIMEOUT_MS = const(1000)
         prev = read_neopixel()
 
         # brief white flash when writing
         write_neopixel((200, 200, 200))
 
         try:
-            await self.command_char.write(command, timeout_ms=TIMEOUT_MS)
+            await self.command_char.write(command, timeout_ms=_TIMEOUT_MS)
             return True
         except Exception as e:
             print('write_command', repr(e))

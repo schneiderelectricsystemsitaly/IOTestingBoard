@@ -17,12 +17,18 @@ class BoardTester:
         self.test_failures = 0
         self.status = {}
         self.running = False
+        self.running_total = 0
+        self.running_actual = 0
+        self.running_desc = ''
 
     def get_status_str(self):
         if self.bt_client.connection is None:
             return "Connecting..."
         elif self.running:
-            return "Running"
+            if self.running_total > 0:
+                return f"Running ({self.running_desc} : {self.running_actual}/{self.running_total} : {round(100*self.running_actual/self.running_total)} %)"
+            else:
+                return f"Running ({self.running_desc} : ??? %)"
         else:
             return "Connected, not running"
 
@@ -122,11 +128,16 @@ class BoardTester:
             ts.stats['start'] = time.ticks_ms()
             ts.stats['total'] = 0
             ts.stats['failures'] = 0
+            self.running_actual = 0
+            self.running_desc = ts.description
             for i in range(0, ts.nb_iter):
-                for tc in ts.get_testcases():
+                tests = ts.get_testcases()
+                self.running_total = len(tests) * ts.nb_iter
+                for tc in tests:
                     if not await self.run_test(tc, ts):
                         ts.stats['failures'] += 1
                     ts.stats['total'] += 1
+                    self.running_actual += 1
                     if tc.delay_ms > 0:
                         await asyncio.sleep_ms(tc.delay_ms)
                     else:
@@ -137,4 +148,3 @@ class BoardTester:
 
         self.running = False
         print('Completed all test suites')
-

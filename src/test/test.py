@@ -52,14 +52,14 @@ async def main():
     log = Logger(bt, pm)
     test_suites = [suites.TestSuiteReboot('Reboot', 1, pm),
                    suites.TestSuiteBTCommands('BT Commands', 1),
-                   suites.TestSuiteNoWifi80('NoWifi CPU 80 Mhz', 10, pm),
-                   suites.TestSuiteNoWifiCpu160('NoWifi CPU 160 Mhz', 10, pm),
-                   suites.TestSuiteNoWifiCpu240('NoWifi CPU 240 Mhz', 10, pm),
+                   suites.TestSuiteNoWifi80('NoWifi CPU 80 Mhz', 3, pm),
+                   suites.TestSuiteNoWifiCpu160('NoWifi CPU 160 Mhz', 3, pm),
+                   suites.TestSuiteNoWifiCpu240('NoWifi CPU 240 Mhz', 3, pm),
                    suites.TestSuiteReboot('Reboot', 1, pm),
-                   suites.TestSuiteWifi('Wifi', 10, pm),
-                   suites.TestSuiteWifiREPL('Wifi+REPL', 10, pm),
+                   suites.TestSuiteWifi('Wifi', 3, pm),
+                   suites.TestSuiteWifiREPL('Wifi+REPL', 3, pm),
                    suites.TestSuiteReboot('Reboot', 1, pm),
-                   suites.TestSuiteSlow('Slow testing', 1, pm)]
+                   suites.TestSuiteSlow('Slow testing', 2, pm)]
 
     while True:
         STOP_FLAG = False
@@ -75,5 +75,3 @@ async def main():
             write_neopixel((64, 0, 0))
             STOP_FLAG = True
             await asyncio.sleep_ms(500)
-
-

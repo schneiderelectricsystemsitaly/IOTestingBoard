@@ -4,7 +4,7 @@ import time
 import aioble
 import bluetooth
 import uasyncio as asyncio
-import micropython
+from micropython import const
 
 from machine import freq
 
@@ -22,10 +22,13 @@ __task_battery = None
 __clients = []
 __bt_stop_flag = False
 __status_characteristic = None
+__last_notification_ms = 0
+_MAX_CLIENTS = const(3)
+_MAX_NOTIFICATION_DELAY_MS = const(5000)  # Maximum period for BT notifications
 
 
 def notify_change():
-    global __status_characteristic
+    global __status_characteristic, __last_notification_ms
     # Skip if not BT active
     if get_state().bluetooth not in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
         return True
@@ -34,6 +37,7 @@ def notify_change():
         if __status_characteristic:
             data = __get_notification_data()
             __status_characteristic.write(data, True)
+            __last_notification_ms = time.ticks_ms()
         return True
     except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
         print('notify_change', repr(e))
@@ -110,16 +114,16 @@ async def __peripheral_task():
         else:
             update_bt_state(BluetoothState.enabled_with_client)
 
-        while len(__clients) <= 3 and not __bt_stop_flag:
+        while len(__clients) <= _MAX_CLIENTS and not __bt_stop_flag:
             try:
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
                     name=device_name,
-                    services=[boardbtcfg.MODBUS_SERVICE_UUID],
+                    services=[boardbtcfg.MODBUS_SERVICE_UUID, boardbtcfg.BATTERY_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)
                 __clients.append(asyncio.create_task(__client_task(connection)))
-                await asyncio.sleep_ms(100)
+                await asyncio.sleep_ms(200)
             except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
                 print(time.localtime(), f"peripheral_task: error while connected to BT device: {repr(e)}")
                 break
@@ -127,11 +131,11 @@ async def __peripheral_task():
                 print(time.localtime(), f"peripheral_task: {repr(e)}")
                 break
 
-        if len(__clients) == 3:
+        if len(__clients) == _MAX_CLIENTS:
             print("Too many clients")
             await asyncio.sleep_ms(1000)
-
-        await asyncio.sleep_ms(100)
+        else:
+            await asyncio.sleep_ms(200)
 
     print('\tAdvertising task terminating')
 
@@ -144,7 +148,7 @@ async def disable_bt():
     bluetooth.BLE().active(False)
     await asyncio.sleep_ms(20)
 
-    for t in [__task_adv, __task_status, __task_commands]:
+    for t in (__task_adv, __task_status, __task_commands):
         if t is not None:
             try:
                 t.cancel()
@@ -232,12 +236,15 @@ def __get_notification_data():
 
 
 async def __board_status_loop(bsc):
-    global __bt_stop_flag
+    global __bt_stop_flag, __last_notification_ms
     if is_verbose():
         print('Board status task starting...')
     while not __bt_stop_flag:
         try:
-            bsc.write(__get_notification_data(), True)
+            tick_ms = time.ticks_ms()
+            if tick_ms - __last_notification_ms > _MAX_NOTIFICATION_DELAY_MS:
+                bsc.write(__get_notification_data(), True)
+                __last_notification_ms = tick_ms
             await asyncio.sleep_ms(5000)
         except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
             print(time.localtime(), 'board_status_loop', repr(e))
