@@ -16,6 +16,7 @@ class Settings:
     DEEPSLEEP_MIN = 'DEEPSLEEP_MIN'
     THRESHOLD = 'THRESHOLD'
     OTA = 'OTA'
+    GITHUB_TOKEN = 'GITHUB_TOKEN'
 
     def __init__(self, filename='saved_settings.hex'):
         print('Loading', filename)
@@ -33,6 +34,12 @@ class Settings:
         except Exception as e:
             print('Error while loading', filename, repr(e))
             self.factory_defaults()
+
+        # add new settings defaults after this point
+        if Settings.OTA not in self._db:
+            self.add_key(Settings.OTA, False)
+        if Settings.GITHUB_TOKEN not in self._db:
+            self.add_key(Settings.GITHUB_TOKEN, '')
 
     def save_changes(self):
 
@@ -90,6 +97,7 @@ class Settings:
         self.add_v_threshold(5, 18, 3, 550)
         self.add_v_threshold(6, 20, 1, 0xFFFF)
         self.add_key(Settings.OTA, False)
+        self.add_key(Settings.GITHUB_TOKEN, '')
 
     def __getitem__(self, key):
         return self.get_value(key)

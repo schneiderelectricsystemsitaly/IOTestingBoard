@@ -35,7 +35,7 @@ COMMAND_SET_VERBOSE = const(0x14)  # + 1 byte false(0) / true (!=0)
 COMMAND_SET_INITIAL_COMMAND_TYPE = const(0x15)  # + 1 byte command type enum value
 COMMAND_SET_INITIAL_COMMAND_SETPOINT = const(0x16)  # + 2 bytes little-indian unsigned int
 COMMAND_R_TEST = const(0x17)
-COMMAND_CPU_MAX = const(0x18)
-COMMAND_CPU_MIN = const(0x19)
+COMMAND_SET_CPU = const(0x18)  # + 1 byte (0-80 MHz 1-160 MHz 2- 240 MHz)
+COMMAND_SET_OTA = const(0x19)  # + 1 byte false(0) / true (!=0)
 # + 1 byte idx (0-16) + 1 byte Voltage (0-24V) + 1 byte command type + 2 bytes value (little indian unsigned)
 COMMAND_CONFIGURE_METER_COMM = const(0x20)

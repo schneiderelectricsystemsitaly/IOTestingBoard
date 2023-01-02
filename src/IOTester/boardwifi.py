@@ -25,25 +25,27 @@ def disable_webrepl():
 
 async def enable_wifi():
     print(f'** Enabling Wifi')
-    MAX_TRIES = const(30)
     sta_if = network.WLAN(network.STA_IF)
-    freq(240000000)  # Wifi and REPL require more CPU
+    freq(160000000)  # Wifi and REPL require more CPU
     if not sta_if.active():
         await asyncio.sleep_ms(1)
         sta_if.active(True)
-    await asyncio.sleep_ms(250)
+        await asyncio.sleep_ms(250)
 
     settings = get_settings()
     if not sta_if.isconnected():
         sta_if.connect(settings[Settings.WIFI_NETWORK], settings[Settings.WIFI_PASSWORD])
 
     update_wifi_state(WifiState.enabling)
+
+    MAX_TRIES = const(30)
     cpt = 0
     while not sta_if.isconnected():
         await asyncio.sleep_ms(500)
         cpt += 1
         if cpt > MAX_TRIES:
             break
+
     if sta_if.isconnected():
         print('Wifi connected', sta_if.ifconfig())
         update_wifi_state(WifiState.enabled)
@@ -81,3 +83,4 @@ async def toggle_wifi():
     else:  # enabling
         print(f'Action already in progress (wifi_state:{wifi_state})')
     return False
+

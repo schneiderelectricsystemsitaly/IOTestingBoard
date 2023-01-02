@@ -1,7 +1,7 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
 import os
 import secrets
-from machine import wake_reason, reset_cause
+from machine import wake_reason, reset_cause, reset
 import gc
 from time import sleep_ms, time
 
@@ -45,7 +45,7 @@ def download_and_install_update_if_available():
                                       main_dir='test',
                                       headers={'Authorization': 'token {}'.format(secrets.GITHUB_TOKEN)})
             if o.install_update_if_available():
-                machine.reset()
+                reset()
             else:
                 del o
                 del ota_update

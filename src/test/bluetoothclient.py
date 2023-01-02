@@ -6,8 +6,8 @@ import uasyncio as asyncio
 from bluetooth import BLE
 from micropython import const
 
-import test.boardbtcfg as boardbtcfg
-from test.test import STOP_FLAG, write_neopixel, read_neopixel
+from . import boardbtcfg
+from .test import STOP_FLAG, write_neopixel, read_neopixel
 
 
 class BluetoothClient:

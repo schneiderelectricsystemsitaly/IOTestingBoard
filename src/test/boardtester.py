@@ -2,11 +2,12 @@ import time
 
 import uasyncio as asyncio
 
-from test.bluetoothclient import BluetoothClient
-from test.test import DELAY_BETWEEN_COMMANDS
-from test.testcase import TestCase
-from test.testsuite import TestSuite
-from test.test import STOP_FLAG
+from .bluetoothclient import BluetoothClient
+from .test import DELAY_BETWEEN_COMMANDS
+from .testcase import TestCase
+from .testsuite import TestSuite
+from .test import STOP_FLAG
+from .logger import Logger
 
 
 class BoardTester:
@@ -25,11 +26,11 @@ class BoardTester:
         else:
             return "Connected, not running"
 
-    async def start(self, test_suites, logger):
+    async def start(self, test_suites):
         while not STOP_FLAG:
             if not await self.bt_client.connect():
                 raise Exception("Cannot connect")
-            t2 = asyncio.create_task(self.run_suites(test_suites, logger))
+            t2 = asyncio.create_task(self.run_suites(test_suites))
             try:
                 await asyncio.gather(t2)
             except Exception as e:
@@ -80,7 +81,7 @@ class BoardTester:
             cpt_wait += 1
             await asyncio.sleep_ms(50)
 
-        print(time.localtime(), f'*** timeout waiting for {str(fun_chk}} == {chk_value}')
+        print(time.localtime(), f'*** timeout waiting for {str(fun_chk)} == {chk_value}')
         return False
 
     async def run_test(self, tc: TestCase, ts: TestSuite):
@@ -109,7 +110,7 @@ class BoardTester:
         print('** TEST FAILURE', tc)
         return False
 
-    async def run_suites(self, test_suites, logger):
+    async def run_suites(self, test_suites):
         if test_suites is None or len(test_suites) == 0:
             return
         self.running = True
@@ -132,7 +133,8 @@ class BoardTester:
                         await asyncio.sleep_ms(DELAY_BETWEEN_COMMANDS)
             ts.stats['duration'] = time.ticks_ms() - ts.stats['start']
             print('Completed', ts)
-            logger.save_results(ts, self.status)
+            Logger.save_results(ts, self.status)
 
         self.running = False
         print('Completed all test suites')
+

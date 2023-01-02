@@ -27,19 +27,19 @@ def read_neopixel(idx=0):
     return NEOPIXEL[idx]
 
 
-from test.bluetoothclient import BluetoothClient
-from test.boardtester import BoardTester
-from test.logger import Logger
-from test.powermonitor import PowerMonitor
-from test.suites import TestSuiteReboot, TestSuiteNoWifi, TestSuiteNoWifiCpuMax, TestSuiteWifi, TestSuiteWifiREPL
+from .bluetoothclient import BluetoothClient
+from .boardtester import BoardTester
+from .logger import Logger
+from .powermonitor import PowerMonitor
+from .suites import TestSuiteReboot, TestSuiteNoWifi80, TestSuiteNoWifiCpu160, TestSuiteNoWifiCpu240, TestSuiteWifi, TestSuiteWifiREPL, TestSuiteBTCommands
 
 
 async def main():
     global STOP_FLAG
     from micropython import mem_info
-    
+
     print(mem_info())
-    
+
     write_neopixel((40, 0, 0))
 
     try:
@@ -51,8 +51,10 @@ async def main():
     bt = BoardTester(BluetoothClient())
     log = Logger(bt, pm)
     test_suites = [TestSuiteReboot('Reboot', 1, pm),
-                   TestSuiteNoWifi('NoWifi CPU default', 10, pm),
-                   TestSuiteNoWifiCpuMax('NoWifi CPU 240 Mhz', 10, pm),
+                   TestSuiteBTCommands('BT Commands', 1),
+                   TestSuiteNoWifi80('NoWifi CPU 80 Mhz', 10, pm),
+                   TestSuiteNoWifiCpu160('NoWifi CPU 160 Mhz', 10, pm),
+                   TestSuiteNoWifiCpu240('NoWifi CPU 240 Mhz', 10, pm),
                    TestSuiteReboot('Reboot', 1, pm),
                    TestSuiteWifi('Wifi', 10, pm),
                    TestSuiteWifiREPL('Wifi+REPL', 10, pm)]
@@ -62,7 +64,7 @@ async def main():
 
         try:
             t1 = asyncio.create_task(pm.monitor_loop())
-            t2 = asyncio.create_task(bt.start(test_suites, log))
+            t2 = asyncio.create_task(bt.start(test_suites))
             t3 = asyncio.create_task(log.loop())
 
             await asyncio.gather(t1, t2, t3)
@@ -71,3 +73,4 @@ async def main():
             write_neopixel((64, 0, 0))
             STOP_FLAG = True
             await asyncio.sleep_ms(500)
+

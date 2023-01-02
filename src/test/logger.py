@@ -2,14 +2,12 @@ import time
 
 import uasyncio as asyncio
 
-from test.boardtester import BoardTester
-from test.powermonitor import PowerMonitor
-from test.test import STOP_FLAG
+from .test import STOP_FLAG
 
 
 class Logger:
 
-    def __init__(self, tester: BoardTester, meter: PowerMonitor):
+    def __init__(self, tester, meter):
         self.tester = tester
         self.meter = meter
 
@@ -23,20 +21,15 @@ class Logger:
             await asyncio.sleep_ms(5000)
         print('Logger loop terminating')
 
-    def save_results(self, ts, last_status):
+    @classmethod
+    def save_results(cls, ts, last_status):
         with open('test_results.txt', 'a') as f:
-            print('-------------------------------------------------', file=f)
-            print(time.localtime(), ts, file=f)
-            print("Duration: [", ts.stats['duration'], "] ms, Total tests [", ts.stats['total'], ", Failures [",
-                  ts.stats['failures'], "] testing speed [", ts.stats['total'] / (ts.stats['duration'] / 1000), ' tests/s]', file=f)
-            if last_status is not None:
-                print("Device last status:", file=f)
-                print("\t", last_status, file=f)
-            if ts.pm is not None:
-                print("Energy details:", file=f)
-                print("\t", ts.pm.get_summary(), file=f)
+            print(time.localtime(), '--------------------------------------------------------------------------------', file=f)
+            print('***', ts, '***', file=f)
+            print("Duration: [", int(ts.stats['duration']/1000), "] s, Total tests [", ts.stats['total'], "], Failures [",
+                  ts.stats['failures'], "], Testing speed [", round(ts.stats['total'] / (ts.stats['duration'] / 1000), 1), 'tests/s]', file=f)
             if len(ts.stats['failed_tc']) > 0:
-                print("Failures details:", file=f)
+                print("\tFailures details:", file=f)
                 counts = {}
                 for tc1 in ts.stats['failed_tc']:
                     for tc2 in ts.stats['failed_tc']:
@@ -46,6 +39,18 @@ class Logger:
                             counts[tc1] += 1
                 counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
                 for v in counts:
-                    print('\t', v[0], 'failures #', v[1], file=f)
+                    print('\t\t', v[0], 'failures #', v[1], file=f)
+            if last_status is not None:
+                print("\tDevice last status:", file=f)
+                for key, value in last_status.items():
+                    print("\t\t", key, ':', value, file=f)
+            if ts.pm is not None:
+                print("\tEnergy details:", file=f)
+                summary = ts.pm.get_summary()
+                print("\t\t1h projected Energy (mWh):", round(summary["1h projected energy (mWh)"]), file=f)
+                print("\t\tEnergy measured (mWh):", round(summary["Energy (mWh)"],1), '\tDuration (s):', round(summary["Total duration (s)"], 1), file=f)
+                print("\t\tPeak current (mA):", round(summary["Peak current (mA)"]), file=f)
+            f.close()
         print('Results saved to file')
+
 
