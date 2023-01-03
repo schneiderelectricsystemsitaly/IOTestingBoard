@@ -34,16 +34,16 @@ def set_green_led(value):
 
 
 async def r_test():
-    update_event_time()
-    update_testmode(False)
     update_r_setpoint(R_MAX)
     __optocouplers_off()
     await set_relay_pos(True)
 
-    NB_TESTS = const(3)
+    _NB_TESTS = const(3)
     cpt = 1
-    while cpt <= NB_TESTS:
-        print('Executing test #', cpt, 'ouf of', NB_TESTS)
+    update_testmode(True)
+    while cpt <= _NB_TESTS and get_state().test_mode:
+        update_event_time()
+        print('Executing test #', cpt, 'ouf of', _NB_TESTS)
         series = cpt % 2 == 0
         __set_rseries(not series)
         for i in range(0, len(BOARD['RESISTORS'])):
