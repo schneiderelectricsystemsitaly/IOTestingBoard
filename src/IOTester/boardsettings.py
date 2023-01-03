@@ -1,9 +1,11 @@
 import gc
 import ujson
+from micropython import const
+
 gc.collect()
 
 __settings = None
-
+_AES_KEY = const('IOTesting2023!!!')
 
 class Settings:
     WIFI_ENABLED = 'WIFI'
@@ -26,10 +28,13 @@ class Settings:
         self._filename = filename
 
         try:
-            _f = open(filename, "r+b")
-            self._db = ujson.load(_f)
-        except OSError:
-            print('Creating default settings file')
+            with open(filename, "r+b") as _f:
+                fc = _f.read()
+                _f.close()
+            str_contents = Settings.decrypt(fc)
+            self._db = ujson.loads(str_contents)
+        except OSError as ose:
+            print('Creating default settings file', ose)
             self.factory_defaults()
         except Exception as e:
             print('Error while loading', filename, repr(e))
@@ -44,10 +49,11 @@ class Settings:
             self.add_key(Settings.BLUETOOTH_NAME, 'IOTesting')
 
     def save_changes(self):
-
-        _f = open(self._filename, "wb")
-        ujson.dump(self._db, _f)
-        _f.close()
+        file_str = ujson.dumps(self._db)
+        with open(self._filename, "wb") as _f:
+            _f.write(Settings.encrypt(file_str))
+            _f.close()
+        gc.collect()
 
     def add_key(self, key, value):
         if (key in self._db and self._db[key] == value) or value is None:
@@ -109,7 +115,63 @@ class Settings:
     def __setitem__(self, key, value):
         return self.add_key(key, value)
 
+    @staticmethod
+    def encrypt_file():
+        import ucryptolib
+        enc = ucryptolib.aes(_AES_KEY.encode('utf8'), 1)
+        with open('saved_settings.hex', mode='rb') as f:
+            data_bytes = f.read()
+            f.close()
 
+        # padding
+        data_bytes = data_bytes + b'\x00' * ((16 - (len(data_bytes) % 16)) % 16)
+
+        with open('saved_settings.tst', mode='wb') as f:
+            f.write(enc.encrypt(data_bytes))
+            f.close()
+
+        del enc
+        del ucryptolib
+    @staticmethod
+    def decrypt(data_bytes: bytes) -> str:
+        from ucryptolib import aes
+        enc = aes(_AES_KEY.encode('utf8'), 1)
+        data_bytes = enc.decrypt(data_bytes)
+        data_bytes = data_bytes.decode('utf8')
+        data_bytes = data_bytes.rstrip('\0')
+        del enc
+        del aes
+        return data_bytes
+
+    @staticmethod
+    def encrypt(text_str: str) -> bytes:
+        from ucryptolib import aes
+        enc = aes(_AES_KEY.encode('utf8'), 1)
+        # padding
+        data_bytes = text_str.encode('utf8')
+        data_bytes = data_bytes + b'\x00' * ((16 - (len(data_bytes) % 16)) % 16)
+        data_bytes = enc.encrypt(data_bytes)
+        del enc
+        del aes
+        return data_bytes
+
+    @staticmethod
+    def decrypt_test():
+        import ucryptolib
+        enc = ucryptolib.aes(_AES_KEY.encode('utf8'), 1)
+        with open('saved_settings.tst', mode='rb') as f:
+            # read all lines at once
+            data_bytes = f.read()
+            f.close()
+
+        data_bytes = enc.decrypt(data_bytes)
+        data_bytes = data_bytes.decode('utf8')
+        data_bytes = data_bytes.rstrip('\0')
+        with open('saved_settings.hex2', mode='wt') as f:
+            f.write(data_bytes)
+            f.close()
+        del enc
+        del ucryptolib
 def get_settings():
     global __settings
     if __settings is None:

@@ -35,7 +35,13 @@ async def enable_wifi():
 
     settings = get_settings()
     if not sta_if.isconnected():
-        sta_if.connect(settings[Settings.WIFI_NETWORK], settings[Settings.WIFI_PASSWORD])
+        try:
+            sta_if.connect(settings[Settings.WIFI_NETWORK], settings[Settings.WIFI_PASSWORD])
+        except OSError as oe:
+            print('Failure to connect wifi', oe)
+            sta_if.active(False)
+            update_wifi_state(WifiState.disabled)
+            return False
 
     update_wifi_state(WifiState.enabling)
 

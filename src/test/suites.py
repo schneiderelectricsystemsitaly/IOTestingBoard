@@ -47,7 +47,7 @@ class TestSuiteNoWifi80(TestSuite):
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_INITIAL_WIFI, 0, 1)))
         self.add_base_tests(test_list)
         # Check free memory at the end of the test
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY_NO_WIFI))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY_WIFI))
         return test_list
 
 
@@ -64,7 +64,7 @@ class TestSuiteNoWifiCpu240(TestSuite):
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 0, 1)))
         # Check free memory at the end of the test
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY_NO_WIFI))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY_WIFI))
         return test_list
 
 
@@ -81,7 +81,7 @@ class TestSuiteNoWifiCpu160(TestSuite):
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 0, 1)))
         # Check free memory at the end of the test
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY_NO_WIFI))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY_WIFI))
         return test_list
 
 
@@ -133,8 +133,8 @@ class TestSuiteBTCommands(TestSuite):
 
         # Change bluetooth device name
         arr = int(boardbtcfg.COMMAND_SET_BLUETOOTH_NAME).to_bytes(1, 'little')
-        rnd = random.Random()
-        rnd_int = rnd.randint(1, 100)
+        import urandom
+        rnd_int = urandom.randint(1, 100)
         arr += f"IOTesting {rnd_int}".encode('utf8')
 
         test_list.append(TestCase(arr, delay_ms=1000))
@@ -160,5 +160,5 @@ class TestSuiteSlow(TestSuite):
         self.add_base_tests(test_list, 30000)
 
         # Check free memory at the end of the test
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY_NO_WIFI))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory, TestSuite.MIN_MEMORY_WIFI))
         return test_list
