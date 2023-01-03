@@ -175,7 +175,7 @@ def __set_r(idx, req_value):
 
 
 async def set_relay_pos(is_set, force=False):
-    RELAY_ACTION_TIME_MS = const(5)
+    RELAY_ACTION_TIME_MS = const(10)
     current_state = boardstate.get_state().relay
 
     if is_set and current_state == state.RelayState.resistor and not force:

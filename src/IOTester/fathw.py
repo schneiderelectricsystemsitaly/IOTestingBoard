@@ -147,9 +147,6 @@ async def main():
     # precompute possible R values
     compute_all_r()
 
-    # lower CPU to 80 MHz to reduce power consumption
-    freq(80000000)
-
     await board_hw_init()
 
     t1 = asyncio.create_task(__animate_leds())
