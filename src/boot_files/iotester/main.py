@@ -25,7 +25,7 @@ def download_and_install_update_if_available():
             gc.collect()
             print('network config:', sta_if.ifconfig())
             o = ota_update.OTAUpdater('https://github.com/PBrunot/IOTestingBoard', github_src_dir='src',
-                                      main_dir='IOTester',
+                                      main_dir='IOTester', github_src_main_dir='IOTester-mpy',
                                       headers={'Authorization': 'token {}'.format(settings[Settings.GITHUB_TOKEN])})
             if o.install_update_if_available():
                 machine.reset()
