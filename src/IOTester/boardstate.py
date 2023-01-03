@@ -25,8 +25,8 @@ def update_event_time():
     __state.last_event = time.ticks_ms()
 
 
-def update_testmode(test_mode):
-    if __state.test_mode != test_mode:
+def update_testmode(test_mode, notify=False):
+    if __state.test_mode != test_mode and notify:
         __fun_notify()
 
     __state.test_mode = test_mode

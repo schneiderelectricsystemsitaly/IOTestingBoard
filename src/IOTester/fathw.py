@@ -126,6 +126,8 @@ async def __test_loop():
                 ctype = Command.measure_with_load if ctype == Command.generate_r else Command.generate_r
 
             result = await execute(command)
+            # execute resets test mode
+            update_testmode(True, False)
 
             if result and get_state().setpoint_r != command.setpoint:
                 print('Different setpoints', get_state().setpoint_r, command.setpoint)
