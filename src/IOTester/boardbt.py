@@ -255,10 +255,13 @@ async def __board_status_loop(bsc):
     while not __bt_stop_flag:
         try:
             tick_ms = time.ticks_ms()
-            if tick_ms - __last_notification_ms > _MAX_NOTIFICATION_DELAY_MS:
+            delay_since = tick_ms - __last_notification_ms
+            if 0 > delay_since > _MAX_NOTIFICATION_DELAY_MS:
                 bsc.write(__get_notification_data(), True)
                 __last_notification_ms = tick_ms
-            await asyncio.sleep_ms(5000)
+                await asyncio.sleep_ms(5000)
+            else:
+                await asyncio.sleep_ms(5000 - delay_since if delay_since > 0 else 0)
         except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
             print(time.localtime(), 'board_status_loop', repr(e))
             pass
