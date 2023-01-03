@@ -5,7 +5,6 @@ from micropython import const
 
 class TestSuite:
     # minimum free memory on testing board
-    MIN_MEMORY_NO_WIFI = const(35000)
     MIN_MEMORY_WIFI = const(20000)
     R_OPEN = const(0xFFFF)
     R_MAX = const(0xFFFE)
