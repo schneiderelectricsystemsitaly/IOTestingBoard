@@ -25,7 +25,7 @@ __status_characteristic = None
 __last_notification_ms = 0
 _MAX_CLIENTS = const(3)
 _MAX_NOTIFICATION_DELAY_MS = const(5000)  # Maximum period for BT notifications
-
+_MIN_NOTIFICATION_DELAY_MS = const(49)  # Minimum period for BT notifications
 
 def notify_change():
     global __status_characteristic, __last_notification_ms
@@ -35,6 +35,11 @@ def notify_change():
     try:
         # Check interface is initialized
         if __status_characteristic:
+            since_last = time.ticks_ms() - __last_notification_ms
+            while _MIN_NOTIFICATION_DELAY_MS > since_last > 0:
+                await asyncio.sleep_ms(_MIN_NOTIFICATION_DELAY_MS - since_last)
+                # Need to recheck because a 5s transmission may have happened during await period
+                since_last = time.ticks_ms() - __last_notification_ms
             data = __get_notification_data()
             __status_characteristic.write(data, True)
             __last_notification_ms = time.ticks_ms()
