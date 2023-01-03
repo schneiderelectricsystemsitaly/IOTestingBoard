@@ -113,7 +113,7 @@ async def __test_loop():
     test_cycle.append(R_MAX)
     test_cycle.append(R_OPEN)
     cpt = 0
-    LOOP_SLEEP_MS = 5000
+    _LOOP_SLEEP_MS = const(4000)
     ctype = Command.generate_r
     while True:
         current_state = get_state()
@@ -127,15 +127,14 @@ async def __test_loop():
 
             result = await execute(command)
 
-            update_testmode(True)
-            update_last_result(result, True)
-
             if result and get_state().setpoint_r != command.setpoint:
                 print('Different setpoints', get_state().setpoint_r, command.setpoint)
-                update_last_result(result, True, f'Setpoints are different')
+                update_last_result(False, True, 'Setpoints are different')
+            else:
+                update_last_result(result, True, 'Test')
             cpt += 1
 
-        await asyncio.sleep_ms(LOOP_SLEEP_MS)
+        await asyncio.sleep_ms(_LOOP_SLEEP_MS)
 
 
 async def main():
