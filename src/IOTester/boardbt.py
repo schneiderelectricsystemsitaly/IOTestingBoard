@@ -27,11 +27,19 @@ _MAX_CLIENTS = const(3)
 _MAX_NOTIFICATION_DELAY_MS = const(5000)  # Maximum period for BT notifications
 _MIN_NOTIFICATION_DELAY_MS = const(49)  # Minimum period for BT notifications
 
+
 def notify_change():
     global __status_characteristic, __last_notification_ms
     # Skip if not BT active
     if get_state().bluetooth not in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
         return True
+    else:
+        t1 = asyncio.create_task(__notify_task())
+        asyncio.gather(t1)
+
+
+async def __notify_task():
+    global __status_characteristic, __last_notification_ms
     try:
         # Check interface is initialized
         if __status_characteristic:
@@ -258,14 +266,20 @@ async def __board_status_loop(bsc):
 
 
 async def __battery_loop(battery_char):
-    global __bt_stop_flag
+    global __bt_stop_flag, __last_notification_ms
     if is_verbose():
         print('Board battery task starting...')
     while not __bt_stop_flag:
         try:
             percent = await get_battery_percent()
             set_battery(percent)
+            since_last = time.ticks_ms() - __last_notification_ms
+            while _MIN_NOTIFICATION_DELAY_MS > since_last > 0:
+                await asyncio.sleep_ms(_MIN_NOTIFICATION_DELAY_MS - since_last)
+                # Need to recheck because a 5s transmission may have happened during await period
+                since_last = time.ticks_ms() - __last_notification_ms
             battery_char.write(percent.to_bytes(1, "little"), True)
+            __last_notification_ms = time.ticks_ms()
             await asyncio.sleep_ms(30000)
         except (asyncio.core.TimeoutError, asyncio.core.CancelledError) as e:
             print(time.localtime(), 'battery_loop', repr(e))
