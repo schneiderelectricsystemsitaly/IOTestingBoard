@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Owon B41T+ with web bluetooth example</title>
+    <script src="./dist/bt-iotesting.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js" type="module"></script>
+</head>
+
+<body onload="setInterval(refreshStatus, 450)">
+    <style>
+        .output {
+            background-color: #f0f0f0;
+            border-radius: 0.75em;
+            display: block;
+            margin: 0.5em;
+            padding: 0.5em;
+        }
+
+        .status {
+            background-color: #b0b0b0;
+            border-radius: 0.75em;
+            display: block;
+            margin: 0.5em;
+            padding: 0.5em;
+        }
+
+        #status {
+            margin: .5em 0;
+            font-style: italic;
+        }
+
+        #log {
+            margin: .5em 0;
+            white-space: pre-wrap;
+        }
+
+        #status:empty,
+        #log:empty,
+        #content:empty {
+            display: none;
+        }
+
+        .highlight {
+            border-radius: 0.75em;
+            border: 1px solid #f0f0f0;
+            display: block;
+            margin: 0.5em;
+            overflow-x: auto;
+            padding: 0.5em;
+        }
+
+        code {
+            font-family: Inconsolata, Consolas, monospace;
+        }
+    </style>
+    <h1>IOTesting<br /></h1>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <p>
+                    This webpage uses Web-Bluetooth to control an IOTesting board.
+                    A Bluetooth Low-energy interface is required in your device.
+                <ul>
+                    <li>Then click Connect and select "IOTesting"
+                </ul>
+                </p>
+                <br />
+                Status:<div id="status" class="status">?</div><br />
+                <button id="btnStart" class="btn btn-primary">START</button>
+                <button id="btnStop" class="btn btn-primary">STOP</button>
+                &nbsp;
+                <button id="btnDebugLog" class="btn btn-info">LOG (Debug)</button>
+                <br /><br />
+                <strong>Latest data:</strong>
+                <div id="measure" class="output"></div>
+            </div>
+            <div class="col">
+                <img src="iotesting.png" />
+            </div>
+            <div class="col">
+                <strong>Statistics:</strong>
+                <div id="stats" class="output"></div>
+                Logs (see Developer Tools console):
+                <ul>
+                    <li>To adjust: IOTestingBT.SetLogLevel(value 0..5) where 0=TRACE, 5=SILENT</li>
+                    <li>To enable packet logging into application local storage : IOTestingBT.SetPacketLog(true)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Setpoint Resistance
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Ω</span>
+                    </div>
+                    <input id="r_value" class="form-control" type="number" placeholder="input value" aria-label="resistor" aria-describedby="basic-addon1">
+                </div>
+            </div>
+            <div class="col">
+                <button id="btnExecuteR" class="btn btn-primary">Execute R</button>
+                <br/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Setpoint Voltmeter + load
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon2">Ω</span>
+                    </div>
+                    <input id="r_load" class="form-control" type="number" placeholder="input value" aria-label="resistor" aria-describedby="basic-addon2">
+                </div>
+            </div>
+            <div class="col">
+                <button id="btnExecuteV" class="btn btn-primary">Execute V+load</button>
+                <br/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Meter mode
+            </div>
+            <div class="col">
+                &nbsp;no parameter
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <button id="btnExecuteM" class="btn btn-primary">Execute Meter</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Wi-Fi SSID
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <input id="wp" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <button id="btnExecuteWS" class="btn btn-primary">Set Wi-Fi SSID</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Wi-Fi Password
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <input id="wp" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="col">
+                <button id="btnExecuteWP" class="btn btn-primary">Set Wi-Fi Password</button>
+                <br/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Wi-Fi
+            </div>
+            <div class="col">
+                <div class="checkbox">
+                    <label><input id="en_wifi" type="checkbox" value="">tick to enable</label>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <button id="btnExecuteWP" class="btn btn-primary">Set Wi-Fi (once)</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Wi-Fi at boot
+            </div>
+            <div class="col">
+                <div class="checkbox">
+                    <label><input id="en_wifi_boot" type="checkbox" value="">tick to enable</label>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <button id="btnExecuteWP" class="btn btn-primary">Set Wi-Fi (always)</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Various
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <button id="btnExecuteWS" class="btn btn-primary">Reboot</button>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <button id="btnExecuteWS" class="btn btn-primary">Enable WebREPL</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="speed">Select speed:</label>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <select class="form-control" id="speed">
+                        <option value="1">80 Mhz (default)</option>
+                        <option value="2">160 Mhz (min. for Wi-Fi)</option>
+                        <option value="3">240 Mhz (max)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <button id="btnExecuteWS" class="btn btn-primary">Set CPU speed</button>
+                </div>
+            </div>
+        </div>        
+    </div>
+   
+    <script language="javascript">
+        chartData = [];
+        lastData = null;
+        previousData = null;
+        /* HELPERS */
+        function time(text) {
+            log('[' + new Date().toJSON().substr(11, 8) + '] ' + text);
+        }
+        var init = 0;
+
+        async function refreshStatus() {
+            var new_sample = false;
+            document.getElementById("status").innerHTML = IOTestingBT.btState.state;
+            document.getElementById("stats").innerHTML = JSON.stringify(IOTestingBT.btState.stats).replaceAll(',', '<br/>');
+            if (IOTestingBT.btState.formattedResponse != '') {
+                document.getElementById("measure").innerHTML = JSON.stringify(IOTestingBT.btState.formattedResponse);
+                lastData = IOTestingBT.btState.parsedResponse;
+            } else {
+                document.getElementById("measure").innerHTML = "No data available";
+                lastData = null;
+            }
+        }
+        document.getElementById("btnStart").onclick = async () => { await IOTestingBT.Start() };
+        document.getElementById("btnStop").onclick = async () => { await IOTestingBT.Stop() };
+        document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.SetLogLevel(1) };
+    </script>
+
+</body>
+
+</html>
