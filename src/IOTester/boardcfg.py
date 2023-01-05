@@ -4,8 +4,8 @@ from .abutton import Pushbutton
 
 BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),
          'KRESET_CMD': Pin(33, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),
-         'VMETER_EN': Pin(17, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
-         'SERIESR_CMD': Pin(18, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
+         'VMETER_EN': Pin(17, Pin.OUT, drive=Pin.DRIVE_1),
+         'SERIESR_CMD': Pin(18, Pin.OUT, drive=Pin.DRIVE_1),
          'VSENSE': Pin(34, Pin.IN, pull=None)}
 
 # PINS CONFIGURATION
@@ -27,14 +27,14 @@ BOARD['GREEN_LED_DAC'] = DAC(BOARD['GREEN_LED'], bits=8, buffering=False)
 
 # RESISTOR NETWORK CONFIGURATION
 # Mapping to pins through optocouplers (DRIVE_1 required to drive the optocoupler LED)
-BOARD['RESISTORS'] = (Pin(19, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
-                      Pin(21, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
-                      Pin(22, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
-                      Pin(23, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
-                      Pin(4, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
-                      Pin(16, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
-                      Pin(13, Pin.OUT, drive=Pin.DRIVE_1, hold=True),
-                      Pin(12, Pin.OUT, drive=Pin.DRIVE_1, hold=True))
+BOARD['RESISTORS'] = (Pin(19, Pin.OUT, drive=Pin.DRIVE_1),
+                      Pin(21, Pin.OUT, drive=Pin.DRIVE_1),
+                      Pin(22, Pin.OUT, drive=Pin.DRIVE_1),
+                      Pin(23, Pin.OUT, drive=Pin.DRIVE_1),
+                      Pin(4, Pin.OUT, drive=Pin.DRIVE_1),
+                      Pin(16, Pin.OUT, drive=Pin.DRIVE_1),
+                      Pin(13, Pin.OUT, drive=Pin.DRIVE_1),
+                      Pin(12, Pin.OUT, drive=Pin.DRIVE_1))
 BOARD['OPTOCOUPLER_R'] = 33
 BOARD['R_VALUES'] = const((0.9, 221.4, 1033.9, 2222, 5550, 7502, 8225, 11027))
 BOARD['R_SERIES'] = const(2550 - 33)
