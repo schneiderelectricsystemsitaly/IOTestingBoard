@@ -4,7 +4,8 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-from .boardstate import get_state, update_meter_commands, update_r_actual, update_testmode, update_v_parallel_state, is_verbose, update_event_time, \
+from .boardstate import get_state, update_meter_commands, update_r_actual, update_testmode, update_v_parallel_state, \
+    is_verbose, update_event_time, \
     update_last_result, update_r_setpoint, update_relay_state
 from .boardwifi import disable_wifi, enable_wifi
 from .resistors import find_best_r_with_opt, k_divider

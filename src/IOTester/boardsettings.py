@@ -7,6 +7,7 @@ gc.collect()
 __settings = None
 _AES_KEY = const('IOTesting2023!!!')
 
+
 class Settings:
     WIFI_ENABLED = 'WIFI'
     BLUETOOTH_ENABLED = 'BLUETOOTH'
@@ -132,6 +133,7 @@ class Settings:
 
         del enc
         del ucryptolib
+
     @staticmethod
     def decrypt(data_bytes: bytes) -> str:
         from ucryptolib import aes
@@ -172,6 +174,8 @@ class Settings:
             f.close()
         del enc
         del ucryptolib
+
+
 def get_settings():
     global __settings
     if __settings is None:
