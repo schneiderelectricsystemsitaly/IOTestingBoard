@@ -28,13 +28,13 @@ _MAX_STATUS_DELAY_MS = const(5000)  # Maximum period for Status BT notifications
 _MIN_BLUETOOTH_DELAY_MS = const(49)  # Minimum period for all BT notifications
 
 
-def notify_change() -> None:
+def notify_change(force=False) -> None:
     global __status_characteristic, __last_notification_ms
     # Skip if not BT active
     if get_state().bluetooth not in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
         return True
     else:
-        t1 = asyncio.create_task(__notify_task())
+        t1 = asyncio.create_task(__notify_task(force))
         asyncio.gather(t1)
 
 
@@ -85,13 +85,13 @@ def __device_info_service() -> aioble.Service:
     return service
 
 
-async def __notify_task() -> bool:
+async def __notify_task(force=False) -> bool:
     global __status_characteristic, __last_notification_ms
     try:
         # Check interface is initialized
         if __status_characteristic:
             since_last = time.ticks_ms() - __last_notification_ms
-            while _MIN_BLUETOOTH_DELAY_MS > since_last > 0:
+            while _MIN_BLUETOOTH_DELAY_MS > since_last > 0 and not force:
                 await asyncio.sleep_ms(_MIN_BLUETOOTH_DELAY_MS - since_last)
                 # Need to recheck because a 5s transmission may have happened during await period
                 since_last = time.ticks_ms() - __last_notification_ms

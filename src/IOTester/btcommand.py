@@ -7,6 +7,7 @@ from .boardstate import update_event_time, update_last_result, update_meter_comm
 from .boardwifi import enable_wifi, disable_wifi, enable_webrepl, disable_webrepl
 from .command import Command
 from .boardsettings import get_settings, Settings
+from .boardbt import notify_change
 
 type_gen = type((lambda: (yield))())  # Generator type
 
@@ -62,6 +63,9 @@ async def parse_command_packet(command) -> None:
             launch(__bt_command_execute, (command_word, (idx, voltage, ctype, setpoint)))
         else:
             print('Invalid COMMAND_CONFIGURE_METER_COMM command', 'len', len(command))
+    elif command_word == boardbtcfg.COMMAND_REFRESH:
+
+        notify_change(True)
     else:
         launch(__bt_command_execute, (command_word, None))
 
@@ -73,9 +77,11 @@ async def __bt_command_execute(command, setpoint) -> None:
 
     try:
         if command == boardbtcfg.COMMAND_ENABLE_WIFI:
-            return await enable_wifi()
+            result = await enable_wifi()
+            update_last_result(result, notify=True, msg='BT Enable wifi')
         elif command == boardbtcfg.COMMAND_DISABLE_WIFI:
-            return await disable_wifi()
+            result = await disable_wifi()
+            update_last_result(result, notify=True, msg='BT Disable wifi')
         elif command == boardbtcfg.COMMAND_ENABLE_WEBREPL:
             await enable_wifi()
             await enable_webrepl()
