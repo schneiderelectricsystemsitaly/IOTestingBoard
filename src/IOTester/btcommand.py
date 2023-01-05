@@ -64,7 +64,6 @@ async def parse_command_packet(command) -> None:
         else:
             print('Invalid COMMAND_CONFIGURE_METER_COMM command', 'len', len(command))
     elif command_word == boardbtcfg.COMMAND_REFRESH:
-
         notify_change(True)
     else:
         launch(__bt_command_execute, (command_word, None))
