@@ -39,15 +39,15 @@ def notify_change(force=False) -> None:
 
 
 def __get_model_number() -> str:
-    return get_settings().get_value(Settings.SERIAL)
+    return boardbtcfg.DEVICE_INFORMATION_MODEL
 
 
 def __get_serial_number() -> str:
-    return '1'
+    return get_settings().get_value(Settings.SERIAL)
 
 
 def __get_hardware_revision() -> str:
-    return boardbtcfg.DEVICE_INFORMATION_HW_VER
+    return get_settings().get_value(Settings.HW_REV)
 
 
 def __sw_get_version(directory, version_file_name='.version') -> str:
