@@ -7,7 +7,6 @@ from .boardstate import update_event_time, update_last_result, update_meter_comm
 from .boardwifi import enable_wifi, disable_wifi, enable_webrepl, disable_webrepl
 from .command import Command
 from .boardsettings import get_settings, Settings
-from .boardbt import notify_change
 
 type_gen = type((lambda: (yield))())  # Generator type
 
@@ -64,6 +63,7 @@ async def parse_command_packet(command) -> None:
         else:
             print('Invalid COMMAND_CONFIGURE_METER_COMM command', 'len', len(command))
     elif command_word == boardbtcfg.COMMAND_REFRESH:
+        from .boardbt import notify_change
         notify_change(True)
     else:
         launch(__bt_command_execute, (command_word, None))
