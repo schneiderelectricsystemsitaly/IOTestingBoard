@@ -5,8 +5,8 @@
   "main": "owon.js",
   "scripts": {
     "test": "jest",
-    "dist": "browserify iotesting.js --standalone IOTestingBT --debug | uglifyjs --source-map -o ./dist/bt-iotesting.min.js",
-    "dev": "browserify iotesting.js --standalone IOTestingBT --debug -o ./dist/bt-iotesting.js"
+    "dist": "browserify iotesting.js --standalone IOTestingBT --debug | uglifyjs --source-map -o ./dist/iotesting-bt.min.js",
+    "dev": "browserify iotesting.js --standalone IOTestingBT --debug -o ./dist/iotesting-bt.js"
   },
   "keywords": [
     "web",
