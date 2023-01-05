@@ -39,7 +39,7 @@ def notify_change(force=False) -> None:
 
 
 def __get_model_number() -> str:
-    return boardbtcfg.DEVICE_INFORMATION_MODEL
+    return get_settings().get_value(Settings.SERIAL)
 
 
 def __get_serial_number() -> str:

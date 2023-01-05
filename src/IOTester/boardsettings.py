@@ -21,6 +21,7 @@ class Settings:
     OTA = 'OTA'
     GITHUB_TOKEN = 'GITHUB_TOKEN'
     BLUETOOTH_NAME = 'BLUETOOTH_DEVICE'
+    SERIAL = 'SERIAL'
 
     def __init__(self, filename='saved_settings.hex'):
         print('Loading', filename)
@@ -48,6 +49,8 @@ class Settings:
             self.add_key(Settings.GITHUB_TOKEN, '')
         if Settings.BLUETOOTH_NAME not in self._db:
             self.add_key(Settings.BLUETOOTH_NAME, 'IOTesting')
+        if Settings.SERIAL not in self._db:
+            self.add_key(Settings.SERIAL, '1.0')
 
     def save_changes(self):
         file_str = ujson.dumps(self._db)
@@ -109,6 +112,7 @@ class Settings:
         self.add_key(Settings.OTA, False)
         self.add_key(Settings.GITHUB_TOKEN, '')
         self.add_key(Settings.BLUETOOTH_NAME, 'IOTesting board')
+        self.add_key(Settings.SERIAL, '1')
 
     def __getitem__(self, key):
         return self.get_value(key)
