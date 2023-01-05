@@ -9,7 +9,7 @@ from .boardstate import (get_state, update_wifi_state, update_event_time)
 from .state import WifiState
 
 
-async def enable_webrepl():
+async def enable_webrepl() -> None:
     if get_state().wifi != WifiState.enabled:
         await enable_wifi()
     freq(240000000)  # Wifi and REPL require more CPU
@@ -18,13 +18,13 @@ async def enable_webrepl():
     print('Enabled WEBREPL')
 
 
-def disable_webrepl():
+def disable_webrepl() -> None:
     import webrepl
     webrepl.stop()
     print('Disabled WEBREPL')
 
 
-async def enable_wifi():
+async def enable_wifi() -> bool:
     print(f'** Enabling Wifi')
     sta_if = network.WLAN(network.STA_IF)
     freq(160000000)  # Wifi and REPL require more CPU
@@ -64,7 +64,7 @@ async def enable_wifi():
         return False
 
 
-async def disable_wifi():
+async def disable_wifi() -> bool:
     print('** Disabling Wifi')
     cpt = 0
     while get_state().wifi == WifiState.enabling and cpt < 31:
@@ -80,7 +80,7 @@ async def disable_wifi():
 
 
 # callback from button
-async def toggle_wifi():
+async def toggle_wifi() -> bool:
     update_event_time()
     wifi_state = get_state().wifi
     if wifi_state in [WifiState.disabled, WifiState.unknown]:

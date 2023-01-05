@@ -28,7 +28,7 @@ _MAX_STATUS_DELAY_MS = const(5000)  # Maximum period for Status BT notifications
 _MIN_BLUETOOTH_DELAY_MS = const(49)  # Minimum period for all BT notifications
 
 
-def notify_change():
+def notify_change() -> None:
     global __status_characteristic, __last_notification_ms
     # Skip if not BT active
     if get_state().bluetooth not in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
@@ -38,7 +38,54 @@ def notify_change():
         asyncio.gather(t1)
 
 
-async def __notify_task():
+def __get_model_number() -> str:
+    return boardbtcfg.DEVICE_INFORMATION_MODEL
+
+
+def __get_serial_number() -> str:
+    return '1'
+
+
+def __get_hardware_revision() -> str:
+    return boardbtcfg.DEVICE_INFORMATION_HW_VER
+
+
+def __sw_get_version(directory, version_file_name='.version') -> str:
+    # see ota_updater.py
+    from os import listdir
+    if version_file_name in listdir(directory):
+        with open(directory + '/' + version_file_name) as f:
+            version = f.read()
+            return version
+    return '0.0'
+
+
+def __get_firmware_revision() -> str:
+    return __sw_get_version('IOTester')
+
+
+def __get_manufacturer_name() -> str:
+    return boardbtcfg.DEVICE_INFORMATION_MANUFACTURER
+
+
+def __device_info_service() -> aioble.Service:
+    service = aioble.Service(boardbtcfg.DEVICE_INFORMATION_SERVICE_UUID)
+    # model number
+    chars = {bluetooth.UUID(0x2a24): __get_model_number,
+             bluetooth.UUID(0x2a25): __get_serial_number,
+             bluetooth.UUID(0x2a26): __get_firmware_revision,
+             bluetooth.UUID(0x2a27): __get_hardware_revision,
+             bluetooth.UUID(0x2a29): __get_manufacturer_name,
+             }
+
+    for kv in chars.items():
+        char = aioble.Characteristic(service, kv[0], read=True, notify=False, capture=False)
+        char.write(kv[1]())
+
+    return service
+
+
+async def __notify_task() -> bool:
     global __status_characteristic, __last_notification_ms
     try:
         # Check interface is initialized
@@ -74,7 +121,7 @@ async def enable_bt_with_retry():
             await asyncio.sleep_ms(5000)
 
 
-async def toggle_bluetooth():
+async def toggle_bluetooth() -> None:
     print("** Toggle bluetooth called")
     update_event_time()
     bt_state = get_state().bluetooth
@@ -85,7 +132,7 @@ async def toggle_bluetooth():
         await disable_bt()
 
 
-async def __client_task(connection):
+async def __client_task(connection) -> None:
     global __clients
 
     if not connection:
@@ -107,7 +154,7 @@ async def __client_task(connection):
         update_bt_state(BluetoothState.enabled_with_client)
 
 
-async def __peripheral_task():
+async def __peripheral_task() -> None:
     global __bt_stop_flag, __clients
     update_bt_state(BluetoothState.enabled)
 
@@ -132,7 +179,7 @@ async def __peripheral_task():
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
                     name=device_name,
-                    services=[boardbtcfg.MODBUS_SERVICE_UUID, boardbtcfg.BATTERY_SERVICE_UUID],
+                    services=[boardbtcfg.MODBUS_SERVICE_UUID, boardbtcfg.BATTERY_SERVICE_UUID, boardbtcfg.DEVICE_INFORMATION_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)
                 __clients.append(asyncio.create_task(__client_task(connection)))
@@ -153,7 +200,7 @@ async def __peripheral_task():
     print('\tAdvertising task terminating')
 
 
-async def disable_bt():
+async def disable_bt() -> None:
     global __bt_stop_flag, __task_adv, __task_status, __task_commands, __clients, __status_characteristic
     __bt_stop_flag = True
     update_bt_state(BluetoothState.disabling)
@@ -190,7 +237,7 @@ async def disable_bt():
     gc.collect()
 
 
-async def __board_command_loop(board_command_char):
+async def __board_command_loop(board_command_char) -> None:
     global __bt_stop_flag
     if is_verbose():
         print('Board command task starting...')
@@ -211,7 +258,7 @@ async def __board_command_loop(board_command_char):
 
 
 @micropython.native
-def __get_notification_data():
+def __get_notification_data() -> bytearray:
     gc.collect()
     # 0 - WIFI b7 b6 RELAY b5 b4 BLUETOOTH b3 b2 b1 UNUSED b0
     # 1 - UNUSED b7-b2 METER PARALLEL b1 LAST RESULT b0
@@ -248,7 +295,7 @@ def __get_notification_data():
     return values
 
 
-async def __board_status_loop(bsc):
+async def __board_status_loop(bsc) -> None:
     global __bt_stop_flag, __last_notification_ms
     if is_verbose():
         print('Board status task starting...')
@@ -268,7 +315,7 @@ async def __board_status_loop(bsc):
     print('\tBoard status task terminating.')
 
 
-async def __battery_loop(battery_char):
+async def __battery_loop(battery_char) -> None:
     global __bt_stop_flag, __last_notification_ms
     if is_verbose():
         print('Board battery task starting...')
@@ -290,7 +337,7 @@ async def __battery_loop(battery_char):
     print('\tBoard battery task terminating.')
 
 
-async def __enable_bt():
+async def __enable_bt() -> bool:
     global __bt_stop_flag, __task_adv, __task_status, __task_commands, __task_battery, __status_characteristic
 
     update_bt_state(BluetoothState.enabling)
@@ -309,7 +356,9 @@ async def __enable_bt():
     service2 = aioble.Service(boardbtcfg.BATTERY_SERVICE_UUID)
     battery_char = aioble.Characteristic(service2, boardbtcfg.BATTERY_CHAR_UUID, read=True, notify=True, capture=False)
 
-    aioble.register_services(service1, service2)
+    service3 = __device_info_service()
+
+    aioble.register_services(service1, service2, service3)
 
     gc.collect()
 
@@ -322,3 +371,4 @@ async def __enable_bt():
     print('** Bluetooth enabled')
     await asyncio.sleep(0)
     return True
+

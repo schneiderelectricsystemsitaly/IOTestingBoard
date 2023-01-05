@@ -16,13 +16,13 @@ from .state import WifiState, BluetoothState
 
 
 # FUNCTIONS
-def __is_client_connected():
+def __is_client_connected() -> bool:
     return get_state().bluetooth == BluetoothState.enabled_with_client or \
         get_state().wifi == WifiState.enabled
 
 
 # micropython.native
-async def __animate_leds():
+async def __animate_leds() -> None:
     error = False
     cpt = 0
     current_state = get_state()
@@ -69,7 +69,7 @@ async def __animate_leds():
 
 
 # micropython.native
-async def __meter_commands_check():
+async def __meter_commands_check() -> None:
     _METER_CHECK_LOOP_SLEEP_MS = const(500)
 
     while True:
@@ -87,7 +87,7 @@ async def __meter_commands_check():
 
 
 # micropython.native
-async def __sleep_check():
+async def __sleep_check() -> None:
     _CHECK_LOOP_SLEEP_MS = const(2000)
     _IDLE_LIGHT_THRESHOLD_MS = const(60 * 1000)
     _LIGHT_DURATION_MS = const(5000)
@@ -108,7 +108,7 @@ async def __sleep_check():
         await asyncio.sleep_ms(_CHECK_LOOP_SLEEP_MS)
 
 
-async def __test_loop():
+async def __test_loop() -> None:
     test_cycle = list(range(0, 12000, 250))
     test_cycle.append(R_MAX)
     test_cycle.append(R_OPEN)
@@ -139,7 +139,7 @@ async def __test_loop():
         await asyncio.sleep_ms(_LOOP_SLEEP_MS)
 
 
-async def main():
+async def main() -> None:
     print("Starting IOTesting  module...")
 
     gc.collect()

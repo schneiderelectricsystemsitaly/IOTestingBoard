@@ -17,7 +17,7 @@ last_red_value = 0
 last_green_value = 0
 
 
-def set_red_led(value):
+def set_red_led(value) -> int:
     global last_red_value
     previous = last_red_value
     BOARD['RED_LED_DAC'].write(value)
@@ -25,7 +25,7 @@ def set_red_led(value):
     return previous
 
 
-def set_green_led(value):
+def set_green_led(value) -> int:
     global last_green_value
     previous = last_green_value
     BOARD['GREEN_LED_DAC'].write(value)
@@ -33,7 +33,7 @@ def set_green_led(value):
     return previous
 
 
-async def r_test():
+async def r_test() -> None:
     update_r_setpoint(R_MAX)
     __optocouplers_off()
     await set_relay_pos(True)
@@ -66,7 +66,7 @@ async def r_test():
 
 
 # micropython.native
-async def execute(command):
+async def execute(command) -> bool:
     update_event_time()
     final_result = False
 
@@ -111,7 +111,7 @@ async def execute(command):
 
 
 # micropython.native
-def __configure_for_r(best_tuple):
+def __configure_for_r(best_tuple) -> bool:
     if is_verbose():
         print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]}")
     series_r = best_tuple[2] == 0
@@ -128,7 +128,7 @@ def __configure_for_r(best_tuple):
 
 
 # micropython.native
-def __set_digital_pin(pin_name, req_value):
+def __set_digital_pin(pin_name, req_value) -> bool:
     if req_value:
         BOARD[pin_name].on()
     else:
@@ -146,11 +146,11 @@ def __set_digital_pin(pin_name, req_value):
     return True
 
 
-def __set_rseries(req_value):
+def __set_rseries(req_value) -> bool:
     return __set_digital_pin('SERIESR_CMD', req_value)
 
 
-def __set_v_parallel(req_value):
+def __set_v_parallel(req_value) -> bool:
     result = __set_digital_pin('VMETER_EN', req_value)
     if result:
         update_v_parallel_state(req_value)
@@ -158,7 +158,7 @@ def __set_v_parallel(req_value):
 
 
 # micropython.native
-def __set_r(idx, req_value):
+def __set_r(idx, req_value) -> bool:
     assert (0 <= idx < len(BOARD['RESISTORS']))
     if req_value:
         BOARD['RESISTORS'][idx].on()
@@ -178,7 +178,7 @@ def __set_r(idx, req_value):
     return True
 
 
-async def set_relay_pos(is_set, force=False):
+async def set_relay_pos(is_set, force=False) -> bool:
     # See hongfa HFD2 datasheet, for latching status to be retained command must
     # be 5 times the nominal set time : 4.5 ms x 5 -> 22 ms
     RELAY_ACTION_TIME_MS = const(22)
@@ -226,7 +226,7 @@ async def set_relay_pos(is_set, force=False):
 
 
 # micropython.native
-async def toggle_relay():
+async def toggle_relay() -> bool:
     print("** Toggle relay called")
     update_event_time()
     update_testmode(False)
@@ -247,7 +247,7 @@ async def toggle_relay():
 
 
 # callback from button
-async def toggle_vmeter_load():
+async def toggle_vmeter_load() -> bool:
     print("** toggle_vmeter_load called")
     update_event_time()
     update_testmode(False)
@@ -255,7 +255,7 @@ async def toggle_vmeter_load():
     return await execute(comm)
 
 
-async def board_hw_init():
+async def board_hw_init() -> bool:
     from .boardbt import (toggle_bluetooth, enable_bt_with_retry, disable_bt)
     __print_wakeup_reason()
     print(f'Machine reset cause: {machine.reset_cause()}')
@@ -296,7 +296,7 @@ async def board_hw_init():
     return await execute(first_command)
 
 
-def __print_wakeup_reason():
+def __print_wakeup_reason() -> None:
     wakeup_reason = machine.wake_reason()
 
     if wakeup_reason == machine.EXT0_WAKE:
@@ -318,8 +318,7 @@ def __print_wakeup_reason():
         print(f'Wakeup was not caused by deep sleep: {wakeup_reason}')
 
 
-async def get_vmeter():
-    import time
+async def get_vmeter() -> float:
     value = 0
     for i in range(0, 5):
         value += BOARD['VSENSE_ADC'].read_uv()
@@ -329,7 +328,7 @@ async def get_vmeter():
     return round((value - 42000) / k_divider(BOARD['R1'], BOARD['R2']) / 1000000.0)
 
 
-async def get_battery_percent():
+async def get_battery_percent() -> int:
     bat_v = await get_vbat()
     # %0-100 to V map for LiPo battery
     scale = [(100, 4.2), (95, 4.15), (90, 4.11), (85, 4.08), (80, 4.02),
@@ -343,7 +342,7 @@ async def get_battery_percent():
     return 0
 
 
-async def get_vbat():
+async def get_vbat() -> float:
     value = 0
     NB_SAMPLES = const(10)
     for i in range(0, NB_SAMPLES):
@@ -353,7 +352,7 @@ async def get_vbat():
     return round((value - 42000) * 2 / 1000000.0, 2)
 
 
-async def light_sleep(delay):
+async def light_sleep(delay) -> None:
     from .boardbt import enable_bt_with_retry, disable_bt
     import network
     sta_if = network.WLAN(network.STA_IF)
@@ -387,7 +386,7 @@ async def light_sleep(delay):
 
 
 # micropython.native
-def __optocouplers_off():
+def __optocouplers_off() -> None:
     # switch off optocouplers
     for i in range(0, len(BOARD['RESISTORS'])):
         __set_r(i, False)
@@ -398,7 +397,7 @@ def __optocouplers_off():
     update_r_actual(R_OPEN)
 
 
-async def deep_sleep():
+async def deep_sleep() -> None:
     from .boardbt import disable_bt
     await disable_bt()
     await disable_wifi()

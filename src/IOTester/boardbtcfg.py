@@ -8,6 +8,11 @@ BOARD_COMMAND_UUID = UUID('0003cdd4-0000-1000-8000-00805f9b0131')
 BATTERY_SERVICE_UUID = UUID(0x180F)
 BATTERY_CHAR_UUID = UUID(0x2A19)
 
+DEVICE_INFORMATION_SERVICE_UUID = UUID(0x180F)
+DEVICE_INFORMATION_MANUFACTURER = const('Schneider Electric')
+DEVICE_INFORMATION_HW_VER = const('1.0-dec-2022')
+DEVICE_INFORMATION_MODEL = const('IOTestingBoard')
+
 GENERIC_REMOTE_CONTROL = const(384)
 DEVICE_NAME = const("IOTesting board")  # used in case no settings is found in persisted file
 ADV_INTERVAL_MS = const(300_000)  # https://www.beaconzone.co.uk/ibeaconadvertisinginterval
@@ -40,3 +45,4 @@ COMMAND_SET_OTA = const(0x19)  # + 1 byte false(0) / true (!=0)
 # + 1 byte idx (0-16) + 1 byte Voltage (0-24V) + 1 byte command type + 2 bytes value (little indian unsigned)
 COMMAND_CONFIGURE_METER_COMM = const(0x20)
 COMMAND_SET_BLUETOOTH_NAME = const(0x21)  # + UTF-8 string
+COMMAND_REFRESH = const(0x22)  # Force status update

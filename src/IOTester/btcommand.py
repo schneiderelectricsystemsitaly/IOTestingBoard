@@ -21,7 +21,7 @@ def launch(func, tup_args):
         loop.create_task(res)
 
 
-async def parse_command_packet(command):
+async def parse_command_packet(command) -> None:
     command_word = command[0]
     if command_word in (boardbtcfg.COMMAND_MODE_RESISTORS,
                         boardbtcfg.COMMAND_MODE_V_LOAD,
@@ -66,7 +66,7 @@ async def parse_command_packet(command):
         launch(__bt_command_execute, (command_word, None))
 
 
-async def __bt_command_execute(command, setpoint):
+async def __bt_command_execute(command, setpoint) -> None:
     update_event_time()
     print(time.localtime(), 'BT received', command, setpoint)
     settings = get_settings()

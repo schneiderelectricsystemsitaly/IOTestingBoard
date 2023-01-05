@@ -9,19 +9,19 @@ available_values = {}
 # Vin >---(r1)------(r2)---> GND
 #                | Vout
 #
-def k_divider(r1, r2):
+def k_divider(r1, r2) -> float:
     assert (r1 + r2 != 0)
     return r2 / (r1 + r2)
 
 
-def __parallel(subset, r_values):
+def __parallel(subset, r_values) -> int:
     result = 0
     for bit in subset:
         result += 1.0 / (r_values[bit])
     return int(1.0 / result)
 
 
-def compute_all_r():
+def compute_all_r() -> dict:
     global available_values
     r_values = BOARD['R_VALUES']
     output = {}
@@ -51,7 +51,7 @@ def compute_all_r():
 
 
 # micropython.native
-def __find_best_r(desired_r, av_values):
+def __find_best_r(desired_r, av_values) -> tuple:
     if len(av_values) == 0:
         raise Exception('Call compute_all_r first')
 
@@ -65,7 +65,7 @@ def __find_best_r(desired_r, av_values):
     return best, av_values[best], 0
 
 
-def find_best_r_with_opt(desired_r):
+def find_best_r_with_opt(desired_r) -> tuple:
     global available_values
     option1 = __find_best_r(desired_r - BOARD['OPTOCOUPLER_R'], available_values)
     option2 = __find_best_r(desired_r - BOARD['R_SERIES'] - BOARD['OPTOCOUPLER_R'], available_values)
