@@ -74,7 +74,8 @@ export class Command {
         case CommandType.COMMAND_DEEP_SLEEP:
           // No parameter
           buf = new ArrayBuffer(1)
-          buf[0] = this.type
+          dv = new DataView(buf)
+          dv.setUint8(0, this.type)
           return buf
         case CommandType.COMMAND_CONFIGURE_METER_COMM:
           buf = new ArrayBuffer(1+5)
@@ -112,7 +113,7 @@ export class Command {
           buf = new ArrayBuffer(3)
           dv = new DataView(buf)
           dv.setUint8(0, this.type)
-          dv.setUint16(1, this.setpoint ? 1 : 0)
+          dv.setUint16(1, this.setpoint)
           return buf
         case CommandType.COMMAND_SET_BLUETOOTH_NAME:
         case CommandType.COMMAND_SET_WIFI_NETWORK:
