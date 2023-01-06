@@ -146,7 +146,7 @@
             </div>
             <div class="col">
                 <div class="input-group mb-3">
-                    <input id="wp" class="form-control" type="text">
+                    <input id="wifissid" class="form-control" type="text">
                 </div>
             </div>
             <div class="col">
@@ -161,7 +161,7 @@
             </div>
             <div class="col">
                 <div class="input-group mb-3">
-                    <input id="wp" class="form-control" type="text">
+                    <input id="wifipwd" class="form-control" type="text">
                 </div>
             </div>
             <div class="col">
@@ -301,8 +301,35 @@
         document.getElementById("btnStop").onclick = async () => { await IOTestingBT.Stop() };
         document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
         document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
-        document.getElementById("btnExecuteM").onclick = async () => { await IOTestingBT.SimpleExecute(IOTestingBT.Command.CreateNoSP(IOTestingBT.CommandType.COMMAND_MODE_METER)) };
-        document.getElementById("btnExecuteR").onclick = async () => { await IOTestingBT.SimpleExecute(IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_MODE_RESISTORS, document.getElementById("r_load").ariaValueText)) };
+        document.getElementById("btnExecuteM").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateNoSP(IOTestingBT.CommandType.COMMAND_MODE_METER)) };
+        document.getElementById("btnExecuteR").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_MODE_RESISTORS, 
+                document.getElementById("r_value").value)) };
+        document.getElementById("btnExecuteL").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_MODE_V_LOAD, 
+                document.getElementById("r_load").value)) };
+        document.getElementById("btnExecuteWS").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_SET_WIFI_NETWORK, 
+                document.getElementById("wifissid").value)) };
+        document.getElementById("btnExecuteWP").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_SET_WIFI_PASSWORD, 
+                document.getElementById("wifipwd").value)) };
+        document.getElementById("btnReboot").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateNoSP(
+                IOTestingBT.CommandType.COMMAND_REBOOT)) };
+        document.getElementById("btnOTA").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_OTA, 1)) };
+        document.getElementById("btnChangeName").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME, 
+                document.getElementById("bt-name").value)) };
+                
     </script>
 
 </body>

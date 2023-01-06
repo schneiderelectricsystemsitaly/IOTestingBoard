@@ -34,9 +34,9 @@ export class IOTestingBoard {
      */
   async getSerialNumber (): Promise<string> {
     log.debug('\t\tReading serial number')
-    /*const dv: DataView = await this.btState.charSerial.readValue()
-    return this.uintToString(dv)*/
-    return "???"
+    /* const dv: DataView = await this.btState.charSerial.readValue()
+    return this.uintToString(dv) */
+    return '???'
   }
 
   /**
@@ -45,8 +45,8 @@ export class IOTestingBoard {
      */
   async getBatteryLevel (): Promise<number> {
     log.debug('\t\tReading battery voltage')
-    /*const dv: DataView = await this.btState.charBattery.readValue()
-    return dv.getUint8(0)*/
+    /* const dv: DataView = await this.btState.charBattery.readValue()
+    return dv.getUint8(0) */
     return 100
   }
 

@@ -16,8 +16,8 @@ import { NotificationData } from './NotificationData'
 export class Driver {
   btState: BTApiState
   iot: IOTestingBoard
-  logging: boolean=false
-  simulation:boolean=false
+  logging: boolean = false
+  simulation: boolean = false
 
   constructor () {
     this.btState = new BTApiState()
@@ -390,7 +390,7 @@ export class Driver {
       this.btState.state = State.SUBSCRIBING
       this.btState.stats.subcribes++
       const device = this.btState.btDevice
-      let gattserver: BluetoothRemoteGATTServer | null = null
+      const gattserver: BluetoothRemoteGATTServer | null = null
 
       if (device && device.gatt) {
         if (!device.gatt.connected || this.btState.btGATTServer == null) {
@@ -401,9 +401,7 @@ export class Driver {
         } else {
           log.debug('GATT already connected')
         }
-      } 
-      else 
-      {
+      } else {
         this.btState.reset(this.onDisconnected.bind(this))
         this.btState.btDevice = null
         this.btState.state = State.NOT_CONNECTED
@@ -416,15 +414,15 @@ export class Driver {
 
       this.btState.charWrite = await this.btState.btIOTService.getCharacteristic(BlueToothIOTUUID.CommandCharUuid)
       log.debug('> Found command characteristic')
-      
+
       this.btState.charRead = await this.btState.btIOTService.getCharacteristic(BlueToothIOTUUID.StatusCharUuid)
       log.debug('> Found notifications characteristic')
-    
+
       /*
-      this.btState.charBattery = await this.btState.btIOTService.getCharacteristic('0003cdd6-0000-1000-8000-00805f9b34fb') 
+      this.btState.charBattery = await this.btState.btIOTService.getCharacteristic('0003cdd6-0000-1000-8000-00805f9b34fb')
       this.btState.charFirmware = await this.btState.btIOTService.getCharacteristic('0003cdd9-0000-1000-8000-00805f9b34fb')
       this.btState.charSerial = await this.btState.btIOTService.getCharacteristic('0003cdd8-0000-1000-8000-00805f9b34fb') */
-      
+
       this.btState.response = null
       this.btState.charRead.addEventListener('characteristicvaluechanged', this.handleNotifications.bind(this))
       this.btState.charRead.startNotifications()

@@ -6,25 +6,25 @@ import log = require('loglevel')
 
 // Current state of the bluetooth
 export class BTApiState {
-  state: string=State.NOT_CONNECTED
-  prev_state: string=State.NOT_CONNECTED
-  state_cpt: number=0
-  started: boolean=false
-  stopRequest: boolean=false
-  lastMeasure: NotificationData=new NotificationData()
-  meter: MeterState=new MeterState()
-  command: Command=null
-  response: ArrayBuffer=null
+  state: string = State.NOT_CONNECTED
+  prev_state: string = State.NOT_CONNECTED
+  state_cpt: number = 0
+  started: boolean = false
+  stopRequest: boolean = false
+  lastMeasure: NotificationData = new NotificationData()
+  meter: MeterState = new MeterState()
+  command: Command = null
+  response: ArrayBuffer = null
 
-  btDevice: BluetoothDevice=null
-  btGATTServer: BluetoothRemoteGATTServer=null
-  
-  btIOTService: BluetoothRemoteGATTService=null
-  charRead: BluetoothRemoteGATTCharacteristic=null
-  charWrite: BluetoothRemoteGATTCharacteristic=null  
-  charSerial: BluetoothRemoteGATTCharacteristic=null
-  charFirmware: BluetoothRemoteGATTCharacteristic=null
-  charBattery: BluetoothRemoteGATTCharacteristic=null
+  btDevice: BluetoothDevice = null
+  btGATTServer: BluetoothRemoteGATTServer = null
+
+  btIOTService: BluetoothRemoteGATTService = null
+  charRead: BluetoothRemoteGATTCharacteristic = null
+  charWrite: BluetoothRemoteGATTCharacteristic = null
+  charSerial: BluetoothRemoteGATTCharacteristic = null
+  charFirmware: BluetoothRemoteGATTCharacteristic = null
+  charBattery: BluetoothRemoteGATTCharacteristic = null
 
   stats: { requests: number, responses: number, modbus_errors: number, 'GATT disconnects': number, exceptions: number, subcribes: number, commands: number, responseTime: number, lastResponseTime: string, last_connect: string }
   options: { forceDeviceSelection: boolean }

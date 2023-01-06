@@ -95,7 +95,7 @@ export async function SimpleExecuteJSON (jsonCommand: string): Promise<string> {
  * Execute a command and returns the measurement or setpoint with error flag and message
  * @param {Command} command
  */
-export async function SimpleExecute(command: Command): Promise<CommandResult> {
+export async function SimpleExecute (command: Command): Promise<CommandResult> {
   const SIMPLE_EXECUTE_TIMEOUT_S = 5
   const cr = new CommandResult()
 
@@ -144,9 +144,9 @@ export async function SimpleExecute(command: Command): Promise<CommandResult> {
 
   // State is updated by execute command, so we can use btState right away
   cr.value = driver.btState.lastMeasure.Setpoint_R
-  cr.unit = "Ohms"
+  cr.unit = 'Ohms'
   cr.secondary_value = driver.btState.lastMeasure.Actual_R
-  cr.secondary_unit = "Ohms"
+  cr.secondary_unit = 'Ohms'
   cr.success = true
   cr.message = 'Command executed successfully'
   return cr
@@ -194,7 +194,7 @@ export async function Execute (command: Command): Promise<Command> {
  * MUST BE CALLED FROM A USER GESTURE EVENT HANDLER
   * @returns {boolean} true if meter is ready to execute command
  * */
-export async function Pair (forceSelection:boolean = false): Promise<boolean> {
+export async function Pair (forceSelection: boolean = false): Promise<boolean> {
   log.info('Pair(' + forceSelection + ') called...')
 
   driver.btState.options.forceDeviceSelection = forceSelection
