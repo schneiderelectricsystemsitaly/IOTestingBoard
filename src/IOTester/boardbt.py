@@ -176,7 +176,7 @@ async def __peripheral_task() -> None:
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
                     name= device_name,
-                    services=[boardbtcfg.BOARD_SERVICE_UUID],
+                    services=[boardbtcfg.BOARD_SERVICE_UUID, boardbtcfg.BATTERY_SERVICE_UUID, boardbtcfg.DEVICE_INFORMATION_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)
                 __clients.append(asyncio.create_task(__client_task(connection)))
