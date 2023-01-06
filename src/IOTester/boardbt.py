@@ -176,7 +176,8 @@ async def __peripheral_task() -> None:
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
                     name= device_name,
-                    services=[boardbtcfg.IOTESTER_SERVICE_UUID],
+                    services=[boardbtcfg.MODBUS_SERVICE_UUID, boardbtcfg.BATTERY_SERVICE_UUID,
+                              boardbtcfg.DEVICE_INFORMATION_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)
                 __clients.append(asyncio.create_task(__client_task(connection)))
@@ -346,7 +347,7 @@ async def __enable_bt() -> bool:
 
     await asyncio.sleep_ms(0)
 
-    service1 = aioble.Service(boardbtcfg.IOTESTER_SERVICE_UUID)
+    service1 = aioble.Service(boardbtcfg.MODBUS_SERVICE_UUID)
     __status_characteristic = aioble.Characteristic(service1, boardbtcfg.BOARD_STATUS_UUID, read=False, notify=True,
                                                     capture=False)
     board_command_char = aioble.Characteristic(service1, boardbtcfg.BOARD_COMMAND_UUID, write_no_response=True,
