@@ -298,8 +298,8 @@
         document.getElementById("btnStop").onclick = async () => { await IOTestingBT.Stop() };
         document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
         document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
-        document.getElementById("btnExecuteM").onclick = async () => { await IOTestingBT.SimpleExecute(Command.CreateNoSp(CommandType.COMMAND_MODE_METER)) };
-        document.getElementById("btnExecuteR").onclick = async () => { await IOTestingBT.SimpleExecute(Command.CreateOneSp(CommandType.COMMAND_MODE_RESISTOR, document.getElementById("r_load").ariaValueText)) };
+        document.getElementById("btnExecuteM").onclick = async () => { await IOTestingBT.SimpleExecute(IOTestingBT.Command.CreateNoSP(IOTestingBT.CommandType.COMMAND_MODE_METER)) };
+        document.getElementById("btnExecuteR").onclick = async () => { await IOTestingBT.SimpleExecute(IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_MODE_RESISTOR, document.getElementById("r_load").ariaValueText)) };
     </script>
 
 </body>

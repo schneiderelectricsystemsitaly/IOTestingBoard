@@ -126,7 +126,7 @@ export async function SimpleExecute(command: Command): Promise<CommandResult> {
   }
 
   // Wait for completion of the command, or halt of the state machine
-  driver.btState.command = command
+  driver.btState.command = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
   if (command != null) {
     await waitForTimeout(() => !command.pending || driver.btState.state == State.STOPPED, SIMPLE_EXECUTE_TIMEOUT_S)
   }
@@ -173,7 +173,7 @@ export async function Execute (command: Command): Promise<Command> {
   }
 
   log.info('Setting new command :' + command)
-  driver.btState.command = command
+  driver.btState.command = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
 
   // Start the regular state machine
   if (!driver.btState.started) {

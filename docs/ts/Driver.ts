@@ -187,7 +187,7 @@ export class Driver {
      * */
   async processCommand () {
     try {
-      const command: Command | null = this.btState.command
+      const command: Command = this.btState.command
       const result = ResultCode.SUCCESS
       let packet, response, startGen
 
@@ -426,7 +426,7 @@ export class Driver {
       this.btState.charSerial = await this.btState.btIOTService.getCharacteristic('0003cdd8-0000-1000-8000-00805f9b34fb') */
       
       this.btState.response = null
-      this.btState.charRead.addEventListener('characteristicvaluechanged', this.handleNotifications)
+      this.btState.charRead.addEventListener('characteristicvaluechanged', this.handleNotifications.bind(this))
       this.btState.charRead.startNotifications()
 
       log.info('> Bluetooth interfaces ready.')

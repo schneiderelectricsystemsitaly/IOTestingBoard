@@ -32,18 +32,18 @@ export class Command {
   }
 
   static CreateNoSP (ctype): Command {
-    const cmd = new Command(ctype)
+    let cmd:Command = new Command(ctype)
     return cmd
   }
 
   static CreateOneSP (ctype, setpoint): Command {
-    const cmd = new Command(ctype)
+    let cmd:Command = new Command(ctype)
     cmd.setpoint = setpoint
     return cmd
   }
 
   static CreateFourSP (ctype, set1, set2, set3, set4): Command {
-    const cmd = new Command(ctype)
+    let cmd:Command = new Command(ctype)
     cmd.setpoint = set1
     cmd.setpoint2 = set2
     cmd.setpoint3 = set3
@@ -52,11 +52,86 @@ export class Command {
   }
 
   toString (): string {
-    return 'Type: ' + Parse(CommandType, this.type) + ', setpoint:' + this.setpoint + ', setpoint2: ' + this.setpoint2 + ', pending:' + this.pending + ', error:' + this.error
+    return 'Type: ' + this.type + ', setpoint:' + this.setpoint + ', setpoint2: ' + this.setpoint2 + ', pending:' + this.pending + ', error:' + this.error
   }
 
   getPacket (): ArrayBuffer {
-    return new ArrayBuffer(0)
+    var buf:ArrayBuffer
+    var dv:DataView
+
+    switch(this.type) {
+        case CommandType.COMMAND_BREAK:
+        case CommandType.COMMAND_DISABLE_WEBREPL:
+        case CommandType.COMMAND_DISABLE_WIFI:
+        case CommandType.COMMAND_ENABLE_WEBREPL:
+        case CommandType.COMMAND_ENABLE_WIFI:
+        case CommandType.COMMAND_LIGHT_SLEEP:
+        case CommandType.COMMAND_MODE_METER:
+        case CommandType.COMMAND_REBOOT:
+        case CommandType.COMMAND_REFRESH:
+        case CommandType.COMMAND_RUN_TEST:
+        case CommandType.COMMAND_R_TEST:
+        case CommandType.COMMAND_DEEP_SLEEP:
+          // No parameter
+          buf = new ArrayBuffer(1)
+          buf[0] = this.type
+          return buf
+        case CommandType.COMMAND_CONFIGURE_METER_COMM:
+          buf = new ArrayBuffer(1+5)
+          dv = new DataView(buf)
+          dv.setUint8(0, this.type)
+          dv.setUint8(1, this.setpoint)
+          dv.setUint8(2, this.setpoint2)
+          dv.setUint8(3, this.setpoint3)
+          dv.setUint16(4, this.setpoint4)
+          return buf
+        case CommandType.COMMAND_SET_DEEPSLEEP_MIN:
+        case CommandType.COMMAND_SET_CPU:
+        case CommandType.COMMAND_SET_INITIAL_COMMAND_SETPOINT:
+        case CommandType.COMMAND_SET_INITIAL_COMMAND_TYPE:
+          // One Uint8 parameter
+          buf = new ArrayBuffer(2)
+          dv = new DataView(buf)
+          dv.setUint8(0, this.type)
+          dv.setUint8(1, this.setpoint)
+          return buf
+        case CommandType.COMMAND_METER_COMMANDS:
+        case CommandType.COMMAND_SET_INITIAL_BLUETOOTH:
+        case CommandType.COMMAND_SET_INITIAL_METER_COMM:
+        case CommandType.COMMAND_SET_OTA:
+        case CommandType.COMMAND_SET_VERBOSE:
+          // One Uint8 parameter with 1 or 0 value
+          buf = new ArrayBuffer(2)
+          dv = new DataView(buf)
+          dv.setUint8(0, this.type)
+          dv.setUint8(1, this.setpoint ? 1 : 0)
+          return buf
+        case CommandType.COMMAND_MODE_RESISTORS:
+        case CommandType.COMMAND_MODE_V_LOAD:
+          // One Uint16 R parameter
+          buf = new ArrayBuffer(3)
+          dv = new DataView(buf)
+          dv.setUint8(0, this.type)
+          dv.setUint16(1, this.setpoint ? 1 : 0)
+          return buf
+        case CommandType.COMMAND_SET_BLUETOOTH_NAME:
+        case CommandType.COMMAND_SET_WIFI_NETWORK:
+        case CommandType.COMMAND_SET_WIFI_PASSWORD:
+          // One UTF8 string parameter
+          let utf8Encode = new TextEncoder();
+          let bytes_utf8 = utf8Encode.encode(this.setpoint)
+          buf = new ArrayBuffer(1 + bytes_utf8.length)
+          dv = new DataView(buf)
+          dv.setUint8(0, this.type)
+          var byte_num = 1
+          for(const byte_v of bytes_utf8) {
+            dv.setUint8(byte_num, byte_v)
+            byte_num++
+          }
+          return buf
+        default:
+          throw new Error('Invalid command' + this)
+    }
   }
 
   /**
