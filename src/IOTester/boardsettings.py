@@ -93,7 +93,7 @@ class Settings:
             val = self.get_value(Settings.THRESHOLD + str(i))
             if val is not None:
                 output.append(val)
-        return val
+        return output
 
     def factory_defaults(self):
         self.add_key(Settings.WIFI_ENABLED, False)

@@ -68,8 +68,7 @@ def __get_manufacturer_name() -> str:
     return boardbtcfg.DEVICE_INFORMATION_MANUFACTURER
 
 
-def __device_info_service() -> aioble.Service:
-    service = aioble.Service(boardbtcfg.DEVICE_INFORMATION_SERVICE_UUID)
+def __device_info_service(service: aioble.Service) -> None:
     # model number
     chars = {bluetooth.UUID(0x2a24): __get_model_number,
              bluetooth.UUID(0x2a25): __get_serial_number,
@@ -81,8 +80,6 @@ def __device_info_service() -> aioble.Service:
     for kv in chars.items():
         char = aioble.Characteristic(service, kv[0], read=True, notify=False, capture=False)
         char.write(kv[1]())
-
-    return service
 
 
 async def __notify_task(force=False) -> bool:
@@ -176,7 +173,7 @@ async def __peripheral_task() -> None:
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
                     name= device_name,
-                    services=[boardbtcfg.BOARD_SERVICE_UUID, boardbtcfg.BATTERY_SERVICE_UUID, boardbtcfg.DEVICE_INFORMATION_SERVICE_UUID],
+                    services=[boardbtcfg.BOARD_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)
                 __clients.append(asyncio.create_task(__client_task(connection)))
@@ -352,12 +349,11 @@ async def __enable_bt() -> bool:
     board_command_char = aioble.Characteristic(service1, boardbtcfg.BOARD_COMMAND_UUID, write_no_response=True,
                                                notify=False, capture=False)
 
-    service2 = aioble.Service(boardbtcfg.BATTERY_SERVICE_UUID)
-    battery_char = aioble.Characteristic(service2, boardbtcfg.BATTERY_CHAR_UUID, read=True, notify=True, capture=False)
+    battery_char = aioble.Characteristic(service1, boardbtcfg.BATTERY_CHAR_UUID, read=True, notify=True, capture=False)
 
-    service3 = __device_info_service()
+    __device_info_service(service1)
 
-    aioble.register_services(service1, service2, service3)
+    aioble.register_services(service1)
 
     gc.collect()
 
