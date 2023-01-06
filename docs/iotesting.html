@@ -3,13 +3,10 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Owon B41T+ with web bluetooth example</title>
-    <script src="./dist/iotesting-bt.js"></script>
+    <title>IOTesting Board test page</title>
+    <script src="./dist/bt-iotesting.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
         integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
-    <script
-        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js" type="module"></script>
 </head>
 
 <body onload="setInterval(refreshStatus, 450)">
@@ -292,19 +289,14 @@
 
         async function refreshStatus() {
             var new_sample = false;
-            document.getElementById("status").innerHTML = IOTestingBT.btState.state;
-            document.getElementById("stats").innerHTML = JSON.stringify(IOTestingBT.btState.stats).replaceAll(',', '<br/>');
-            if (IOTestingBT.btState.formattedResponse != '') {
-                document.getElementById("measure").innerHTML = JSON.stringify(IOTestingBT.btState.formattedResponse).replaceAll(',', '<br/>');
-                lastData = IOTestingBT.btState.parsedResponse;
-            } else {
-                document.getElementById("measure").innerHTML = "No data available";
-                lastData = null;
-            }
+            var status = await IOTestingBT.GetState();
+            var driver = IOTestingBT.driver;
+            document.getElementById("status").innerHTML = JSON.stringify(status);
+            document.getElementById("stats").innerHTML = JSON.stringify(driver.btState?.stats).replaceAll(',', '<br/>');
         }
-        document.getElementById("btnStart").onclick = async () => { await IOTestingBT.Start() };
+        document.getElementById("btnStart").onclick = async () => { await IOTestingBT.Pair(true) };
         document.getElementById("btnStop").onclick = async () => { await IOTestingBT.Stop() };
-        document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.SetLogLevel(1) };
+        document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
     </script>
 
 </body>

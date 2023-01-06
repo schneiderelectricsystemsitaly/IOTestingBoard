@@ -1,0 +1,53 @@
+{
+  "name": "bt-iotester",
+  "version": "0.0.1",
+  "description": "A browser-friendly Javascript API for the IOTester custom board, using web bluetooth.",
+  "main": "js/meterApi.js",
+  "keywords": [
+    "web-bluetooth",
+    "javascript",
+    "API",
+    "bluetooth",
+    "metering",
+    "measurements",
+    "automation",
+    "testing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PBrunot/bt-iotester.git"
+  },
+  "dependencies": {
+    "loglevel": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/web-bluetooth": "^0.0.16",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "browserify": "^17.0.0",
+    "eslint": "^8.31.0",
+    "eslint-config-standard-with-typescript": "^26.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.6.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^28.1.2",
+    "jest-environment-jsdom": "^28.1.2",
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4",
+    "uglify-js": "^3.16.1"
+  },
+  "author": "Pascal Brunot",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PBrunot/bt-iotester/issues"
+  },
+  "homepage": "https://github.com/PBrunot/bt-iotester#readme",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "dist": "browserify js/meterApi.js --standalone IOTestingBT --debug | uglifyjs --source-map -o ./dist/bt-iotesting.min.js",
+    "dev": "browserify js/meterApi.js --standalone IOTestingBT --debug -o ./dist/bt-iotesting.js",
+    "lint": "eslint ts --ext .ts",
+    "lint:fix": "npm run lint -- --fix"
+  }
+}

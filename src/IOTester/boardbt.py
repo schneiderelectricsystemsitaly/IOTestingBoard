@@ -349,11 +349,13 @@ async def __enable_bt() -> bool:
     board_command_char = aioble.Characteristic(service1, boardbtcfg.BOARD_COMMAND_UUID, write_no_response=True,
                                                notify=False, capture=False)
 
-    battery_char = aioble.Characteristic(service1, boardbtcfg.BATTERY_CHAR_UUID, read=True, notify=True, capture=False)
+    service2 = aioble.Service(boardbtcfg.BATTERY_SERVICE_UUID)
+    battery_char = aioble.Characteristic(service2, boardbtcfg.BATTERY_CHAR_UUID, read=True, notify=True, capture=False)
 
-    __device_info_service(service1)
+    service3 = aioble.Service(boardbtcfg.DEVICE_INFORMATION_SERVICE_UUID)
+    __device_info_service(service3)
 
-    aioble.register_services(service1)
+    aioble.register_services(service1, service2, service3)
 
     gc.collect()
 

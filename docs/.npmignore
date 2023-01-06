@@ -1,3 +1,5 @@
 docs/*.mbp
 coverage/
 .github/
+js/
+docs/

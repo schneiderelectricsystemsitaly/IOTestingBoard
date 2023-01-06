@@ -1,0 +1,8 @@
+.vs/
+*.bak
+node_modules/
+bt-seneca-msc.code-workspace
+.vscode/
+coverage/
+js/*
+
