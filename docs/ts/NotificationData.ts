@@ -13,6 +13,7 @@ export class NotificationData {
     Memfree: number=0
     Errors: number=0
     Battery: number=0
+    Timestamp: Date=new Date()
     constructor() {
 
     }

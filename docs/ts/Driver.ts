@@ -290,13 +290,13 @@ export class Driver {
   handleNotifications (event: any) {
     const value = event.target.value
     if (value != null) {
-      log.debug('<< ' + buf2hex(value.buffer))/*
+      log.debug('<< ' + buf2hex(value.buffer))
       if (this.btState.response != null) {
         this.btState.response = this.arrayBufferConcat(this.btState.response, value.buffer)
       } else {
         this.btState.response = value.buffer.slice(0)
       }
-      this.btState.lastMeasure = NotificationData.parse(this.btState.response)*/
+      this.btState.lastMeasure = NotificationData.parse(this.btState.response)
     }
   }
 
