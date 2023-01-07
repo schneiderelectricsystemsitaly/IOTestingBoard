@@ -187,9 +187,8 @@ export class Driver {
      * */
   async processCommand () {
     try {
-      const command: Command = this.btState.command
-      const result = ResultCode.SUCCESS
-      let packet, response
+      let response
+      const command = this.btState.command
 
       if (command == null) {
         return
@@ -199,9 +198,9 @@ export class Driver {
 
       log.info('\t\tExecuting command :' + command)
 
-      const packet_clear = Command.CreateNoSP(CommandType.COMMAND_CLEAR_FLAGS)
-      packet = IOTestingBoard.getPacket(command)
-      const packets = [packet_clear, packet]
+      const packet_clear = IOTestingBoard.getPacket(Command.CreateNoSP(CommandType.COMMAND_CLEAR_FLAGS))
+      const packet = IOTestingBoard.getPacket(command)
+      const packets: ArrayBuffer[] = [packet_clear, packet]
 
       for (const msg of packets) {
         const currentCpt = this.btState.lastMeasure != null ? this.btState.lastMeasure.CommandCpt : -1
