@@ -95,7 +95,7 @@
         </div>
         <div class="row">
             <div class="col">
-                Setpoint Resistance
+                Setpoint Resistance generation
             </div>
             <div class="col">
                 <div class="input-group mb-3">
@@ -106,13 +106,13 @@
                 </div>
             </div>
             <div class="col">
-                <button id="btnExecuteR" class="btn btn-primary">Execute R</button>
+                <button id="btnExecuteR" class="btn btn-primary">Set to R mode</button>
                 <br/>
             </div>
         </div>
         <div class="row">
             <div class="col">
-                Setpoint Voltmeter + load
+                Setpoint load with voltmeter
             </div>
             <div class="col">
                 <div class="input-group mb-3">
@@ -123,20 +123,20 @@
                 </div>
             </div>
             <div class="col">
-                <button id="btnExecuteV" class="btn btn-primary">Execute V+load</button>
+                <button id="btnExecuteV" class="btn btn-primary">Set to V + load</button>
                 <br/>
             </div>
         </div>
         <div class="row">
             <div class="col">
-                Meter mode
+                By-pass mode
             </div>
             <div class="col">
                 &nbsp;no parameter
             </div>
             <div class="col">
                 <div class="input-group mb-3">
-                    <button id="btnExecuteM" class="btn btn-primary">Execute Meter</button>
+                    <button id="btnExecuteM" class="btn btn-primary">Set to Bypass</button>
                 </div>
             </div>
         </div>
@@ -221,6 +221,9 @@
             <div class="col">
                 <div class="input-group mb-3">
                     <button id="btnReboot" class="btn btn-primary">Reboot</button>
+                </div>
+                <div class="input-group mb-3">
+                    <button id="btnTest" class="btn btn-primary">Auto-test mode</button>
                 </div>
             </div>
             <div class="col">
@@ -366,6 +369,9 @@
         document.getElementById("btnDelay").onclick = async () => { await IOTestingBT.SimpleExecute(
             IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_DEEPSLEEP_MIN,
                 document.getElementById("minutes").value)) };
+        document.getElementById("btnTest").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateNoSP(
+                IOTestingBT.CommandType.COMMAND_RUN_TEST)) };  
     </script>
 
 </body>
