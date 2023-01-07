@@ -26,7 +26,7 @@ class BoardTester:
             return "Connecting..."
         elif self.running:
             if self.running_total > 0:
-                return f"Running ({self.running_desc} : {self.running_actual}/{self.running_total} : {round(100*self.running_actual/self.running_total)} %)"
+                return f"Running ({self.running_desc} : {self.running_actual}/{self.running_total} : {round(100 * self.running_actual / self.running_total)} %)"
             else:
                 return f"Running ({self.running_desc} : ??? %)"
         else:

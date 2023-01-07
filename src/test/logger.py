@@ -24,10 +24,13 @@ class Logger:
     @classmethod
     def save_results(cls, ts, last_status):
         with open('test_results.txt', 'a') as f:
-            print(time.localtime(), '--------------------------------------------------------------------------------', file=f)
+            print(time.localtime(), '--------------------------------------------------------------------------------',
+                  file=f)
             print('***', ts, '***', file=f)
-            print("Duration: [", int(ts.stats['duration'] / 1000), "] s, Total tests [", ts.stats['total'], "], Failures [",
-                  ts.stats['failures'], "], Testing speed [", round(ts.stats['total'] / (ts.stats['duration'] / 1000), 1), 'tests/s]', file=f)
+            print("Duration: [", int(ts.stats['duration'] / 1000), "] s, Total tests [", ts.stats['total'],
+                  "], Failures [",
+                  ts.stats['failures'], "], Testing speed [",
+                  round(ts.stats['total'] / (ts.stats['duration'] / 1000), 1), 'tests/s]', file=f)
             if len(ts.stats['failed_tc']) > 0:
                 print("\tFailures details:", file=f)
                 counts = {}
@@ -48,7 +51,8 @@ class Logger:
                 print("\tEnergy details:", file=f)
                 summary = ts.pm.get_summary()
                 print("\t\t1h projected Energy (mWh):", round(summary["1h projected energy (mWh)"]), file=f)
-                print("\t\tEnergy measured (mWh):", round(summary["Energy (mWh)"], 1), '\tDuration (s):', round(summary["Total duration (s)"], 1), file=f)
+                print("\t\tEnergy measured (mWh):", round(summary["Energy (mWh)"], 1), '\tDuration (s):',
+                      round(summary["Total duration (s)"], 1), file=f)
                 print("\t\tPeak current (mA):", round(summary["Peak current (mA)"]), file=f)
             f.close()
         print('Results saved to file')

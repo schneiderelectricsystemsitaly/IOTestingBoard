@@ -22,7 +22,7 @@ class BluetoothClient:
         self.should_reinit = False
         self.task_status = None
         self.status_value = None
-        s
+
     def __terminate_tasks(self):
         self.board_service = None
         self.board_service = None
