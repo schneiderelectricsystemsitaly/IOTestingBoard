@@ -17,8 +17,9 @@ class Logger:
             print('\tTests', self.tester.test_total, ', failures ', self.tester.test_failures, 'status',
                   self.tester.get_status_str())
             print('\tLast status from device', self.tester.status)
-            print('\tPower monitor', self.meter.get_summary())
-            await asyncio.sleep_ms(5000)
+            print('\tPower statistics', self.meter.get_summary())
+            print('\tPower last values', self.meter.get_last_values())
+            await asyncio.sleep_ms(3000)
         print('Logger loop terminating')
 
     @classmethod
