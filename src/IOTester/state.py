@@ -44,6 +44,7 @@ class BoardState:
         self.VERBOSE = False
         self.battery_percent = 0
         self.last_error_msg = ''
+        self.bt_commands = 0
 
     def __str__(self):
         if self.setpoint_r == R_OPEN:
@@ -60,7 +61,7 @@ class BoardState:
 
         desc = f'Relay={self.relay}, Bluetooth={self.bluetooth}, Wifi={self.wifi} (IP:{self.ip_config}),' + \
                f'setpoint_r={setpoint_desc}, actual_r={actual_desc}, last_result={self.last_command_result},' + \
-               f'err count={self.error_cpt}/{self.command_cpt} Battery={self.battery_percent}%'
+               f'err count={self.error_cpt}/{self.command_cpt} Battery={self.battery_percent}% Bt# ={self.bt_commands}'
 
         if self.error_cpt > 0:
             desc += f' last err msg={self.last_error_msg}'

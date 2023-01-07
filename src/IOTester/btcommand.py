@@ -3,14 +3,13 @@ import uasyncio as asyncio
 
 from . import boardbtcfg
 from .boardctl import execute, light_sleep, deep_sleep, r_test
-from .boardstate import update_event_time, update_last_result, update_meter_commands, set_verbose, clear_errors
+from .boardstate import update_event_time, update_last_result, update_meter_commands, set_verbose, clear_errors, \
+    increment_bt_commands
 from .boardwifi import enable_wifi, disable_wifi, enable_webrepl, disable_webrepl
 from .command import Command
 from .boardsettings import get_settings, Settings
 
 type_gen = type((lambda: (yield))())  # Generator type
-
-bt_command_cpt = 0
 
 
 # If a callback is passed, run it and return.
@@ -72,8 +71,6 @@ async def parse_command_packet(command) -> None:
 
 
 async def __bt_command_execute(command, setpoint) -> None:
-    global bt_command_cpt
-
     update_event_time()
     print(time.localtime(), 'BT received', command, setpoint)
     settings = get_settings()
@@ -185,7 +182,6 @@ async def __bt_command_execute(command, setpoint) -> None:
             print('Applied new bluetooth name', setpoint)
             success = True
         elif command == boardbtcfg.COMMAND_CLEAR_FLAGS:
-            bt_command_cpt = 0
             clear_errors()
             success = True
         else:
@@ -195,5 +191,5 @@ async def __bt_command_execute(command, setpoint) -> None:
         print('Error during BT command execution')
         success = False
 
-    bt_command_cpt += 1
+    increment_bt_commands()
     update_last_result(success, notify=True, msg=f'BT {command}')

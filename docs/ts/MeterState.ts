@@ -5,7 +5,7 @@ import { BoardMode } from './constants'
  * */
 export class MeterState {
   firmware: string
-  serial: string
+  hw_rev: string
   mode: number
   setpoint: number
   actual: number
@@ -13,7 +13,7 @@ export class MeterState {
   battery: number
   constructor () {
     this.firmware = '???' // Firmware version
-    this.serial = '???' // Serial number
+    this.hw_rev = '???' // Serial number
     this.mode = BoardMode.MODE_UNDEFINED
     this.setpoint = 0xFFFF
     this.actual = 0xFFFF
