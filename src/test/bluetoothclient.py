@@ -12,7 +12,7 @@ from .test import STOP_FLAG, write_neopixel, read_neopixel
 
 class BluetoothClient:
 
-    def __init__(self, required_service_uuid=boardbtcfg.MODBUS_SERVICE_UUID):
+    def __init__(self, required_service_uuid=boardbtcfg.BOARD_SERVICE_UUID):
         self.service_uuid = required_service_uuid
         self.board_service = None
         self.status_char = None
@@ -22,7 +22,7 @@ class BluetoothClient:
         self.should_reinit = False
         self.task_status = None
         self.status_value = None
-        s
+
     def __terminate_tasks(self):
         self.board_service = None
         self.board_service = None

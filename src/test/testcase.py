@@ -25,7 +25,9 @@ class TestCase:
             return False
         if 'R setpoint' not in status:
             return False
-        return abs(status['R setpoint'] - expected_value) < 1
+        if 'Result' not in status:
+            return False
+        return abs(status['R setpoint'] - expected_value) < 1 and status['Result']
 
     @classmethod
     def chk_wifi(cls, status, expected_value):
@@ -33,7 +35,9 @@ class TestCase:
             return False
         if 'Wifi' not in status:
             return False
-        return abs(status['Wifi'] - expected_value) < 1
+        if 'Result' not in status:
+            return False
+        return abs(status['Wifi'] - expected_value) < 1 and status['Result']
 
     @classmethod
     def chk_relay(cls, status, expected_value):
@@ -41,15 +45,17 @@ class TestCase:
             return False
         if 'Relay' not in status:
             return False
-        return abs(status['Relay'] - expected_value) < 1
+        if 'Result' not in status:
+            return False
+        return abs(status['Relay'] - expected_value) < 1 and status['Result']
 
     @classmethod
     def chk_delay(cls, status, expected_value):
         if status is None:
             return False
-        if 'Relay' not in status:
+        if 'Result' not in status:
             return False
-        return abs(status['Relay'] - expected_value) < 1
+        return status['Result']
 
     @classmethod
     def chk_memory(cls, status, min_value):
@@ -57,7 +63,9 @@ class TestCase:
             return False
         if 'Mem' not in status:
             return False
-        return status['Mem'] > min_value
+        if 'Result' not in status:
+            return False
+        return status['Mem'] > min_value and status['Result']
 
     @classmethod
     def chk_result(cls, status, value):
@@ -73,4 +81,6 @@ class TestCase:
             return False
         if 'Freq' not in status:
             return False
-        return status['Freq'] == expected_value
+        if 'Result' not in status:
+            return False
+        return status['Freq'] == expected_value and status['Result']

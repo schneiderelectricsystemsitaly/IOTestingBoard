@@ -62,8 +62,8 @@ export class IOTestingBoard {
 
     const output: NotificationData = new NotificationData()
     const dv: DataView = new DataView(buf)
-    const status1: number = dv.getUint8(1)
-    const status2: number = dv.getUint8(0)
+    const status1: number = dv.getUint8(0)
+    const status2: number = dv.getUint8(1)
 
     output.WiFi = (status1 >> 6) & 3
     output.Relay = (status1 >> 4) & 3
