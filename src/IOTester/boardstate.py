@@ -124,4 +124,10 @@ def set_notify_callback(fun):
 
 def clear_errors() -> BoardState:
     __state.error_cpt = 0
+    __state.bt_commands = 0
+    return get_state()
+
+
+def increment_bt_commands() -> BoardState:
+    __state.bt_commands += 1
     return get_state()

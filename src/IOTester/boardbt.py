@@ -285,7 +285,7 @@ def __get_notification_data() -> bytearray:
     values.extend(int(state.actual_r).to_bytes(2, "little"))
     values.extend(int(state.setpoint_r).to_bytes(2, "little"))
     values.extend(int(gc.mem_free()).to_bytes(4, "little"))
-    values.extend(int(bt_command_cpt % 256).to_bytes(1, "little"))
+    values.extend(int(state.bt_commands % 256).to_bytes(1, "little"))
     return values
 
 
