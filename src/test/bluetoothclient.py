@@ -12,7 +12,7 @@ from .test import STOP_FLAG, write_neopixel, read_neopixel
 
 class BluetoothClient:
 
-    def __init__(self, required_service_uuid=boardbtcfg.MODBUS_SERVICE_UUID):
+    def __init__(self, required_service_uuid=boardbtcfg.BOARD_SERVICE_UUID):
         self.service_uuid = required_service_uuid
         self.board_service = None
         self.status_char = None
