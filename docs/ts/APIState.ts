@@ -49,11 +49,11 @@ export class BTApiState {
     }
   }
 
-  reset (onDisconnectEvent: EventListenerOrEventListenerObject | null = null) {
+  async reset (onDisconnectEvent: EventListenerOrEventListenerObject | null = null): Promise<void> {
     if (this.charRead != null) {
       try {
         if (this.btDevice?.gatt?.connected) {
-          this.charRead.stopNotifications()
+          await this.charRead.stopNotifications()
         }
       } catch (error) { }
     }

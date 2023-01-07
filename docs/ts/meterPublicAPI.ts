@@ -106,7 +106,7 @@ export async function SimpleExecute (command: Command): Promise<CommandResult> {
     cr.message = 'Invalid command'
     return cr
   }
-  // Recreate the object as it may have lost methods due to JSON 
+  // Recreate the object as it may have lost methods due to JSON
   command = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
   command.pending = true // In case caller does not set pending flag
 
@@ -202,7 +202,7 @@ export async function Pair (forceSelection: boolean = false): Promise<boolean> {
 
   if (!driver.btState.started) {
     driver.btState.state = State.NOT_CONNECTED
-    driver.stateMachine() // Start it
+    await driver.stateMachine() // Start it
   } else if (driver.btState.state == State.ERROR) {
     driver.btState.state = State.NOT_CONNECTED // Try to restart
   }

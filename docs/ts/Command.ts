@@ -1,5 +1,3 @@
-import { Parse } from './utils'
-import log = require('loglevel')
 import { CommandType } from './constants'
 
 /**

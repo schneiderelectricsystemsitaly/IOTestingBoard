@@ -175,7 +175,7 @@ export class Driver {
       }
     }
     if (this.btState.state != State.STOPPED) {
-      sleep_ms(DELAY_MS).then(async () => { await this.stateMachine() }) // Recheck status in DELAY_MS ms
+      void sleep_ms(DELAY_MS).then(async () => { await this.stateMachine() }) // Recheck status in DELAY_MS ms
     } else {
       log.debug('\tTerminating State machine')
       this.btState.started = false
@@ -189,7 +189,7 @@ export class Driver {
     try {
       const command: Command = this.btState.command
       const result = ResultCode.SUCCESS
-      let packet, response, startGen
+      let packet, response
 
       if (command == null) {
         return
@@ -244,7 +244,7 @@ export class Driver {
     * */
   async disconnect () {
     this.btState.command = null
-    this.btState.reset(this.onDisconnected.bind(this))
+    await this.btState.reset(this.onDisconnected.bind(this))
     this.btState.state = State.STOPPED
   }
 
@@ -253,7 +253,7 @@ export class Driver {
      * */
   async onDisconnected () {
     log.warn('* GATT Server disconnected event, will try to reconnect *')
-    this.btState.reset()
+    await this.btState.reset()
     this.btState.stats['GATT disconnects']++
     this.btState.state = State.DEVICE_PAIRED // Try to auto-reconnect the interfaces without pairing
   }
@@ -343,7 +343,7 @@ export class Driver {
       await sleep_ms(500)
     } catch (err) {
       log.warn('** error while connecting: ' + err.message)
-      this.btState.reset(this.onDisconnected.bind(this))
+      await this.btState.reset(this.onDisconnected.bind(this))
       this.btState.state = State.ERROR
       this.btState.stats.exceptions++
     }
@@ -377,7 +377,7 @@ export class Driver {
       await sleep_ms(50)
     } catch (err) {
       log.warn('** error while connecting: ' + err.message)
-      this.btState.reset()
+      await this.btState.reset()
       this.btState.stats.exceptions++
     }
   }
@@ -402,7 +402,7 @@ export class Driver {
           log.debug('GATT already connected')
         }
       } else {
-        this.btState.reset(this.onDisconnected.bind(this))
+        await this.btState.reset(this.onDisconnected.bind(this))
         this.btState.btDevice = null
         this.btState.state = State.NOT_CONNECTED
         this.btState.stats.exceptions++
@@ -425,7 +425,7 @@ export class Driver {
 
       this.btState.response = null
       this.btState.charRead.addEventListener('characteristicvaluechanged', this.handleNotifications.bind(this))
-      this.btState.charRead.startNotifications()
+      await this.btState.charRead.startNotifications()
 
       log.info('> Bluetooth interfaces ready.')
 
@@ -434,7 +434,7 @@ export class Driver {
       this.btState.state = State.METER_INIT
     } catch (err) {
       log.warn('** error while subscribing: ' + err.message)
-      this.btState.reset()
+      await this.btState.reset()
       this.btState.state = State.DEVICE_PAIRED
       this.btState.stats.exceptions++
     }
@@ -461,7 +461,7 @@ export class Driver {
       this.btState.state = State.METER_INIT
     } catch (err) {
       log.warn('** error while subscribing: ' + err.message)
-      this.btState.reset(this.onDisconnected.bind(this))
+      await this.btState.reset(this.onDisconnected.bind(this))
       this.btState.state = State.DEVICE_PAIRED
       this.btState.stats.exceptions++
     }
