@@ -200,13 +200,13 @@ export class Driver {
       log.info('\t\tExecuting command :' + command)
 
       const packet_clear = Command.CreateNoSP(CommandType.COMMAND_CLEAR_FLAGS)
-      packet = command.getPacket()
+      packet = IOTestingBoard.getPacket(command)
       const packets = [packet_clear, packet]
 
       for (const msg of packets) {
         const currentCpt = this.btState.lastMeasure != null ? this.btState.lastMeasure.CommandCpt : -1
         do {
-          response = await this.SendAndResponse(packet)
+          response = await this.SendAndResponse(msg)
         }
         while (currentCpt != this.btState.lastMeasure?.CommandCpt)
       }
@@ -305,7 +305,7 @@ export class Driver {
       } else {
         this.btState.response = value.buffer.slice(0)
       }
-      this.btState.lastMeasure = NotificationData.parse(this.btState.response)
+      this.btState.lastMeasure = IOTestingBoard.parseNotification(this.btState.response)
     }
   }
 

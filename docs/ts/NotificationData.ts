@@ -1,4 +1,4 @@
-import { noConflict } from "loglevel"
+import { noConflict } from 'loglevel'
 
 // Must match with __get_notification_data in boardbt.py firmware code.
 export class NotificationData {
@@ -18,30 +18,5 @@ export class NotificationData {
   Timestamp: Date = new Date()
   constructor () {
 
-  }
-
-  static parse (buf: ArrayBuffer) {
-    if (buf.byteLength < 11)
-      return null
-  
-    const output: NotificationData = new NotificationData()
-    const dv: DataView = new DataView(buf)
-    const status1: number = dv.getUint8(1)
-    const status2: number = dv.getUint8(0)
-    
-    output.WiFi = (status1 >> 6) & 3
-    output.Relay = (status1 >> 4) & 3
-    output.Bluetooth = (status1 >> 1) & 7
-    output.Error = (status2 & 64) != 0
-    output.Frequency = (status2 >> 5) & 3
-    output.Verbose = (status2 & 8) != 0
-    output.Test = (status2 & 4) != 0
-    output.V_with_load = (status2 & 2) != 0
-    output.LastResult = (status2 & 1) != 0
-    output.Actual_R = dv.getUint16(2, true)
-    output.Setpoint_R = dv.getUint16(4, true)
-    output.Memfree = dv.getUint32(6, true)
-    output.CommandCpt = dv.getUint8(10)
-    return output
   }
 }
