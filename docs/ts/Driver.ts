@@ -6,7 +6,7 @@
  */
 
 import { BTApiState } from './APIState'
-import { State, BlueToothIOTUUID, ResultCode } from './constants'
+import { State, BlueToothIOTUUID, ResultCode, CommandType } from './constants'
 import { IOTestingBoard } from './IOTestingBoard'
 import { Command } from './Command'
 import { buf2hex, sleep as sleep_ms } from './utils'
@@ -199,14 +199,23 @@ export class Driver {
 
       log.info('\t\tExecuting command :' + command)
 
+      const packet_clear = Command.CreateNoSP(CommandType.COMMAND_CLEAR_FLAGS)
       packet = command.getPacket()
-      response = await this.SendAndResponse(packet)
+      const packets = [packet_clear, packet]
+
+      for (const msg of packets) {
+        const currentCpt = this.btState.lastMeasure != null ? this.btState.lastMeasure.CommandCpt : -1
+        do {
+          response = await this.SendAndResponse(packet)
+        }
+        while (currentCpt != this.btState.lastMeasure?.CommandCpt)
+      }
 
       // Caller expects a valid property in GetState() once command is executed.
       log.debug('\t\tRefreshing current state')
       await this.refresh()
 
-      command.error = false
+      command.error = this.btState.lastMeasure?.Error
       command.pending = false
       this.btState.command = null
 
@@ -477,7 +486,7 @@ export class Driver {
       if (this.btState.lastMeasure != null) {
         this.btState.meter.actual = this.btState.lastMeasure.Actual_R
         this.btState.meter.setpoint = this.btState.lastMeasure.Setpoint_R
-        this.btState.meter.battery = this.btState.lastMeasure.Battery
+        this.btState.meter.battery = await this.iot.getBatteryLevel()
         this.btState.meter.mode = (this.btState.lastMeasure.Relay == 1 ? 1 : (this.btState.lastMeasure.V_with_load ? 3 : 2))
         this.btState.meter.free_bytes = this.btState.lastMeasure.Memfree
       }

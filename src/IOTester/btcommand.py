@@ -3,12 +3,14 @@ import uasyncio as asyncio
 
 from . import boardbtcfg
 from .boardctl import execute, light_sleep, deep_sleep, r_test
-from .boardstate import update_event_time, update_last_result, update_meter_commands, set_verbose
+from .boardstate import update_event_time, update_last_result, update_meter_commands, set_verbose, clear_errors
 from .boardwifi import enable_wifi, disable_wifi, enable_webrepl, disable_webrepl
 from .command import Command
 from .boardsettings import get_settings, Settings
 
 type_gen = type((lambda: (yield))())  # Generator type
+
+bt_command_cpt = 0
 
 
 # If a callback is passed, run it and return.
@@ -70,110 +72,128 @@ async def parse_command_packet(command) -> None:
 
 
 async def __bt_command_execute(command, setpoint) -> None:
+    global bt_command_cpt
+
     update_event_time()
     print(time.localtime(), 'BT received', command, setpoint)
     settings = get_settings()
+    success = False
 
     try:
         if command == boardbtcfg.COMMAND_ENABLE_WIFI:
-            result = await enable_wifi()
-            update_last_result(result, notify=True, msg='BT Enable wifi')
+            success = await enable_wifi()
         elif command == boardbtcfg.COMMAND_DISABLE_WIFI:
-            result = await disable_wifi()
-            update_last_result(result, notify=True, msg='BT Disable wifi')
+            success = await disable_wifi()
         elif command == boardbtcfg.COMMAND_ENABLE_WEBREPL:
-            await enable_wifi()
+            success = await enable_wifi()
             await enable_webrepl()
         elif command == boardbtcfg.COMMAND_DISABLE_WEBREPL:
             disable_webrepl()
+            success = True
         elif command == boardbtcfg.COMMAND_BREAK:
             import sys
             sys.exit(0)
         elif command == boardbtcfg.COMMAND_MODE_METER:
             comm = Command(Command.bypass, 0xFFFF)
-            result = await execute(comm)
-            update_last_result(result, True, f'BT {comm}')
+            success = await execute(comm)
         elif command == boardbtcfg.COMMAND_MODE_RESISTORS:
-            if setpoint is not None:
-                comm = Command(Command.generate_r, setpoint)
-                result = await execute(comm)
-                update_last_result(result, True, f'BT {comm}')
+            comm = Command(Command.generate_r, setpoint)
+            success = await execute(comm)
         elif command == boardbtcfg.COMMAND_MODE_V_LOAD:
-            if setpoint is not None:
-                comm = Command(Command.measure_with_load, setpoint)
-                result = await execute(comm)
-                update_last_result(result, True, f'BT {comm}')
+            comm = Command(Command.measure_with_load, setpoint)
+            success = await execute(comm)
         elif command == boardbtcfg.COMMAND_REBOOT:
             import machine
             machine.reset()
         elif command == boardbtcfg.COMMAND_RUN_TEST:
             comm = Command(Command.test_mode, 0)
-            result = await execute(comm)
-            update_last_result(result, True, f'BT {comm}')
+            success = await execute(comm)
         elif command == boardbtcfg.COMMAND_LIGHT_SLEEP:
             await light_sleep(10000)
+            success = True
         elif command == boardbtcfg.COMMAND_DEEP_SLEEP:
             await deep_sleep()
         elif command == boardbtcfg.COMMAND_METER_COMMANDS:
-            if setpoint is not None:
-                update_meter_commands(True if setpoint else False)
+            update_meter_commands(True if setpoint else False)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_INITIAL_METER_COMM:
             settings.add_key(Settings.METER_COMMANDS_ENABLED, True if setpoint else False)
             print('Saved INITIAL METER COMMANDS to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_WIFI_NETWORK:
-            if setpoint is not None:
-                settings.add_key(Settings.WIFI_NETWORK, setpoint)
-                print('Saved wifi network to ', setpoint)
+            settings.add_key(Settings.WIFI_NETWORK, setpoint)
+            print('Saved wifi network to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_WIFI_PASSWORD:
-            if setpoint is not None:
-                settings.add_key(Settings.WIFI_PASSWORD, setpoint)
-                print('Saved wifi password to ', setpoint)
+            settings.add_key(Settings.WIFI_PASSWORD, setpoint)
+            print('Saved wifi password to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_INITIAL_BLUETOOTH:
             settings.add_key(Settings.BLUETOOTH_ENABLED, True if setpoint else False)
             print('Saved bluetooth to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_INITIAL_WIFI:
             settings.add_key(Settings.WIFI_ENABLED, True if setpoint else False)
             print('Saved wifi to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_DEEPSLEEP_MIN:
-            if setpoint is not None:
-                settings.add_key(Settings.DEEPSLEEP_MIN, setpoint)
-                print('Set deepsleep delay to ', setpoint)
+            settings.add_key(Settings.DEEPSLEEP_MIN, setpoint)
+            print('Set deepsleep delay to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_VERBOSE:
             set_verbose(True if setpoint else False)
             print('Saved VERBOSE to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_INITIAL_COMMAND_TYPE:
             settings.add_key(Settings.INITIAL_COMMAND_TYPE, setpoint)
             print('Saved INITIAL COMMAND to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_INITIAL_COMMAND_SETPOINT:
             settings.add_key(Settings.INITIAL_COMMAND_SETPOINT, setpoint)
             print('Saved INITIAL SETPOINT to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_R_TEST:
             await r_test()
+            success = True
         elif command == boardbtcfg.COMMAND_SET_CPU:
             from machine import freq
             if setpoint == 0:
                 freq(80000000)
+                success = True
             elif setpoint == 1:
                 freq(160000000)
+                success = True
             elif setpoint == 2:
                 freq(240000000)
+                success = True
             else:
                 print('Unrecognized frequency setting')
+                success = False
         elif command == boardbtcfg.COMMAND_SET_OTA:
             settings.add_key(Settings.OTA, setpoint)
             # Enable Wi-Fi at boot if OTA is enabled
             if setpoint:
                 settings.add_key(Settings.WIFI_ENABLED, True)
             print('Saved OTA to ', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_CONFIGURE_METER_COMM:
             settings.add_v_threshold(setpoint[0], setpoint[1], setpoint[2], setpoint[3])
             print('Applied v threshold', setpoint)
+            success = True
         elif command == boardbtcfg.COMMAND_SET_BLUETOOTH_NAME:
             settings.add_key(Settings.BLUETOOTH_NAME, setpoint)
             print('Applied new bluetooth name', setpoint)
+            success = True
+        elif command == boardbtcfg.COMMAND_CLEAR_FLAGS:
+            bt_command_cpt = 0
+            clear_errors()
+            success = True
         else:
             print('Unrecognized BT command', command, setpoint)
-            update_last_result(False, notify=True)
+            success = False
     except:
         print('Error during BT command execution')
-        update_last_result(False, notify=True)
+        success = False
+
+    bt_command_cpt += 1
+    update_last_result(success, notify=True, msg=f'BT {command}')

@@ -21,7 +21,8 @@ class BluetoothClient:
         self.bt_errors = 0
         self.should_reinit = False
         self.task_status = None
-
+        self.status_value = None
+        s
     def __terminate_tasks(self):
         self.board_service = None
         self.board_service = None
@@ -46,8 +47,10 @@ class BluetoothClient:
             except aioble.DeviceDisconnectedError as err:
                 print('status_loop', 'disconnect error', repr(err))
                 self.should_reinit = True
+                self.bt_errors += 1
             except Exception as ex:
                 print('status_loop', 'error', repr(ex))
+                self.bt_errors += 1
                 self.should_reinit = True
         print('Status loop terminating')
 

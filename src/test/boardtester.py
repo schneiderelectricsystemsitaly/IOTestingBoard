@@ -45,11 +45,12 @@ class BoardTester:
                 self.running = False
 
     def parse_status(self, packet: bytearray):
-        if packet is None or len(packet) < 12:
+        if packet is None or len(packet) < 11:
             return None
         wifi_state = (packet[0] >> 6) & 3
         relay_position = (packet[0] >> 4) & 3
         bluetooth_state = (packet[0] >> 1) & 7
+        err_board = (packet[1] & 64) != 0
         freq = (packet[1] >> 5) & 3
 
         if freq == 1:
@@ -68,11 +69,10 @@ class BoardTester:
         actual_r = int.from_bytes(packet[2:4], "little")
         setpoint_r = int.from_bytes(packet[4:6], "little")
         mem_free = int.from_bytes(packet[6:10], "little")
-        err_board = packet[10]
-        battery = packet[11]
+        bt_command_cpt = packet[10]
         retval = {'Wifi': wifi_state, 'Bluetooth': bluetooth_state, 'Relay': relay_position, 'Parallel': meter_parallel,
                   'Result': command_result, 'R act': actual_r, 'R setpoint': setpoint_r, 'Mem': mem_free,
-                  'Board err': err_board, 'Battery': battery, 'BT test err': self.bt_client.bt_errors,
+                  'Board err': err_board, 'BT Commands #': bt_command_cpt, 'BT test err': self.bt_client.bt_errors,
                   'Verbose': verbose, 'Test mode': test_mode, 'Freq': freq}
         return retval
 

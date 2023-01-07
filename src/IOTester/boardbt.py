@@ -11,7 +11,7 @@ from machine import freq
 from . import boardbtcfg
 from .boardctl import (get_battery_percent)
 from .boardstate import (get_state, update_bt_state, update_event_time, is_verbose, set_battery, set_notify_callback)
-from .btcommand import parse_command_packet
+from .btcommand import parse_command_packet, bt_command_cpt
 from .state import BluetoothState
 from .boardsettings import get_settings, Settings
 
@@ -255,7 +255,7 @@ async def __board_command_loop(board_command_char) -> None:
 def __get_notification_data() -> bytearray:
     gc.collect()
     # 0 - WIFI b7 b6 RELAY b5 b4 BLUETOOTH b3 b2 b1 UNUSED b0
-    # 1 - UNUSED b7-b2 METER PARALLEL b1 LAST RESULT b0
+    # 1 - ERROR FLAG b6 FREQ b5-b4 VERBOSE b3 TESTMODE b2 METER PARALLEL b1 LAST RESULT b0
     # 2 - R actual (2 bytes)
     # 4 - R setpoint (2 bytes)
     # 6 - free memory (4 bytes)
@@ -273,7 +273,8 @@ def __get_notification_data() -> bytearray:
     else:
         i_freq = 0
 
-    status_b2 = int(i_freq) << 5 | \
+    status_b2 = (0b1 if state.error_cpt > 0 else 0b0) << 6 | \
+                int(i_freq) << 5 | \
                 (0b1 if state.VERBOSE else 0b0) << 3 | \
                 (0b1 if state.test_mode else 0b0) << 2 | \
                 (0b1 if state.meter_parallel else 0b0) << 1 | \
@@ -284,8 +285,7 @@ def __get_notification_data() -> bytearray:
     values.extend(int(state.actual_r).to_bytes(2, "little"))
     values.extend(int(state.setpoint_r).to_bytes(2, "little"))
     values.extend(int(gc.mem_free()).to_bytes(4, "little"))
-    values.extend(int(state.error_cpt).to_bytes(1, "little"))
-    values.extend(int(state.battery_percent).to_bytes(1, "little"))
+    values.extend(int(bt_command_cpt % 256).to_bytes(1, "little"))
     return values
 
 
