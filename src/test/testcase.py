@@ -73,7 +73,6 @@ class TestCase:
             return False
         if 'Result' not in status:
             return False
-            '
         return status['Result']
 
     @classmethod
