@@ -474,6 +474,13 @@ export class Driver {
     this.btState.state = State.BUSY
     try {
       log.debug('\t\tFinished refreshing current state')
+      if (this.btState.lastMeasure != null) {
+        this.btState.meter.actual = this.btState.lastMeasure.Actual_R
+        this.btState.meter.setpoint = this.btState.lastMeasure.Setpoint_R
+        this.btState.meter.battery = this.btState.lastMeasure.Battery
+        this.btState.meter.mode = (this.btState.lastMeasure.Relay == 1 ? 1 : (this.btState.lastMeasure.V_with_load ? 3 : 2))
+        this.btState.meter.free_bytes = this.btState.lastMeasure.Memfree
+      }
       this.btState.state = State.IDLE
     } catch (err) {
       log.warn('Error while refreshing measure' + err)
