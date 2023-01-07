@@ -3,7 +3,8 @@ import uasyncio as asyncio
 
 from . import boardbtcfg
 from .boardctl import execute, light_sleep, deep_sleep, r_test
-from .boardstate import update_event_time, update_last_result, update_meter_commands, set_verbose, clear_errors
+from .boardstate import update_event_time, update_last_result, update_meter_commands, set_verbose, clear_errors, \
+    increment_bt_commands
 from .boardwifi import enable_wifi, disable_wifi, enable_webrepl, disable_webrepl
 from .command import Command
 from .boardsettings import get_settings, Settings
@@ -70,7 +71,6 @@ async def parse_command_packet(command) -> None:
 
 
 async def __bt_command_execute(command, setpoint) -> None:
-
     update_event_time()
     print(time.localtime(), 'BT received', command, setpoint)
     settings = get_settings()

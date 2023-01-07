@@ -172,7 +172,7 @@ async def __peripheral_task() -> None:
             try:
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
-                    name= device_name,
+                    name=device_name,
                     services=[boardbtcfg.BOARD_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)

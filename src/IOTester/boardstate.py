@@ -9,7 +9,7 @@ __state = BoardState()
 __fun_notify = lambda *args, **kwargs: None
 
 
-def set_battery(percent:int) -> BoardState:
+def set_battery(percent: int) -> BoardState:
     __state.battery_percent = percent
     return get_state()
 
@@ -26,7 +26,7 @@ def update_event_time() -> BoardState:
     return get_state()
 
 
-def update_testmode(test_mode:bool, notify: bool=False) -> BoardState:
+def update_testmode(test_mode: bool, notify: bool = False) -> BoardState:
     if __state.test_mode != test_mode and notify:
         __fun_notify()
 
@@ -55,7 +55,7 @@ def update_wifi_state(new_state: bool) -> BoardState:
     return get_state()
 
 
-def update_relay_state(new_relay:bool) -> BoardState:
+def update_relay_state(new_relay: bool) -> BoardState:
     if __state.relay != new_relay:
         __fun_notify()
     __state.relay = new_relay
