@@ -11,7 +11,7 @@ from machine import freq
 from . import boardbtcfg
 from .boardctl import (get_battery_percent)
 from .boardstate import (get_state, update_bt_state, update_event_time, is_verbose, set_battery, set_notify_callback)
-from .btcommand import parse_command_packet, bt_command_cpt
+from .btcommand import parse_command_packet
 from .state import BluetoothState
 from .boardsettings import get_settings, Settings
 
