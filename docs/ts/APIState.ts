@@ -72,7 +72,8 @@ export class BTApiState {
         }
       } catch (error) { }
     }
-
+    this.btBatteryService = null
+    this.btDeviceInfoService = null
     this.btGATTServer = null
     this.charBattery = null
     this.charFirmware = null

@@ -214,7 +214,7 @@ export class Driver {
       }
 
       // Last error flag
-      command.error = this.btState.lastMeasure?.Error
+      command.error = !this.btState.lastMeasure.LastResult
 
       // Caller expects a valid property in GetState() once command is executed.
       log.debug('\t\tRefreshing current state')
