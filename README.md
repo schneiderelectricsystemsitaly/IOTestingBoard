@@ -48,6 +48,7 @@ pip install esptool
 ## Demo page
 * A WebBluetooth-based javascript client is available here: https://pbrunot.github.io/IOTestingBoard/iotesting.html
 * This page implements most of the commands available below.
+* I found that the Bluetooth in browsers is sometimes very buggy (random GATT errors), depending on the Windows machine or Bluetooth driver version. It is usually very stable on Android with Chrome, on Windows your mileage may vary. It has not been tested with other platforms.
 
 ## Bluetooth interface
 * The following commands are exposed through bluetooth 
