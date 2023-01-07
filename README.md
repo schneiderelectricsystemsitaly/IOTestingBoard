@@ -45,6 +45,10 @@ pip install esptool
 ```
 
 # Usage
+## Demo page
+* A WebBluetooth-based javascript client is available here: https://pbrunot.github.io/IOTestingBoard/iotesting.html
+* This page implements most of the commands available below.
+
 ## Bluetooth interface
 * The following commands are exposed through bluetooth 
 
@@ -77,6 +81,7 @@ pip install esptool
 | SET_OTA | 0x19 | uint8, 0/1 | Allows over-the-air update from github repository (persisted). SET_INITIAL_WIFI must be enabled too. |
 | CONFIGURE_METER_COMM | 0x20 | * uint8: 0-15 index<br/>* uint8: 0-24 voltage<br/>* uint8: command type<br/>* uint16 LE: R value | Sets the threshold #idx: if Volts value is read and METER_COMMANDS are enabled, executes command with the setpoint |
 | BLUETOOTH_NAME | 0x21 | utf8 string | Sets the bluetooth broadcast name (persisted). Requires reboot. |
+| REFRESH | 0x22 | None | Requests immediate notification packet |
 
 ## Commands by generator
 * When the board is RESISTORS mode AND commands by meter are enabled (see COMMAND_METER_COMMANDS, COMMAND_SET_INITIAL_METER_COMM), it will interpret voltage accross input terminals as commands.
