@@ -79,7 +79,7 @@ async def execute(command) -> bool:
         print('Invalid command', command)
     elif command.ctype == Command.bypass:
         update_testmode(False)
-        update_r_setpoint(R_MAX)
+        update_r_setpoint(R_OPEN)
         __optocouplers_off()
         final_result = await set_relay_pos(False, False)
     elif command.ctype == Command.generate_r or command.ctype == Command.measure_with_load:

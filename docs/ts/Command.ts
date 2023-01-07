@@ -84,7 +84,6 @@ export class Command {
         dv.setUint8(3, this.setpoint3)
         dv.setUint16(4, this.setpoint4, true)
         return buf
-      case CommandType.COMMAND_SET_DEEPSLEEP_MIN:
       case CommandType.COMMAND_SET_CPU:
       case CommandType.COMMAND_SET_INITIAL_COMMAND_SETPOINT:
       case CommandType.COMMAND_SET_INITIAL_COMMAND_TYPE:
@@ -99,6 +98,7 @@ export class Command {
       case CommandType.COMMAND_SET_INITIAL_METER_COMM:
       case CommandType.COMMAND_SET_OTA:
       case CommandType.COMMAND_SET_VERBOSE:
+      case CommandType.COMMAND_SET_INITIAL_WIFI:
         // One Uint8 parameter with 1 or 0 value
         buf = new ArrayBuffer(2)
         dv = new DataView(buf)
@@ -107,6 +107,7 @@ export class Command {
         return buf
       case CommandType.COMMAND_MODE_RESISTORS:
       case CommandType.COMMAND_MODE_V_LOAD:
+      case CommandType.COMMAND_SET_DEEPSLEEP_MIN:
         // One Uint16 R parameter
         buf = new ArrayBuffer(3)
         dv = new DataView(buf)

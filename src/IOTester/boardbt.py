@@ -68,7 +68,7 @@ def __get_manufacturer_name() -> str:
     return boardbtcfg.DEVICE_INFORMATION_MANUFACTURER
 
 
-def __device_info_service(service: aioble.Service) -> None:
+def __configure_device_info(service: aioble.Service) -> None:
     # model number
     chars = {bluetooth.UUID(0x2a24): __get_model_number,
              bluetooth.UUID(0x2a25): __get_serial_number,
@@ -353,7 +353,7 @@ async def __enable_bt() -> bool:
     battery_char = aioble.Characteristic(service2, boardbtcfg.BATTERY_CHAR_UUID, read=True, notify=True, capture=False)
 
     service3 = aioble.Service(boardbtcfg.DEVICE_INFORMATION_SERVICE_UUID)
-    __device_info_service(service3)
+    __configure_device_info(service3)
 
     aioble.register_services(service1, service2, service3)
 

@@ -356,7 +356,7 @@
                 document.getElementById("en_wifi_boot").checked)) };
         document.getElementById("btnOTA").onclick = async () => { await IOTestingBT.SimpleExecute(
             IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_OTA,
-                document.getElementById("en_OTA").checked)) };
+                document.getElementById("en_ota").checked)) };
         document.getElementById("btnChangeCPU").onclick = async () => { await IOTestingBT.SimpleExecute(
             IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_CPU,
                 document.getElementById("speed").value)) };
