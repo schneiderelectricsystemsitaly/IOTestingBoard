@@ -180,7 +180,7 @@
             </div>
             <div class="col">
                 <div class="input-group mb-3">
-                    <button id="btnExecuteWP" class="btn btn-primary">Set Wi-Fi (once)</button>
+                    <button id="btnWifiOnce" class="btn btn-primary">Set Wi-Fi (once)</button>
                 </div>
             </div>
         </div>
@@ -195,7 +195,7 @@
             </div>
             <div class="col">
                 <div class="input-group mb-3">
-                    <button id="btnExecuteWP" class="btn btn-primary">Set Wi-Fi (always)</button>
+                    <button id="btnWifiBoot" class="btn btn-primary">Set Wi-Fi (always)</button>
                 </div>
             </div>
         </div>
@@ -210,7 +210,7 @@
             </div>
             <div class="col">
                 <div class="input-group mb-3">
-                    <button id="btnExecuteOTA" class="btn btn-primary">Set OTA (always)</button>
+                    <button id="btnOTA" class="btn btn-primary">Set OTA (always)</button>
                 </div>
             </div>
         </div>
@@ -225,7 +225,7 @@
             </div>
             <div class="col">
                 <div class="input-group mb-3">
-                    <button id="btnOTA" class="btn btn-primary">Enable OTA at reboot</button>
+                    <button id="btnBreak" class="btn btn-primary">Stop program</button>
                 </div>
             </div>
         </div>
@@ -236,9 +236,9 @@
             <div class="col">
                 <div class="input-group mb-3">
                     <select class="form-control" id="speed">
-                        <option value="1">80 Mhz (default)</option>
-                        <option value="2">160 Mhz (min. for Wi-Fi)</option>
-                        <option value="3">240 Mhz (max)</option>
+                        <option value="0">80 Mhz (default)</option>
+                        <option value="1">160 Mhz (min. for Wi-Fi)</option>
+                        <option value="2">240 Mhz (max)</option>
                     </select>
                 </div>
             </div>
@@ -250,7 +250,7 @@
         </div>
         <div class="row">
             <div class="col">
-                <label for="speed">Bluetooth device name after reboot</label>
+                <label for="speed">Bluetooth device name after reboot (persistent)</label>
             </div>
             <div class="col">
                 <div class="input-group mb-3">
@@ -265,7 +265,7 @@
         </div>
         <div class="row">
             <div class="col">
-                <label for="speed">Enable commands via meter voltage</label>
+                <label for="speed">Enable commands via meter voltage (persistent)</label>
             </div>
             <div class="col">
                 <div class="input-group mb-3">
@@ -274,7 +274,7 @@
             </div>
             <div class="col">
                 <div class="input-group mb-3">
-                    <button id="btnMeterCommands" class="btn btn-primary">Set commands</button>
+                    <button id="btnMeterCommands" class="btn btn-primary">Set commands by meter</button>
                 </div>
             </div>
         </div>   
@@ -322,14 +322,28 @@
         document.getElementById("btnReboot").onclick = async () => { await IOTestingBT.SimpleExecute(
             IOTestingBT.Command.CreateNoSP(
                 IOTestingBT.CommandType.COMMAND_REBOOT)) };
-        document.getElementById("btnOTA").onclick = async () => { await IOTestingBT.SimpleExecute(
-            IOTestingBT.Command.CreateOneSP(
-                IOTestingBT.CommandType.COMMAND_OTA, 1)) };
+        document.getElementById("btnBreak").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateNoSP(
+                IOTestingBT.CommandType.COMMAND_BREAK)) };        
         document.getElementById("btnChangeName").onclick = async () => { await IOTestingBT.SimpleExecute(
             IOTestingBT.Command.CreateOneSP(
                 IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME, 
                 document.getElementById("bt-name").value)) };
-                
+        document.getElementById("btnWifiOnce").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateNoSP(
+                document.getElementById("en_wifi").checked ? IOTestingBT.CommandType.COMMAND_ENABLE_WIFI : IOTestingBT.CommandType.COMMAND_DISABLE_WIFI)) };
+        document.getElementById("btnWifiBoot").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_WIFI,
+                document.getElementById("en_wifi_boot").checked)) };
+        document.getElementById("btnOTA").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_OTA,
+                document.getElementById("en_OTA").checked)) };
+        document.getElementById("btnChangeCPU").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_CPU,
+                document.getElementById("speed").value)) };
+        document.getElementById("btnMeterCommands").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_METER_COMM,
+                document.getElementById("bt-voltage").checked)) };
     </script>
 
 </body>

@@ -106,7 +106,8 @@ export async function SimpleExecute (command: Command): Promise<CommandResult> {
     cr.message = 'Invalid command'
     return cr
   }
-
+  // Recreate the object as it may have lost methods due to JSON 
+  command = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
   command.pending = true // In case caller does not set pending flag
 
   // Fail immediately if not paired.
@@ -126,7 +127,7 @@ export async function SimpleExecute (command: Command): Promise<CommandResult> {
   }
 
   // Wait for completion of the command, or halt of the state machine
-  driver.btState.command = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
+  driver.btState.command = command
   if (command != null) {
     await waitForTimeout(() => !command.pending || driver.btState.state == State.STOPPED, SIMPLE_EXECUTE_TIMEOUT_S)
   }
@@ -162,7 +163,7 @@ export async function Execute (command: Command): Promise<Command> {
   log.info('Execute called...')
 
   if (command == null) { return null }
-
+  command = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
   command.pending = true
 
   let cpt = 0
@@ -173,7 +174,7 @@ export async function Execute (command: Command): Promise<Command> {
   }
 
   log.info('Setting new command :' + command)
-  driver.btState.command = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
+  driver.btState.command = command
 
   // Start the regular state machine
   if (!driver.btState.started) {
