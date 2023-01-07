@@ -84,7 +84,7 @@ export class Command {
         dv.setUint8(1, this.setpoint)
         dv.setUint8(2, this.setpoint2)
         dv.setUint8(3, this.setpoint3)
-        dv.setUint16(4, this.setpoint4)
+        dv.setUint16(4, this.setpoint4, true)
         return buf
       case CommandType.COMMAND_SET_DEEPSLEEP_MIN:
       case CommandType.COMMAND_SET_CPU:
@@ -113,7 +113,7 @@ export class Command {
         buf = new ArrayBuffer(3)
         dv = new DataView(buf)
         dv.setUint8(0, this.type)
-        dv.setUint16(1, this.setpoint)
+        dv.setUint16(1, this.setpoint, true)
         return buf
       case CommandType.COMMAND_SET_BLUETOOTH_NAME:
       case CommandType.COMMAND_SET_WIFI_NETWORK:

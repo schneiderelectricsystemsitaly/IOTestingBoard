@@ -32,9 +32,9 @@ export class NotificationData {
     output.Test = (status2 & 4) != 0
     output.V_with_load = (status2 & 2) != 0
     output.LastResult = (status2 & 1) != 0
-    output.Actual_R = dv.getUint16(2)
-    output.Setpoint_R = dv.getUint16(4)
-    output.Memfree = dv.getUint32(6)
+    output.Actual_R = dv.getUint16(2, true)
+    output.Setpoint_R = dv.getUint16(4, true)
+    output.Memfree = dv.getUint32(6, true)
     output.Errors = dv.getUint8(10)
     output.Battery = dv.getUint8(11)
     return output
