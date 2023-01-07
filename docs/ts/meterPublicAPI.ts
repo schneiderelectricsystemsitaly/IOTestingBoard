@@ -54,13 +54,15 @@ export async function GetState (): Promise<any> {
     lastSetpoint: driver.btState.lastMeasure.Setpoint_R,
     lastMeasure: driver.btState.lastMeasure.Actual_R,
     deviceName: driver.btState.btDevice ? driver.btState.btDevice.name : '',
-    deviceSerial: driver.btState.meter?.serial,
-    stats: driver.btState.stats,
+    deviceSerial: '',
+    deviceHwRev: driver.btState.meter?.hw_rev,
     deviceMode: driver.btState.meter?.mode,
     status: driver.btState.state,
     batteryLevel: driver.btState.meter?.battery,
+    firmware: driver.btState.meter?.firmware,
     ready,
-    initializing
+    initializing,
+    stats: driver.btState.stats
   }
 }
 

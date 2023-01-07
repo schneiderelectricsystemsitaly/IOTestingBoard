@@ -11,7 +11,7 @@ from machine import freq
 from . import boardbtcfg
 from .boardctl import (get_battery_percent)
 from .boardstate import (get_state, update_bt_state, update_event_time, is_verbose, set_battery, set_notify_callback)
-from .btcommand import parse_command_packet, bt_command_cpt
+from .btcommand import parse_command_packet
 from .state import BluetoothState
 from .boardsettings import get_settings, Settings
 
@@ -172,7 +172,7 @@ async def __peripheral_task() -> None:
             try:
                 connection = await aioble.advertise(
                     boardbtcfg.ADV_INTERVAL_MS,
-                    name= device_name,
+                    name=device_name,
                     services=[boardbtcfg.BOARD_SERVICE_UUID],
                     appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)
@@ -285,7 +285,7 @@ def __get_notification_data() -> bytearray:
     values.extend(int(state.actual_r).to_bytes(2, "little"))
     values.extend(int(state.setpoint_r).to_bytes(2, "little"))
     values.extend(int(gc.mem_free()).to_bytes(4, "little"))
-    values.extend(int(bt_command_cpt % 256).to_bytes(1, "little"))
+    values.extend(int(state.bt_commands % 256).to_bytes(1, "little"))
     return values
 
 

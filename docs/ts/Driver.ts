@@ -6,7 +6,7 @@
  */
 
 import { BTApiState } from './APIState'
-import { State, BlueToothIOTUUID, ResultCode, CommandType } from './constants'
+import { State, BlueToothIOTUUID, ResultCode, CommandType, BoardMode, RelayPosition } from './constants'
 import { IOTestingBoard } from './IOTestingBoard'
 import { Command } from './Command'
 import { buf2hex, sleep as sleep_ms } from './utils'
@@ -46,6 +46,8 @@ export class Driver {
 
     const endTime = new Date().getTime()
     const answer = this.btState.response?.slice(0)
+
+    this.btState.lastMeasure = IOTestingBoard.parseNotification(answer)
     this.btState.response = null
 
     // Log the packets
@@ -187,9 +189,8 @@ export class Driver {
      * */
   async processCommand () {
     try {
-      const command: Command = this.btState.command
-      const result = ResultCode.SUCCESS
-      let packet, response
+      let response
+      const command = this.btState.command
 
       if (command == null) {
         return
@@ -199,23 +200,26 @@ export class Driver {
 
       log.info('\t\tExecuting command :' + command)
 
-      const packet_clear = Command.CreateNoSP(CommandType.COMMAND_CLEAR_FLAGS)
-      packet = command.getPacket()
-      const packets = [packet_clear, packet]
+      const packet_clear = IOTestingBoard.getPacket(Command.CreateNoSP(CommandType.COMMAND_CLEAR_FLAGS))
+      const packet = IOTestingBoard.getPacket(command)
+      const packets: ArrayBuffer[] = [packet_clear, packet]
 
       for (const msg of packets) {
         const currentCpt = this.btState.lastMeasure != null ? this.btState.lastMeasure.CommandCpt : -1
         do {
-          response = await this.SendAndResponse(packet)
+          response = await this.SendAndResponse(msg)
         }
-        while (currentCpt != this.btState.lastMeasure?.CommandCpt)
+        while (currentCpt == this.btState.lastMeasure?.CommandCpt)
+        // Board is incrementing the counter every time it processes one command
       }
+
+      // Last error flag
+      command.error = this.btState.lastMeasure?.Error
 
       // Caller expects a valid property in GetState() once command is executed.
       log.debug('\t\tRefreshing current state')
       await this.refresh()
 
-      command.error = this.btState.lastMeasure?.Error
       command.pending = false
       this.btState.command = null
 
@@ -234,8 +238,10 @@ export class Driver {
   async meterInit () {
     try {
       this.btState.state = State.METER_INITIALIZING
-      this.btState.meter.serial = await this.iot.getSerialNumber()
-      log.info('\t\tSerial number:' + this.btState.meter.serial)
+      this.btState.meter.hw_rev = await this.iot.getHardwareRevision()
+      log.info('\t\tSerial number:' + this.btState.meter.hw_rev)
+      this.btState.meter.firmware = await this.iot.getFirmware()
+      log.info('\t\tSerial number:' + this.btState.meter.firmware)
 
       this.btState.meter.battery = await this.iot.getBatteryLevel()
       log.debug('\t\tBattery (%):' + this.btState.meter.battery)
@@ -300,12 +306,7 @@ export class Driver {
     const value = event.target.value
     if (value != null) {
       log.debug('<< ' + buf2hex(value.buffer))
-      if (this.btState.response != null) {
-        this.btState.response = this.arrayBufferConcat(this.btState.response, value.buffer)
-      } else {
-        this.btState.response = value.buffer.slice(0)
-      }
-      this.btState.lastMeasure = NotificationData.parse(this.btState.response)
+      this.btState.response = value.buffer.slice(0)
     }
   }
 
@@ -427,10 +428,12 @@ export class Driver {
       this.btState.charRead = await this.btState.btIOTService.getCharacteristic(BlueToothIOTUUID.StatusCharUuid)
       log.debug('> Found notifications characteristic')
 
-      /*
-      this.btState.charBattery = await this.btState.btIOTService.getCharacteristic('0003cdd6-0000-1000-8000-00805f9b34fb')
-      this.btState.charFirmware = await this.btState.btIOTService.getCharacteristic('0003cdd9-0000-1000-8000-00805f9b34fb')
-      this.btState.charSerial = await this.btState.btIOTService.getCharacteristic('0003cdd8-0000-1000-8000-00805f9b34fb') */
+      this.btState.btDeviceInfoService = await this.btState.btGATTServer.getPrimaryService('device_information')
+      this.btState.charFirmware = await this.btState.btDeviceInfoService.getCharacteristic(0x2A26)
+      this.btState.charHWRev = await this.btState.btDeviceInfoService.getCharacteristic(0x2a27)
+
+      this.btState.btBatteryService = await this.btState.btGATTServer.getPrimaryService('battery_service')
+      this.btState.charBattery = await this.btState.btBatteryService.getCharacteristic(0x2A19)
 
       this.btState.response = null
       this.btState.charRead.addEventListener('characteristicvaluechanged', this.handleNotifications.bind(this))
@@ -483,11 +486,28 @@ export class Driver {
     this.btState.state = State.BUSY
     try {
       log.debug('\t\tFinished refreshing current state')
+      if (this.btState.response) {
+        this.btState.lastMeasure = IOTestingBoard.parseNotification(this.btState.response)
+        this.btState.response = null
+      }
       if (this.btState.lastMeasure != null) {
         this.btState.meter.actual = this.btState.lastMeasure.Actual_R
         this.btState.meter.setpoint = this.btState.lastMeasure.Setpoint_R
-        this.btState.meter.battery = await this.iot.getBatteryLevel()
-        this.btState.meter.mode = (this.btState.lastMeasure.Relay == 1 ? 1 : (this.btState.lastMeasure.V_with_load ? 3 : 2))
+        // Read randomly once every 20 loops
+        if (Math.random() > 0.95) { this.btState.meter.battery = await this.iot.getBatteryLevel() }
+        if (this.btState.lastMeasure.Test) {
+          this.btState.meter.mode = BoardMode.MODE_TEST
+        } else if (this.btState.lastMeasure.Relay == RelayPosition.POS_METER) {
+          this.btState.meter.mode = BoardMode.MODE_METER
+        } else if (this.btState.lastMeasure.Relay == RelayPosition.POS_RESISTOR) {
+          if (this.btState.lastMeasure.V_with_load) {
+            this.btState.meter.mode = BoardMode.MODE_V_WITH_LOAD
+          } else {
+            this.btState.meter.mode = BoardMode.MODE_RESISTOR
+          }
+        } else {
+          this.btState.meter.mode = BoardMode.MODE_UNDEFINED
+        }
         this.btState.meter.free_bytes = this.btState.lastMeasure.Memfree
       }
       this.btState.state = State.IDLE

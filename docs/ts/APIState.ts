@@ -22,8 +22,12 @@ export class BTApiState {
   btIOTService: BluetoothRemoteGATTService = null
   charRead: BluetoothRemoteGATTCharacteristic = null
   charWrite: BluetoothRemoteGATTCharacteristic = null
-  charSerial: BluetoothRemoteGATTCharacteristic = null
+
+  btDeviceInfoService: BluetoothRemoteGATTService = null
+  charHWRev: BluetoothRemoteGATTCharacteristic = null
   charFirmware: BluetoothRemoteGATTCharacteristic = null
+
+  btBatteryService: BluetoothRemoteGATTService = null
   charBattery: BluetoothRemoteGATTCharacteristic = null
 
   stats: { requests: number, responses: number, modbus_errors: number, 'GATT disconnects': number, exceptions: number, subcribes: number, commands: number, responseTime: number, lastResponseTime: string, last_connect: string }
@@ -73,7 +77,7 @@ export class BTApiState {
     this.charBattery = null
     this.charFirmware = null
     this.charRead = null
-    this.charSerial = null
+    this.charHWRev = null
     this.charWrite = null
   }
 }

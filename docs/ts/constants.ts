@@ -42,6 +42,12 @@ export const BoardMode = {
   MODE_TEST: 4
 }
 
+export const RelayPosition = {
+  POS_UNKNOWN: 0,
+  POS_METER: 1,
+  POS_RESISTOR: 2
+}
+
 /*
  * Internal state machine descriptions
  */
