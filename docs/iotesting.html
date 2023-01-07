@@ -277,7 +277,24 @@
                     <button id="btnMeterCommands" class="btn btn-primary">Set commands by meter</button>
                 </div>
             </div>
-        </div>   
+        </div>
+        <div class="row">
+            <div class="col">
+                Auto-shutdown delay (persistent)
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">Minutes (0=never)</span>
+                    </div>
+                    <input id="minutes" class="form-control" type="number" placeholder="input value" aria-label="minutes" aria-describedby="basic-addon3" max="255" min="0">
+                </div>
+            </div>
+            <div class="col">
+                <button id="btnDelay" class="btn btn-primary">Set delay</button>
+                <br/>
+            </div>
+        </div>
     </div>
    
     <script language="javascript">
@@ -297,10 +314,12 @@
             document.getElementById("status").innerHTML = JSON.stringify(status);
             document.getElementById("stats").innerHTML = JSON.stringify(driver.btState?.stats).replaceAll(',', '<br/>');
         }
+
+        // Buttons binding
         document.getElementById("btnStart").onclick = async () => { await IOTestingBT.Pair(true) };
         document.getElementById("btnStop").onclick = async () => { await IOTestingBT.Stop() };
         document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
-        document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
+
         document.getElementById("btnExecuteM").onclick = async () => { await IOTestingBT.SimpleExecute(
             IOTestingBT.Command.CreateNoSP(IOTestingBT.CommandType.COMMAND_MODE_METER)) };
         document.getElementById("btnExecuteR").onclick = async () => { await IOTestingBT.SimpleExecute(
@@ -344,6 +363,9 @@
         document.getElementById("btnMeterCommands").onclick = async () => { await IOTestingBT.SimpleExecute(
             IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_METER_COMM,
                 document.getElementById("bt-voltage").checked)) };
+        document.getElementById("btnDelay").onclick = async () => { await IOTestingBT.SimpleExecute(
+            IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_DEEPSLEEP_MIN,
+                document.getElementById("minutes").value)) };
     </script>
 
 </body>
