@@ -60,6 +60,7 @@ export async function GetState (): Promise<any> {
     status: driver.btState.state,
     batteryLevel: driver.btState.meter?.battery,
     firmware: driver.btState.meter?.firmware,
+    notification: driver.btState.lastMeasure,
     ready,
     initializing,
     stats: driver.btState.stats

@@ -95,19 +95,20 @@ pip install esptool
 
 | Threshold | Voltage (V) | Command | Notes |
 |---|---|---|---|
-| 0 | 8 | Resistor, 1k | -
-| 1 | 10 | Resistor, 4k69 | -
-| 2 | 12 | Resistor, 7k18 | -
-| 3 | 14 | Resistor, 11k | -
-| 4 | 16 | Resistor, short | Actual value <40 ohms
-| 5 | 18 | Resistor, open | Actual value >50Mohms
-| 6 | 20 | Voltmeter with load of 550 | User will need to press back the switch button to allow other commands
-| 7 | 22 | Bypass mode | User will need to press back the switch button to allow other commands
+| 0 | 3 | Resistor, 1k | -
+| 1 | 4 | Resistor, 4k69 | -
+| 2 | 5 | Resistor, 7k18 | -
+| 3 | 6 | Resistor, 11k | -
+| 4 | 7 | Resistor, short | Actual value <40 ohms
+| 5 | 8 | Resistor, open | Actual value >50Mohms
+| 6 | 9 | Voltmeter + load 550 ohms | Generator will be shortly put in parallel with the load.
+| 7 | 12 | Bypass mode | User will need to press again the switch button, to allow other commands
 
-* Up to 16 thresholds are supported, but the minimum voltage is 3V and the maximum voltage allowed is 27 V. 
+* Up to 16 thresholds are supported, but the minimum voltage is 3V and the maximum voltage allowed is 20 V (ADC range limitation) 
 * ADC resolution of ESP32 is poor and not linear, especially with low values ; readings are rounded to nearest integer voltage.
 * Order of thresholds does not matter.
-* This sense circuit uses a voltage divider circuit, adding 158 kohms accross input terminals (when in resistors/V with load modes).
+* The voltage sensing circuit uses a voltage divider, adding 158 kohms accross input terminals (when in resistors/V with load modes).
+* When in voltmeter with load, the voltmeter used shall not generate tension >3V across 158kohms internal resistor, otherwise it will be interpreted as a command. In such voltmeter is needed, disable meter commands and use only bluetooth interface.
 
 ## Command types
 * The following command types uint8 are recognized

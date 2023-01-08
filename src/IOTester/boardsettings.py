@@ -110,7 +110,7 @@ class Settings:
         self.add_v_threshold(2, 5, 2, 7180)
         self.add_v_threshold(3, 6, 2, 11000)
         self.add_v_threshold(4, 7, 2, 0)
-        self.add_v_threshold(5, 8, 2, 0xFFFE)
+        self.add_v_threshold(5, 8, 2, 0xFFFF)
         self.add_v_threshold(6, 9, 3, 550)
         self.add_v_threshold(7, 12, 1, 0xFFFF)
         self.add_key(Settings.OTA, False)
