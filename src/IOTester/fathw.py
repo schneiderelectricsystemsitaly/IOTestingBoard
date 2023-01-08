@@ -27,8 +27,8 @@ async def __animate_leds() -> None:
     cpt = 0
     current_state = get_state()
     meter_pattern = [0]  # don't blink
-    _parallel_pattern = const((0, 0, 0, 185, 0, 185, 0, 0, 0))  # 2 fast blinks
-    _resistor_pattern = const((0, 0, 0, 185, 185, 185, 0, 0, 0))  # 1 slow blink
+    _parallel_pattern = const((185, 110, 185, 110, 185, 110, 110, 110, 110))  # 2 fast blinks
+    _resistor_pattern = const((110, 110, 110, 185, 185, 185, 110, 110, 110))  # 1 slow blink
     _error_pattern = const((190, 190, 0, 0))
 
     while True:
