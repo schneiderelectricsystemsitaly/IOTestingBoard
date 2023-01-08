@@ -127,11 +127,13 @@ pip install esptool
 ## Notifications details
 * If bluetooth is active, three services are exposed
 
-| Service UUID | Description | Characteristics exposed |
+| Service UUID | Description | Characteristic (UUID) R/N/W attributes |
 |---|---|---|
-| 0003cdd5-0000-1000-8000-00805f9b0131 | Service for commands and status | *status* (0003cdd3-0000-1000-8000-00805f9b0131)<br/> *commands* (0003cdd4-0000-1000-8000-00805f9b0131) |
-| battery_status | Battery status | Battery level in % (0x2a19) |
-| device_info | General information about the device (FW, HW versions...) | *model number* (0x2a24) <br/> *serial number* (0x2a25) <br/> *firmware version* (0x2a26) <br/> *hardware revision* (0x2a27) <br/> *manufacturer name* (0x2a29) |
+| 0003cdd5-0000-1000-8000-00805f9b0131 | Service for commands and status | *status* (0003cdd3-0000-1000-8000-00805f9b0131) N<br/> *commands* (0003cdd4-0000-1000-8000-00805f9b0131) W,N |
+| battery_status | Battery status | *Battery level in %(0-100)* (0x2a19) R,N |
+| device_information | General information about the device (FW, HW versions...) | *model number* (0x2a24) R <br/> *serial number* (0x2a25) R<br/> *firmware version* (0x2a26) R<br/> *hardware revision* (0x2a27) R<br/> *manufacturer name* (0x2a29) R|
+
+R=Read, N=Notify, W=Write
 
 * The notification by status characteristics are 11 bytes as follows:
 
@@ -144,7 +146,7 @@ pip install esptool
 | 2 | 2 | Voltmeter with load configuration | 0- not active, 1- active |
 | 2 | 3 | Test mode active | 0-not active, 1- active |
 | 2 | 4 | VERBOSE active (Serial UART) | 0-not active, 1- active |
-! 2 | 5-6 | Frequency of the CPU | 0-80 MHz, 1-160 MHz, 2-240 MHz |
+| 2 | 5-6 | Frequency of the CPU | 0-80 MHz, 1-160 MHz, 2-240 MHz |
 | 2 | 7 | Hardware error present | 0-none, 1-error |
 | 3-4 | - | Actual Resistance in ohms | uint16 little indian, special value 65535 - Open (>30Mohms) |
 | 5-6 | - | Setpoint Resistance in ohms | uint16 little indian, special value 65535 - Open (>30Mohms), 65534 - Maximum generable ohm value |
