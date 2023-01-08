@@ -292,6 +292,8 @@ async def board_hw_init() -> bool:
     else:
         await disable_bt()
 
+    update_meter_commands(defaults[Settings.METER_COMMANDS_ENABLED])
+
     first_command = Command(defaults[Settings.INITIAL_COMMAND_TYPE],
                             defaults[Settings.INITIAL_COMMAND_SETPOINT])
     return await execute(first_command)
@@ -326,7 +328,7 @@ async def get_vmeter() -> float:
         await asyncio.sleep_ms(1)
     value = value / 5
     # precision of ADC insufficient for decimal points anyway
-    return round((value - 42000) / k_divider(BOARD['R1'], BOARD['R2']) / 1000000.0)
+    return round(value / k_divider(BOARD['R1'], BOARD['R2']) / 1000000.0)
 
 
 async def get_battery_percent() -> int:

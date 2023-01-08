@@ -71,19 +71,32 @@ async def __animate_leds() -> None:
 # micropython.native
 async def __meter_commands_check() -> None:
     _METER_CHECK_LOOP_SLEEP_MS = const(500)
+    _DELAY_BETWEEN_COMMANDS = const(2000)
+
+    print('Thresholds loaded', get_settings().get_thresholds())
 
     while True:
         state = get_state()
+        additional_delay = False
+
         # execute only if in correct mode with enabled meter commands
-        if state.meter_commands and not state.meter_parallel and state.relay == IOTester.state.RelayState.resistor:
+        if state.meter_commands and state.relay == IOTester.state.RelayState.resistor:
             voltage = await get_vmeter()
             if voltage > 1:
+                if state.VERBOSE:
+                    print('VSense=', voltage, 'V')
                 commands = get_settings().get_thresholds()
-                for val in commands:
-                    if voltage == commands[0]:
-                        comm = Command(commands[1], commands[2])
-                        await execute(comm)
-        await asyncio.sleep_ms(_METER_CHECK_LOOP_SLEEP_MS)
+                for tuple_thr in commands:
+                    if voltage == tuple_thr[0]:
+                        comm = Command(tuple_thr[1], tuple_thr[2])
+                        result = await execute(comm)
+                        update_last_result(result, notify=True, msg='Voltage command')
+                        additional_delay = True
+
+        if additional_delay:
+            await asyncio.sleep_ms(_DELAY_BETWEEN_COMMANDS)
+        else:
+            await asyncio.sleep_ms(_METER_CHECK_LOOP_SLEEP_MS)
 
 
 # micropython.native
