@@ -219,6 +219,9 @@
         <div class="row">
             <div class="col">
                 Various
+                <div class="input-group mb-3">
+                    <button id="btnREPL" class="btn btn-primary">Start WEBREPL</button>
+                </div>
             </div>
             <div class="col">
                 <div class="input-group mb-3">
@@ -412,6 +415,11 @@
             await IOTestingBT.SimpleExecute(
                 IOTestingBT.Command.CreateNoSP(
                     IOTestingBT.CommandType.COMMAND_DEEP_SLEEP))
+        };
+        document.getElementById("btnREPL").onclick = async () => {
+            await IOTestingBT.SimpleExecute(
+                IOTestingBT.Command.CreateNoSP(
+                    IOTestingBT.CommandType.COMMAND_ENABLE_WEBREPL))
         };  
     </script>
 
