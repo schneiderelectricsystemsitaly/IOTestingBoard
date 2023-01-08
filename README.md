@@ -156,6 +156,11 @@ R=Read, N=Notify, W=Write
 Bytes and bits are counted starting from 1.
 Hardware errors are failures from ESP32 to drive an output to the required value e.g. due to shorts.
 
+* Notifications frequency
+1. The status notification is sent *at least* every 5 seconds, or as board status changes (e.g. after button press or command execution)
+2. The battery notification is sent every 30s
+3. The device is enforcing a minimum delay of 50 milliseconds between notifications to avoid overloading its bluetooth chip.        
+
 # Special
 ## OTA support
 * Device will download latest release from this repository if Wi-Fi and OTA flags are enabled. Updates are applied during boot only.
