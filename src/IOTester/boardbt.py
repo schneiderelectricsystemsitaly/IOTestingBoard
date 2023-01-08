@@ -13,7 +13,7 @@ from .boardsettings import get_settings, Settings
 from .boardstate import (get_state, update_bt_state, update_event_time, is_verbose, set_battery, set_notify_callback)
 from .boardwifi import get_ip_address
 from .btcommand import parse_command_packet
-from .state import BluetoothState, WifiState
+from .state import BluetoothState
 
 __task_adv = None
 __task_status = None
