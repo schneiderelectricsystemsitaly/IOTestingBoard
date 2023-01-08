@@ -1,15 +1,19 @@
 # IOTestingBoard
 * MicroPython project for smart boards extending the features of calibrators during automation projects IO testing phase.
-* This repository includes both SW and HW information to make the following tool:
-![board assembly](https://user-images.githubusercontent.com/6236243/210255944-00ad9902-d084-4316-a0a8-11a4b11ba48b.png)
+* This repository includes both SW and HW information to make the following handheld tool:
+![image](https://user-images.githubusercontent.com/6236243/211174052-dccd6331-ea85-4593-b69f-b58484b4cd02.png)
+
 * During the I-O testing, an additional meter or generator will be required, therefore this board is designed to work together with a calibrator connected to the INPUT terminals. OUTPUT terminals are connected to electrical pannel. There are 3 different working modes:
 * ![Modes (1)](https://user-images.githubusercontent.com/6236243/210256338-45ba53c8-014f-437a-9ad8-10c911cf99e3.png)
 
 # Requirements
 
 ## Hardware requirements
-* ESP32 board with Micropython 1.19 (I used LOLIN D32 https://www.wemos.cc/en/latest/d32/d32.html)
+* ESP32 board with Micropython 1.19, I used LOLIN D32 (see https://www.wemos.cc/en/latest/d32/d32.html)
 * PCB with other components for R generation (see below for hardware folder and BOM)
+* 3.7V Li-Ion battery (7.4 Wh gives >20 hours autonomy), power consumption approx 300 mWh when active
+* Hammond Manufacturing 1553C enclosure, 4 female 4mm banana plugs
+![board assembly](https://user-images.githubusercontent.com/6236243/210255944-00ad9902-d084-4316-a0a8-11a4b11ba48b.png)
 
 ## Firmware requirements
 * Micropython 1.19 (used v1.19.1 for ESP32 standard firmware from https://micropython.org/download/esp32/ )
@@ -50,7 +54,7 @@ pip install esptool
 * This page implements most of the commands available below.
 * I found that the Bluetooth in browsers is sometimes very buggy (random GATT errors), depending on the Windows machine or Bluetooth driver version. It is usually very stable on Android with Chrome, on Windows your mileage may vary. It has not been tested with other platforms.
 
-## Bluetooth interface
+## Bluetooth interface 📶
 * The following commands are exposed through bluetooth 
 
 | Command description | Command byte | Arguments | Notes |
@@ -83,6 +87,7 @@ pip install esptool
 | CONFIGURE_METER_COMM | 0x20 | * uint8: 0-15 index<br/>* uint8: 0-24 voltage<br/>* uint8: command type<br/>* uint16 LE: R value | Sets the threshold #idx: if Volts value is read and METER_COMMANDS are enabled, executes command with the setpoint |
 | BLUETOOTH_NAME | 0x21 | utf8 string | Sets the bluetooth broadcast name (persisted). Requires reboot. |
 | REFRESH | 0x22 | None | Requests immediate notification packet |
+| CLEAR_FLAGS | 0x23 | None | Resets the error flags. |
 
 ## Commands by generator
 * When the board is RESISTORS mode AND commands by meter are enabled (see COMMAND_METER_COMMANDS, COMMAND_SET_INITIAL_METER_COMM), it will interpret voltage accross input terminals as commands.
@@ -115,9 +120,39 @@ pip install esptool
 | 4 | test mode (alternates resistor and V with load modes, with stepped R values) |
 
 ## Manual switching
-* User can switch betweem modes by pressing a button on the board.
+* User can switch betweem modes by pressing a button above the "METER" engraving on the front pannel
 * Short press : switch to bypass mode if in (resistors, V with load) mode or to resistors modes if in bypass mode
 * Long press : switch to bypass mode if in (resistors, V with load) mode or to V with load modes if in bypass mode
+
+## Notifications details
+* If bluetooth is active, three services are exposed
+
+| Service UUID | Description | Characteristics exposed |
+|---|---|---|
+| 0003cdd5-0000-1000-8000-00805f9b0131 | Service for commands and status | *status* (0003cdd3-0000-1000-8000-00805f9b0131)<br/> *commands* (0003cdd4-0000-1000-8000-00805f9b0131) |
+| battery_status | Battery status | Battery level in % (0x2a19) |
+| device_info | General information about the device (FW, HW versions...) | *model number* (0x2a24) <br/> *serial number* (0x2a25) <br/> *firmware version* (0x2a26) <br/> *hardware revision* (0x2a27) <br/> *manufacturer name* (0x2a29) |
+
+* The notification by status characteristics are 11 bytes as follows:
+
+| Byte # | Bits | Description | Format |
+|---|---|---|---|
+| 1 | 2-4 | Bluetooth status | 0-unknown, 1-disabled, 2-enabled, 3-enabled with active clients, 4- enabling, 5- disabling |
+| 1 | 5-6 | Wifi state | 0-unknown, 1-disabled, 2-enabled, 3-enabling |
+| 1 | 7-8 | Relay position | 0-unknown, 1-bypass, 2-resistors (or V with load depending on byte 2.2) |
+| 2 | 1 | Last command result | 0- error, 1- success |
+| 2 | 2 | Voltmeter with load configuration | 0- not active, 1- active |
+| 2 | 3 | Test mode active | 0-not active, 1- active |
+| 2 | 4 | VERBOSE active (Serial UART) | 0-not active, 1- active |
+! 2 | 5-6 | Frequency of the CPU | 0-80 MHz, 1-160 MHz, 2-240 MHz |
+| 2 | 7 | Hardware error present | 0-none, 1-error |
+| 3-4 | - | Actual Resistance in ohms | uint16 little indian, special value 65535 - Open (>30Mohms) |
+| 5-6 | - | Setpoint Resistance in ohms | uint16 little indian, special value 65535 - Open (>30Mohms), 65534 - Maximum generable ohm value |
+| 7-10 | - | Free memory in bytes | uint32 little indian. Should be >20.000 |
+| 11 | - | Bluetooth commands counter | uint8. Incremented by each command received via Bluetooth |
+
+Bytes and bits are counted starting from 1.
+Hardware errors are failures from ESP32 to drive an output to the required value e.g. due to shorts.
 
 # Special
 ## OTA support
