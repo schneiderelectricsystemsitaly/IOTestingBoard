@@ -4,16 +4,15 @@ import time
 import aioble
 import bluetooth
 import uasyncio as asyncio
-from micropython import const
-
 from machine import freq
+from micropython import const
 
 from . import boardbtcfg
 from .boardctl import (get_battery_percent)
+from .boardsettings import get_settings, Settings
 from .boardstate import (get_state, update_bt_state, update_event_time, is_verbose, set_battery, set_notify_callback)
 from .btcommand import parse_command_packet
 from .state import BluetoothState
-from .boardsettings import get_settings, Settings
 
 __task_adv = None
 __task_status = None
@@ -31,9 +30,7 @@ _MIN_BLUETOOTH_DELAY_MS = const(49)  # Minimum period for all BT notifications
 def notify_change(force=False) -> None:
     global __status_characteristic, __last_notification_ms
     # Skip if not BT active
-    if get_state().bluetooth not in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
-        return True
-    else:
+    if get_state().bluetooth in [BluetoothState.enabled_with_client, BluetoothState.enabled]:
         t1 = asyncio.create_task(__notify_task(force))
         asyncio.gather(t1)
 

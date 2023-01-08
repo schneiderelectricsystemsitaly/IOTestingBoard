@@ -1,13 +1,14 @@
 import time
+
 import uasyncio as asyncio
 
 from . import boardbtcfg
 from .boardctl import execute, light_sleep, deep_sleep, r_test
+from .boardsettings import get_settings, Settings
 from .boardstate import update_event_time, update_last_result, update_meter_commands, set_verbose, clear_errors, \
     increment_bt_commands
 from .boardwifi import enable_wifi, disable_wifi, enable_webrepl, disable_webrepl
 from .command import Command
-from .boardsettings import get_settings, Settings
 
 type_gen = type((lambda: (yield))())  # Generator type
 
