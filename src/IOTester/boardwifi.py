@@ -89,3 +89,11 @@ async def toggle_wifi() -> bool:
     else:  # enabling
         print(f'Action already in progress (wifi_state:{wifi_state})')
     return False
+
+
+async def get_ip_address() -> str:
+    if get_state().wifi == WifiState.enabled:
+        sta_if = network.WLAN(network.STA_IF)
+        return sta_if.ifconfig()[0]
+    return ''
+

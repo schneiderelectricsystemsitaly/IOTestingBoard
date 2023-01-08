@@ -11,8 +11,9 @@ from . import boardbtcfg
 from .boardctl import (get_battery_percent)
 from .boardsettings import get_settings, Settings
 from .boardstate import (get_state, update_bt_state, update_event_time, is_verbose, set_battery, set_notify_callback)
+from .boardwifi import get_ip_address
 from .btcommand import parse_command_packet
-from .state import BluetoothState
+from .state import BluetoothState, WifiState
 
 __task_adv = None
 __task_status = None
@@ -72,6 +73,7 @@ def __configure_device_info(service: aioble.Service) -> None:
              bluetooth.UUID(0x2a26): __get_firmware_revision,
              bluetooth.UUID(0x2a27): __get_hardware_revision,
              bluetooth.UUID(0x2a29): __get_manufacturer_name,
+             bluetooth.UUID(0x2ac9): get_ip_address
              }
 
     for kv in chars.items():
