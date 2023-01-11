@@ -51,8 +51,8 @@ export async function GetState (): Promise<any> {
       initializing = false
   }
   return {
-    lastSetpoint: driver.btState.lastMeasure.Setpoint_R,
-    lastMeasure: driver.btState.lastMeasure.Actual_R,
+    lastSetpoint: {'Value':driver.btState.lastMeasure.Setpoint_R, 'Units':'Ohms', 'Timestamp': driver.btState.lastMeasure?.Timestamp},
+    lastMeasure: {'Value':driver.btState.lastMeasure.Actual_R, 'Units':'Ohms', 'Timestamp': driver.btState.lastMeasure?.Timestamp},
     deviceName: driver.btState.btDevice ? driver.btState.btDevice.name : '',
     deviceSerial: '',
     deviceHwRev: driver.btState.meter?.hw_rev,
@@ -75,23 +75,10 @@ export async function GetStateJSON (): Promise<string> {
   return JSON.stringify(await GetState())
 }
 
-/**
- * Execute command with setpoints, JSON version
- * @param {string} jsonCommand the command to execute
- * @returns {string} JSON command object
- */
-export async function ExecuteJSON (jsonCommand: string): Promise<string> {
-  const command = JSON.parse(jsonCommand)
-  // deserialized object has lost its methods, let's recreate a complete one.
-  const command2 = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
-  return JSON.stringify(await Execute(command2))
-}
 
 export async function SimpleExecuteJSON (jsonCommand: string): Promise<string> {
   const command = JSON.parse(jsonCommand)
-  // deserialized object has lost its methods, let's recreate a complete one.
-  const command2 = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
-  return JSON.stringify(await SimpleExecute(command2))
+  return JSON.stringify(await SimpleExecute(command))
 }
 
 /**
@@ -148,51 +135,20 @@ export async function SimpleExecute (command: Command): Promise<CommandResult> {
 
   // State is updated by execute command, so we can use btState right away
   cr.value = driver.btState.lastMeasure.Setpoint_R
+  if (cr.value == 0xFFFF)
+    cr.value = Infinity
+
   cr.unit = 'Ohms'
   cr.secondary_value = driver.btState.lastMeasure.Actual_R
+  if (cr.secondary_value == 0xFFFF)
+    cr.secondary_value = Infinity
+
   cr.secondary_unit = 'Ohms'
   cr.success = true
   cr.message = 'Command executed successfully'
   return cr
 }
 
-/**
- * External interface to require a command to be executed.
- * The bluetooth device pairing window will open if device is not connected.
- * This may fail if called outside a user gesture.
- * @param {Command} command
- */
-export async function Execute (command: Command): Promise<Command> {
-  log.info('Execute called...')
-
-  if (command == null) { return null }
-  command = Command.CreateFourSP(command.type, command.setpoint, command.setpoint2, command.setpoint3, command.setpoint4)
-  command.pending = true
-
-  let cpt = 0
-  while (driver.btState.command != null && driver.btState.command.pending && cpt < 300) {
-    log.debug('Waiting for current command to complete...')
-    await sleep(100)
-    cpt++
-  }
-
-  log.info('Setting new command :' + command)
-  driver.btState.command = command
-
-  // Start the regular state machine
-  if (!driver.btState.started) {
-    driver.btState.state = State.NOT_CONNECTED
-    await driver.stateMachine()
-  }
-
-  // Wait for completion of the command, or halt of the state machine
-  if (command != null) {
-    await waitFor(() => !command.pending || driver.btState.state == State.STOPPED)
-  }
-
-  // Return the command object result
-  return command
-}
 
 /**
  * MUST BE CALLED FROM A USER GESTURE EVENT HANDLER

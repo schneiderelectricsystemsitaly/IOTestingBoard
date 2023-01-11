@@ -5,14 +5,15 @@ import { CommandType } from './constants'
  * */
 export class Command {
   type: number
-  setpoint: any
-  setpoint3: any
-  setpoint4: any
+  setpoint: any = null
+  setpoint2: any = null
+  setpoint3: any = null
+  setpoint4: any = null
   error: boolean
   pending: boolean
   request: ArrayBuffer | null
   response: ArrayBuffer | null
-  setpoint2: any
+  
   /**
      * Creates a new command
      * @param {CommandType} ctype
@@ -53,6 +54,18 @@ export class Command {
     return 'Type: ' + this.type + ', setpoint:' + this.setpoint + ', setpoint2: ' + this.setpoint2 + ', pending:' + this.pending + ', error:' + this.error
   }
 
+  isGeneration(): boolean {
+    return true
+  }
+  isMeasurement(): boolean {
+    return false
+  }
+  isSetting(): boolean {
+    return false
+  }
+  isValid(): boolean {
+    return true
+  }
   /**
      * Gets the default setpoint for this command type
      * @returns {Object} setpoint(s) expected
