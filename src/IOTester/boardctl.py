@@ -215,6 +215,7 @@ async def set_short_relay_pos(is_set) -> bool:
             print("*** Cannot drive SHORT command to 1")
             update_last_result(False, True, f'Relay SHORT 1')
             return False
+        update_r_actual(0)
     else:
         __set_digital_pin('SHORT', False)
         await asyncio.sleep_ms(SHORT_RELAY_ACTION_TIME_MS)
@@ -232,7 +233,6 @@ async def set_short_relay_pos(is_set) -> bool:
             print("Shorting Relay inactive")
 
     update_last_result(True, True)
-    update_r_actual(0)
 
     return True
 
