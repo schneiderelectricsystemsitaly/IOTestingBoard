@@ -39,7 +39,7 @@ BOARD['RESISTORS'] = (Pin(19, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
                       Pin(12, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN))
 
 BOARD['OPTOCOUPLER_R'] = 5
-BOARD['R_VALUES'] = const((500, 21920, 1033.9, 2222, 5550, 7502, 8225, 11027))
+BOARD['R_VALUES'] = const((496, 21920, 1033.9, 2222, 5540, 7560, 8225, 11027))
 BOARD['R_SERIES'] = const(2550 - 5)
 
 # Resistor divider for Vsense
