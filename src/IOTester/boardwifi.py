@@ -96,4 +96,3 @@ def get_ip_address() -> str:
         sta_if = network.WLAN(network.STA_IF)
         return sta_if.ifconfig()[0]
     return ''
-
