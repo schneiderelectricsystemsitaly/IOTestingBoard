@@ -7,7 +7,8 @@ BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),
          'KRESET_CMD': Pin(33, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),
          'VMETER_EN': Pin(17, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
          'SERIESR_CMD': Pin(18, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
-         'VSENSE': Pin(34, Pin.IN, pull=None)}
+         'VSENSE': Pin(34, Pin.IN, pull=None),
+         'SHORT': Pin(27, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN)}
 
 # PINS CONFIGURATION
 BOARD['VSENSE_ADC'] = ADC(BOARD['VSENSE'])
@@ -54,3 +55,7 @@ BOARD['GREEN_LED_DAC'].write(190)
 # R_MAX = the maximum value closed circuit obtainable by resistor network
 R_OPEN = const(0xFFFF)
 R_MAX = const(0xFFFE)
+
+# Do not accept R setpoints below this threshold
+# @24VDC Rload=500 => I=50mA. Power dissipated by resistor = 1.1 W
+MIN_LOAD = const(500)

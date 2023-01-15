@@ -4,11 +4,11 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-from .boardcfg import BOARD, R_OPEN, R_MAX
+from .boardcfg import BOARD, R_OPEN, MIN_LOAD
 from .boardsettings import Settings, get_settings
 from .boardstate import get_state, update_meter_commands, update_r_actual, update_testmode, update_v_parallel_state, \
     is_verbose, update_event_time, \
-    update_last_result, update_r_setpoint, update_relay_state
+    update_last_result, update_r_setpoint, update_relay_state, update_short_relay_state
 from .boardwifi import disable_wifi, enable_wifi
 from .command import Command
 from .resistors import find_best_r_with_opt, k_divider
@@ -34,39 +34,6 @@ def set_green_led(value) -> int:
     return previous
 
 
-async def r_test() -> None:
-    update_r_setpoint(R_MAX)
-    __optocouplers_off()
-    await set_relay_pos(True)
-
-    _NB_TESTS = const(3)
-    cpt = 1
-    update_testmode(True)
-    while cpt <= _NB_TESTS and get_state().test_mode:
-        update_event_time()
-        print('Executing test #', cpt, 'ouf of', _NB_TESTS)
-        series = cpt % 2 == 0
-        __set_rseries(not series)
-        for i in range(0, len(BOARD['RESISTORS'])):
-            # best_tuple = resistors.find_best_r_with_opt(BOARD['R_VALUES'][i], resistors.available_values, BOARD['R_SERIES'])
-            # __set_v_parallel(False)
-            # final_result = __configure_for_r(best_tuple)
-            # print(BOARD['R_VALUES'][i], best_tuple)
-            for j in range(0, len(BOARD['RESISTORS'])):
-                __set_r(j, i == j)
-            print('Resistor', i, ' is now ON, expected',
-                  BOARD['R_VALUES'][i] + BOARD['OPTOCOUPLER_R'] + (BOARD['R_SERIES'] if series else 0))
-            # read_val = float(input("Actual reading"))
-            # BOARD['R_VALUES'][i]=read_val - BOARD['OPTOCOUPLER_R']
-            # print('New value', BOARD['R_VALUES'][i])
-            if get_state().test_mode:
-                await asyncio.sleep_ms(5000)
-            else:
-                return
-        cpt += 1
-
-
-# micropython.native
 async def execute(command) -> bool:
     update_event_time()
     final_result = False
@@ -81,11 +48,23 @@ async def execute(command) -> bool:
         update_testmode(False)
         update_r_setpoint(R_OPEN)
         __optocouplers_off()
+        await set_short_relay_pos(False)
         final_result = await set_relay_pos(False, False)
     elif command.ctype == Command.generate_r or command.ctype == Command.measure_with_load:
+        # Enforce minimum R
+        if 0 > command.setpoint > MIN_LOAD:
+            print('Enforcing minimum load of', MIN_LOAD, ' for request of', command.setpoint)
+            command.setpoint = MIN_LOAD
+
         update_testmode(False)
         update_r_setpoint(command.setpoint)
         __optocouplers_off()  # Before to switch, configure for open circuit
+
+        # If setpoint is zero, setup short
+        if command.setpoint == 0:
+            await set_short_relay_pos(True)
+
+        # Now setup main relay and optos
         if await set_relay_pos(True, False):
             if command.setpoint != R_OPEN:  # Nothing to do if open circuit command
                 best_tuple = find_best_r_with_opt(command.setpoint)
@@ -97,6 +76,7 @@ async def execute(command) -> bool:
             final_result = False
     elif command.ctype == Command.test_mode:
         __optocouplers_off()
+        await set_short_relay_pos(False)
         update_testmode(True)
         final_result = True
     else:
@@ -111,24 +91,24 @@ async def execute(command) -> bool:
     return final_result
 
 
-# micropython.native
 def __configure_for_r(best_tuple) -> bool:
     if is_verbose():
         print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]}")
     series_r = best_tuple[2] == 0
 
-    if not __set_rseries(series_r):
-        return False
-
-    for i in range(0, len(BOARD['RESISTORS'])):
+    # Enable higher value resistors first
+    for i in reversed(range(0, len(BOARD['RESISTORS']))):
         if not __set_r(i, i in best_tuple[1]):
             return False
+
+    # Then set R series
+    if not __set_rseries(series_r):
+        return False
 
     update_r_actual(best_tuple[0])
     return True
 
 
-# micropython.native
 def __set_digital_pin(pin_name, req_value) -> bool:
     if req_value:
         BOARD[pin_name].on()
@@ -158,7 +138,6 @@ def __set_v_parallel(req_value) -> bool:
     return result
 
 
-# micropython.native
 def __set_r(idx, req_value) -> bool:
     assert (0 <= idx < len(BOARD['RESISTORS']))
     if req_value:
@@ -226,7 +205,38 @@ async def set_relay_pos(is_set, force=False) -> bool:
     return True
 
 
-# micropython.native
+async def set_short_relay_pos(is_set) -> bool:
+    SHORT_RELAY_ACTION_TIME_MS = const(5)
+
+    if is_set:
+        __set_digital_pin('SHORT', True)
+        await asyncio.sleep_ms(SHORT_RELAY_ACTION_TIME_MS)
+        if not BOARD['SHORT'].value():
+            print("*** Cannot drive SHORT command to 1")
+            update_last_result(False, True, f'Relay SHORT 1')
+            return False
+    else:
+        __set_digital_pin('SHORT', False)
+        await asyncio.sleep_ms(SHORT_RELAY_ACTION_TIME_MS)
+        if BOARD['SHORT'].value():
+            print("*** Cannot drive SHORT command to 0")
+            update_last_result(False, True, f'Relay SHORT 0')
+            return False
+
+    update_short_relay_state(is_set)
+
+    if is_verbose():
+        if is_set:
+            print("Shorting Relay active")
+        else:
+            print("Shorting Relay inactive")
+
+    update_last_result(True, True)
+    update_r_actual(0)
+
+    return True
+
+
 async def toggle_relay() -> bool:
     print("** Toggle relay called")
     update_event_time()
@@ -388,7 +398,6 @@ async def light_sleep(delay) -> None:
         await disable_bt()
 
 
-# micropython.native
 def __optocouplers_off() -> None:
     # switch off optocouplers
     for i in range(0, len(BOARD['RESISTORS'])):
@@ -413,6 +422,9 @@ async def deep_sleep() -> None:
     await set_relay_pos(False, True)
 
     __optocouplers_off()
+
+    # Make sure shorting relay is off
+    BOARD['SHORT'].off()
 
     set_red_led(0)
     set_green_led(0)

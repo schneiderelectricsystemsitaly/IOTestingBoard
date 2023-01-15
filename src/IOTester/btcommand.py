@@ -3,7 +3,7 @@ import time
 import uasyncio as asyncio
 
 from . import boardbtcfg
-from .boardctl import execute, light_sleep, deep_sleep, r_test
+from .boardctl import execute, light_sleep, deep_sleep
 from .boardsettings import get_settings, Settings
 from .boardstate import update_event_time, update_last_result, update_meter_commands, set_verbose, clear_errors, \
     increment_bt_commands
@@ -151,7 +151,7 @@ async def __bt_command_execute(command, setpoint) -> None:
             print('Saved INITIAL SETPOINT to ', setpoint)
             success = True
         elif command == boardbtcfg.COMMAND_R_TEST:
-            await r_test()
+            # Command disabled due to potential electrical risk (low load)
             success = True
         elif command == boardbtcfg.COMMAND_SET_CPU:
             from machine import freq

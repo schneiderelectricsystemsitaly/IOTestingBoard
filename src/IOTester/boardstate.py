@@ -2,7 +2,7 @@ import time
 
 import machine
 
-from .state import BluetoothState, WifiState, BoardState
+from .state import BluetoothState, WifiState, BoardState, RelayState
 
 __state = BoardState()
 
@@ -56,10 +56,18 @@ def update_wifi_state(new_state: bool) -> BoardState:
     return get_state()
 
 
-def update_relay_state(new_relay: bool) -> BoardState:
+def update_relay_state(new_relay: RelayState) -> BoardState:
     if __state.relay != new_relay:
         __fun_notify()
     __state.relay = new_relay
+    __state.last_event = time.ticks_ms()
+    return get_state()
+
+
+def update_short_relay_state(new_relay: bool) -> BoardState:
+    if __state.short_relay != new_relay:
+        __fun_notify()
+    __state.short_relay = new_relay
     __state.last_event = time.ticks_ms()
     return get_state()
 
