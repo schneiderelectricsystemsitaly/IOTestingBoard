@@ -58,5 +58,6 @@ R_OPEN = const(0xFFFF)
 R_MAX = const(0xFFFE)
 
 # Do not accept R setpoints below this threshold
-# @24VDC Rload=500 => I=50mA. Power dissipated by resistor = 1.1 W
-MIN_LOAD = const(500)
+# @24VDC Rload=600 => I=40mA. Power dissipated by resistor = .96 W
+# P opto = 40mA*40mA*35ohms = 56 mW < 100 mW limit
+MIN_LOAD = const(600)
