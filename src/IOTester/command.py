@@ -31,3 +31,8 @@ class Command:
             setpoint_desc = f'{self.setpoint} Ω'
 
         return f'Command type:{c_desc}, setpoint: {setpoint_desc}'
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.ctype == other.ctype and self.setpoint == other.setpoint

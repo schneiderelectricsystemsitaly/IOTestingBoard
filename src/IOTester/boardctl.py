@@ -63,17 +63,17 @@ async def execute(command) -> bool:
         # If setpoint is zero, setup short
         if not await set_short_relay_pos(command.setpoint == 0):
             final_result = False
-
-        # Now setup main relay and optos
-        if await set_relay_pos(True, False):
-            if command.setpoint != R_OPEN:  # Nothing to do if open circuit command
-                best_tuple = find_best_r_with_opt(command.setpoint)
-                __set_v_parallel(command.ctype == Command.measure_with_load)
-                final_result = __configure_for_r(best_tuple)
-            else:
-                final_result = True
         else:
-            final_result = False
+            # Now setup main relay and optos
+            if await set_relay_pos(True, False):
+                if command.setpoint != R_OPEN and command.setpoint != 0:  # Nothing to do if open/short circuit command
+                    best_tuple = find_best_r_with_opt(command.setpoint)
+                    __set_v_parallel(command.ctype == Command.measure_with_load)
+                    final_result = __configure_for_r(best_tuple)
+                else:
+                    final_result = True
+            else:
+                final_result = False
     elif command.ctype == Command.test_mode:
         __optocouplers_off()
         await set_short_relay_pos(False)

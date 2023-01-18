@@ -139,3 +139,19 @@ def clear_errors() -> BoardState:
 def increment_bt_commands() -> BoardState:
     __state.bt_commands += 1
     return get_state()
+
+
+def get_current_command():
+    from IOTester.command import Command
+    cm = Command()
+    cm.setpoint = __state.setpoint_r
+    if __state.short_relay:
+        cm.setpoint = 0
+    if __state.relay == RelayState.meter:
+        cm.ctype = Command.bypass
+    elif __state.relay == RelayState.resistor:
+        if __state.meter_parallel:
+            cm.ctype = Command.measure_with_load
+        else:
+            cm.ctype = Command.generate_r
+    return cm
