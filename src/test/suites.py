@@ -107,7 +107,7 @@ class TestSuiteRandom(TestSuite):
 
         tmp_ls = []
         self.add_base_tests(tmp_ls)
-        test_list.append(TestSuite.shuffle(tmp_ls))
+        test_list += TestSuite.shuffle(tmp_ls)
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 0, 1)))
         # Check free memory at the end of the test
