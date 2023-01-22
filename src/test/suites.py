@@ -96,6 +96,26 @@ class TestSuiteNoWifiCpu160(TestSuite):
         return test_list
 
 
+class TestSuiteRandom(TestSuite):
+
+    def get_testcases(self):
+        test_list = [TestCase(TestSuite.make_array(boardbtcfg.COMMAND_CLEAR_FLAGS), delay_ms=500),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WIFI), TestCase.chk_wifi, 1, 30000),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WEBREPL)),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_INITIAL_WIFI, 0, 1)),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 1, 1))]
+
+        tmp_ls = []
+        self.add_base_tests(tmp_ls)
+        test_list.append(TestSuite.shuffle(tmp_ls))
+
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 0, 1)))
+        # Check free memory at the end of the test
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory,
+                                  TestSuite.MIN_MEMORY_WIFI))
+        return test_list
+
+
 class TestSuiteWifi(TestSuite):
 
     def get_testcases(self):

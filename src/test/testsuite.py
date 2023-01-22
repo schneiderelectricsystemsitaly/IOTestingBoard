@@ -1,3 +1,5 @@
+import gc
+
 from . import boardbtcfg
 from .testcase import TestCase
 from micropython import const
@@ -8,6 +10,7 @@ class TestSuite:
     MIN_MEMORY_WIFI = const(20000)
     R_OPEN = const(0xFFFF)
     R_MAX = const(0xFFFE)
+    MIN_LOAD = const(600)
 
     def __init__(self, description, nb_iter=1, pm=None):
         self.nb_iter = nb_iter
@@ -26,12 +29,26 @@ class TestSuite:
         return ret_val
 
     @staticmethod
+    def shuffle(ls: list) -> list:
+        last_index = len(ls) - 1
+        import urandom as random
+        while last_index > 0:
+            rand_index = random.randint(0, last_index)
+            ls[last_index], ls[rand_index] = ls[rand_index], ls[last_index]
+            last_index -= 1
+        gc.collect()
+        return ls
+
+    @staticmethod
     def add_base_tests(test_list, additional_delay_ms=0):
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
                                   TestCase.chk_relay, 1, delay_ms=additional_delay_ms))
 
-        for r in range(0, 11000, 500):
+        for r in range(0, 12000, 250):
+            if 0 > r > TestSuite.MIN_LOAD:
+                r = TestSuite.MIN_LOAD
+
             test_list.append(
                 TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, r, 2), TestCase.chk_setpoint, r,
                          delay_ms=additional_delay_ms))
@@ -46,7 +63,10 @@ class TestSuite:
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
                                   TestCase.chk_relay, 1, delay_ms=additional_delay_ms))
 
-        for r in range(0, 11000, 500):
+        for r in range(0, 12000, 250):
+            if 0 > r > TestSuite.MIN_LOAD:
+                r = TestSuite.MIN_LOAD
+
             test_list.append(
                 TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, r, 2),
                          TestCase.chk_setpoint, r, delay_ms=additional_delay_ms))

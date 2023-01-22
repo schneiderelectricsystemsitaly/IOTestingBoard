@@ -52,6 +52,7 @@ async def main():
     log = Logger(bt, pm)
     test_suites = [suites.TestSuiteReboot('Reboot', 1, pm),
                    suites.TestSuiteBTCommands('BT Commands', 1),
+                   suites.TestSuiteRandom('Random commands', 1, pm),
                    suites.TestSuiteNoWifi80('NoWifi CPU 80 Mhz', 3, pm),
                    suites.TestSuiteNoWifiCpu160('NoWifi CPU 160 Mhz', 3, pm),
                    suites.TestSuiteNoWifiCpu240('NoWifi CPU 240 Mhz', 3, pm),
