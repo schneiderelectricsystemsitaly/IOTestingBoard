@@ -46,7 +46,7 @@ class TestSuite:
                                   TestCase.chk_relay, 1, delay_ms=additional_delay_ms))
 
         for r in range(0, 12000, 250):
-            if 0 > r > TestSuite.MIN_LOAD:
+            if 0 < r < TestSuite.MIN_LOAD:
                 r = TestSuite.MIN_LOAD
 
             test_list.append(
@@ -64,7 +64,7 @@ class TestSuite:
                                   TestCase.chk_relay, 1, delay_ms=additional_delay_ms))
 
         for r in range(0, 12000, 250):
-            if 0 > r > TestSuite.MIN_LOAD:
+            if 0 < r < TestSuite.MIN_LOAD:
                 r = TestSuite.MIN_LOAD
 
             test_list.append(

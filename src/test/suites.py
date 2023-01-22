@@ -1,5 +1,3 @@
-import random
-
 from . import boardbtcfg
 from .testcase import TestCase
 from .testsuite import TestSuite
@@ -106,7 +104,15 @@ class TestSuiteRandom(TestSuite):
                      TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 1, 1))]
 
         tmp_ls = []
-        self.add_base_tests(tmp_ls)
+        TestSuite.add_base_tests(tmp_ls, 1000)
+
+        # Add more relay switches
+        for i in range(0, len(tmp_ls) // 5):
+            tmp_ls.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
+                                   TestCase.chk_relay, 1, delay_ms=1000))
+            tmp_ls.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, 0, 2),
+                                   TestCase.chk_setpoint, 0, delay_ms=1000))
+
         test_list += TestSuite.shuffle(tmp_ls)
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 0, 1)))
