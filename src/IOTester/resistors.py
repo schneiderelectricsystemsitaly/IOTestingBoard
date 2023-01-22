@@ -14,36 +14,37 @@ def k_divider(r1, r2) -> float:
     return r2 / (r1 + r2)
 
 
-def __parallel(subset, r_values) -> int:
+def __parallel(bitmask, r_values) -> int:
     result = 0
-    for bit in subset:
-        result += 1.0 / (r_values[bit])
+    if bitmask == 0:
+        return 0
+
+    for bit in range(0, len(r_values)):
+        if (bitmask >> bit) & 1:
+            result += 1.0 / (r_values[bit])
     return int(1.0 / result)
+
+
+def __num_bits_set(bitmask) -> int:
+    result = 0
+    for bit in range(0, len(BOARD['R_VALUES'])):
+        if (bitmask >> bit) & 1:
+            result += 1
+    return result
 
 
 def compute_all_r() -> dict:
     global available_values
     r_values = BOARD['R_VALUES']
     output = {}
-    for L in range(len(r_values) + 1):
-        subset = []
-        # to generate all subsets we use a bit mask b1,b2,...,bn where (bn ==1) implies (R_VALUES[n] is in the set)
-        for i in range(1, 2 ** len(r_values) + 1):
-            subset.clear()
-            for bit in range(0, len(r_values)):
-                if (i >> bit) & 1:
-                    subset.append(bit)  # bit is set, we add to the array
-            # subset contains now a subset of R_VALUES
-            if len(subset) == 0:
-                continue
-            rval = __parallel(subset, r_values)
-            if rval not in output:
-                output[rval] = subset.copy()
-            # favor longer combinations to improve maximum W and % precision
-            elif len(subset) > len(output[rval]):
-                output[rval] = subset.copy()
-            if i % 32 == 0:
-                gc.collect()
+    # to generate all subsets we use a bit mask b1,b2,...,bn where (bn ==1) implies (R_VALUES[n] is in the set)
+    for bitmask in range(1, 2 ** len(r_values)):
+        rval = __parallel(bitmask, r_values)
+        if rval not in output:
+            output[rval] = bitmask
+        # favor longer combinations to improve maximum W and % precision
+        elif __num_bits_set(bitmask) > __num_bits_set(output[rval]):
+            output[rval] = bitmask
     print(f"{len(output)} resistors combinations saved.")
     available_values = output
     gc.collect()

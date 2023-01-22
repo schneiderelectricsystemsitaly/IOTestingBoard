@@ -93,12 +93,13 @@ async def execute(command) -> bool:
 
 def __configure_for_r(best_tuple) -> bool:
     if is_verbose():
-        print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]}")
+        print(f"Configuring for R={best_tuple[0]}, Series R={best_tuple[2]}, Resistors = {best_tuple[1]:03b}")
     series_r = best_tuple[2] == 0
 
     # Enable higher value resistors first
     for i in reversed(range(0, len(BOARD['RESISTORS']))):
-        if not __set_r(i, i in best_tuple[1]):
+        is_set = (best_tuple[1] >> i) & 1
+        if not __set_r(i, is_set):
             return False
 
     # Then set R series
@@ -176,6 +177,7 @@ async def set_relay_pos(is_set, force=False) -> bool:
 
     if is_set:
         __set_digital_pin('KRESET_CMD', False)
+        await asyncio.sleep_ms(1)
         __set_digital_pin('KSET_CMD', True)
         await asyncio.sleep_ms(RELAY_ACTION_TIME_MS)
         if not BOARD['KSET_CMD'].value():
@@ -186,6 +188,7 @@ async def set_relay_pos(is_set, force=False) -> bool:
         update_relay_state(RelayState.resistor)
     else:
         __set_digital_pin('KSET_CMD', False)
+        await asyncio.sleep_ms(1)
         __set_digital_pin('KRESET_CMD', True)
         await asyncio.sleep_ms(RELAY_ACTION_TIME_MS)
         if not BOARD['KRESET_CMD'].value():

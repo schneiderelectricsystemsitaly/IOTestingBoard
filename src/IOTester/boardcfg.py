@@ -3,8 +3,8 @@ from micropython import const
 
 from .abutton import Pushbutton
 
-BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),
-         'KRESET_CMD': Pin(33, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN),
+BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN),
+         'KRESET_CMD': Pin(33, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN),
          'VMETER_EN': Pin(17, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
          'SERIESR_CMD': Pin(18, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
          'VSENSE': Pin(34, Pin.IN, pull=None),
