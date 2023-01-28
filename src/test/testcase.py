@@ -1,7 +1,7 @@
 # Represents a single test to be run
 class TestCase:
 
-    def __init__(self, command_packet, check_function=None, expected_value=None, timeout_ms=6000, delay_ms=0):
+    def __init__(self, command_packet, check_function=None, expected_value=None, timeout_ms=6000, delay_ms=0, desc='?'):
         if type(command_packet) is int:
             self.command = command_packet.to_bytes(1, 'little')
         elif type(command_packet) is bytearray:
@@ -15,6 +15,7 @@ class TestCase:
         self.expected = expected_value
         self.timeout_ms = timeout_ms
         self.delay_ms = delay_ms
+        self.description = desc
 
     def __str__(self):
         return f'Command {self.command} expected {str(self.fun_chk)}={self.expected} timeout {self.timeout_ms}'

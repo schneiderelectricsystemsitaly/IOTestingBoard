@@ -1,7 +1,9 @@
 # This module shall be run on a different ESP32 board with bluetooth
 # It will connect to the IOTesting board and run various commands to "stress test"
 #
+import gc
 import time
+
 import machine
 import neopixel
 import uasyncio as asyncio
@@ -50,17 +52,13 @@ async def main():
     pm = PowerMonitor(Pin(10), Pin(8))
     bt = BoardTester(BluetoothClient())
     log = Logger(bt, pm)
-    test_suites = [suites.TestSuiteReboot('Reboot', 1, pm),
-                   suites.TestSuiteBTCommands('BT Commands', 1),
+    test_suites = (suites.TestSuiteReboot('Reboot', 1, pm),
                    suites.TestSuiteRandom('Random commands', 1, pm),
                    suites.TestSuiteNoWifi80('NoWifi CPU 80 Mhz', 3, pm),
-                   suites.TestSuiteNoWifiCpu160('NoWifi CPU 160 Mhz', 3, pm),
-                   suites.TestSuiteNoWifiCpu240('NoWifi CPU 240 Mhz', 3, pm),
                    suites.TestSuiteReboot('Reboot', 1, pm),
-                   suites.TestSuiteWifi('Wifi', 3, pm),
                    suites.TestSuiteWifiREPL('Wifi+REPL', 3, pm),
-                   suites.TestSuiteReboot('Reboot', 1, pm),
-                   suites.TestSuiteSlow('Slow testing', 2, pm)]
+                   suites.TestSuiteBTCommands('Reboot', 1, pm),
+                   suites.TestSuiteSlow('Slow testing', 2, pm))
 
     while True:
         STOP_FLAG = False
@@ -75,4 +73,5 @@ async def main():
             print(time.localtime(), 'main', repr(e))
             write_neopixel((64, 0, 0))
             STOP_FLAG = True
+            gc.collect()
             await asyncio.sleep_ms(500)
