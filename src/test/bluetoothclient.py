@@ -1,11 +1,11 @@
 import gc
 import time
 
-import aioble
 import uasyncio as asyncio
 from bluetooth import BLE
 from micropython import const
 
+import aioble
 from . import boardbtcfg
 from .test import STOP_FLAG, write_neopixel, read_neopixel
 

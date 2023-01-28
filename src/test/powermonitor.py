@@ -11,8 +11,7 @@ from .test import STOP_FLAG
 class PowerMonitor:
     SHUNT_OHMS = const(0.1)
 
-    def __init__(self, sda, sdc):
-        i2c = SoftI2C(sda, sdc)
+    def __init__(self, i2c):
         if len(i2c.scan()) == 0:
             raise Exception("I2C INA219 not found")
 
@@ -43,6 +42,8 @@ class PowerMonitor:
             self.summary['Energy (mWh)'] = 0.0
             self.summary["Total duration (s)"] = 0.0
             self.summary["Peak current (mA)"] = 0.0
+            self.summary["1h projected energy (mWh)"] = 0.0
+            self.summary["Peak current (mA)"] = 0.0
         else:
             delay_us = latest["Timestamp"] - self.summary["Timestamp"]
             if delay_us > 0:
@@ -59,3 +60,4 @@ class PowerMonitor:
 
     def reset(self):
         self.summary = {}
+

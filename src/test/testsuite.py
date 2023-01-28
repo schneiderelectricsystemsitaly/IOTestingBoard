@@ -1,8 +1,9 @@
 import gc
 
+from micropython import const
+
 from . import boardbtcfg
 from .testcase import TestCase
-from micropython import const
 
 
 class TestSuite:
@@ -43,7 +44,7 @@ class TestSuite:
     def add_base_tests(test_list, additional_delay_ms=0):
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
-                                  TestCase.chk_relay, 1, delay_ms=additional_delay_ms))
+                                  TestCase.chk_relay, 1, delay_ms=additional_delay_ms, desc='CMD BYPASS'))
 
         for r in range(0, 12000, 250):
             if 0 < r < TestSuite.MIN_LOAD:
@@ -51,17 +52,17 @@ class TestSuite:
 
             test_list.append(
                 TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, r, 2), TestCase.chk_setpoint, r,
-                         delay_ms=additional_delay_ms))
+                         delay_ms=additional_delay_ms, desc=f'CMD R={r}'))
 
         test_list.append(
             TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, TestSuite.R_OPEN, 2),
-                     TestCase.chk_setpoint, TestSuite.R_OPEN, delay_ms=additional_delay_ms))
+                     TestCase.chk_setpoint, TestSuite.R_OPEN, delay_ms=additional_delay_ms, desc=f'CMD R OPEN'))
         test_list.append(
             TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, TestSuite.R_MAX, 2),
-                     TestCase.chk_setpoint, TestSuite.R_MAX, delay_ms=additional_delay_ms))
+                     TestCase.chk_setpoint, TestSuite.R_MAX, delay_ms=additional_delay_ms, desc=f'CMD R MAX'))
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
-                                  TestCase.chk_relay, 1, delay_ms=additional_delay_ms))
+                                  TestCase.chk_relay, 1, delay_ms=additional_delay_ms, desc='CMD BYPASS'))
 
         for r in range(0, 12000, 250):
             if 0 < r < TestSuite.MIN_LOAD:
@@ -69,18 +70,19 @@ class TestSuite:
 
             test_list.append(
                 TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, r, 2),
-                         TestCase.chk_setpoint, r, delay_ms=additional_delay_ms))
+                         TestCase.chk_setpoint, r, delay_ms=additional_delay_ms, desc=f'CMD LOAD={r}'))
         test_list.append(
             TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, TestSuite.R_OPEN, 2),
-                     TestCase.chk_setpoint, TestSuite.R_OPEN, delay_ms=additional_delay_ms))
+                     TestCase.chk_setpoint, TestSuite.R_OPEN, delay_ms=additional_delay_ms, desc=f'CMD LOAD OPEN'))
         test_list.append(
             TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_V_LOAD, TestSuite.R_MAX, 2),
-                     TestCase.chk_setpoint, TestSuite.R_MAX, delay_ms=additional_delay_ms))
+                     TestCase.chk_setpoint, TestSuite.R_MAX, delay_ms=additional_delay_ms, desc=f'CMD LOAD RMAX'))
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
-                                  TestCase.chk_relay, 1, delay_ms=additional_delay_ms))
+                                  TestCase.chk_relay, 1, delay_ms=additional_delay_ms, desc=f'CMD BYPASS'))
 
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 1, 1), TestCase.chk_result))
+        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 1, 1), TestCase.chk_result, desc='VERBOSE 1'))
 
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_RUN_TEST),
-                                  TestCase.chk_result, delay_ms=additional_delay_ms))
+                                  TestCase.chk_result, delay_ms=additional_delay_ms, desc='AUTO-TEST'))
+        gc.collect()
