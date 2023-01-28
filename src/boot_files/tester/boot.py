@@ -1,9 +1,10 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
-import os
-import secrets
-from machine import wake_reason, reset_cause, reset
 import gc
 from time import sleep_ms, time
+
+from machine import wake_reason, reset_cause, reset
+
+import secrets
 
 gc.collect()
 
@@ -13,7 +14,7 @@ import network
 def connect():
     sta_if = network.WLAN(network.STA_IF)
     sta_if.active(True)
-    sta_if.config(txpower=8.5)
+    sta_if.config(txpower=8.0)
     if not sta_if.isconnected():
         print('connecting to network...')
         sta_if.connect(secrets.WIFI_SSID, secrets.WIFI_PASSWORD)  # Connect to an AP
@@ -42,7 +43,7 @@ def download_and_install_update_if_available():
             import ota_update
             gc.collect()
             o = ota_update.OTAUpdater('https://github.com/PBrunot/IOTestingBoard', github_src_dir='src',
-                                      main_dir='test',
+                                      main_dir='test', github_src_main_dir='test-mpy',
                                       headers={'Authorization': 'token {}'.format(secrets.GITHUB_TOKEN)})
             if o.install_update_if_available():
                 reset()

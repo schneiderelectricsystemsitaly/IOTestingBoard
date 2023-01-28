@@ -18,7 +18,7 @@ class TestSuiteReboot(TestSuite):
                                                                   delay_ms=500, desc='METER COMMANDS 1')]
 
         # test configuration of thresholds
-        commands = [(0, 8, 2, 1000), (0, 0, 0, 0), (0, 8, 2, 1100)]
+        commands = ((0, 8, 2, 1000), (0, 0, 0, 0), (0, 8, 2, 1100))
         for comm in commands:
             idx = comm[0]
             volt = comm[1]
@@ -42,11 +42,10 @@ class TestSuiteReboot(TestSuite):
 class TestSuiteNoWifi80(TestSuite):
 
     def get_testcases(self):
-        test_list = []
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_CLEAR_FLAGS), delay_ms=500, desc='CLEAR FLAGS'))
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WIFI), TestCase.chk_wifi, 1, 30000, desc='DISABLE Wi-Fi'))
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WEBREPL), desc='DISABLE WEBREPL'))
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_INITIAL_WIFI, 0, 1), desc='SET INIT WIFI 0'))
+        test_list = [TestCase(TestSuite.make_array(boardbtcfg.COMMAND_CLEAR_FLAGS), delay_ms=500, desc='CLEAR FLAGS'),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WIFI), TestCase.chk_wifi, 1, 30000, desc='DISABLE Wi-Fi'),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WEBREPL), desc='DISABLE WEBREPL'),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_INITIAL_WIFI, 0, 1), desc='SET INIT WIFI 0')]
         self.add_base_tests(test_list)
         # Check free memory at the end of the test
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_VERBOSE, 0, 1), TestCase.chk_memory,
@@ -57,12 +56,11 @@ class TestSuiteNoWifi80(TestSuite):
 class TestSuiteNoWifiCpu240(TestSuite):
 
     def get_testcases(self):
-        test_list = []
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_CLEAR_FLAGS), delay_ms=500, desc='CLEAR FLAGS'))
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WIFI), TestCase.chk_wifi, 1, 30000, desc='DISABLE Wi-Fi'))
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WEBREPL), desc='DISABLE WEBREPL'))
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_INITIAL_WIFI, 0, 1), desc='SET INIT WIFI 0'))
-        test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 2, 1), desc='CPU 240 Mhz'))
+        test_list = [TestCase(TestSuite.make_array(boardbtcfg.COMMAND_CLEAR_FLAGS), delay_ms=500, desc='CLEAR FLAGS'),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WIFI), TestCase.chk_wifi, 1, 30000, desc='DISABLE Wi-Fi'),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_DISABLE_WEBREPL), desc='DISABLE WEBREPL'),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_INITIAL_WIFI, 0, 1), desc='SET INIT WIFI 0'),
+                     TestCase(TestSuite.make_array(boardbtcfg.COMMAND_SET_CPU, 2, 1), desc='CPU 240 Mhz')]
 
         self.add_base_tests(test_list)
 

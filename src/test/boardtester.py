@@ -1,3 +1,4 @@
+import gc
 import time
 
 import uasyncio as asyncio
@@ -131,6 +132,8 @@ class BoardTester:
             if ts.pm is not None:
                 ts.pm.reset()
             self.running_ts = ts
+            self.running_tc = None
+            gc.collect()
 
             ts.stats['start'] = time.ticks_ms()
             ts.stats['total'] = 0

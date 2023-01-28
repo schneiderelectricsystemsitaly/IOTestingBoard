@@ -1,5 +1,6 @@
 import time
 
+import gc
 import uasyncio as asyncio
 from machine import Pin, SoftI2C
 import ssd1306
@@ -28,6 +29,7 @@ class Logger:
 
     async def loop(self):
         while not STOP_FLAG:
+            gc.collect()
             self.display.fill(0)
 
             if self.tester.bt_client.connection is None:
