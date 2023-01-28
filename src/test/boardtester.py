@@ -20,6 +20,8 @@ class BoardTester:
         self.running_total = 0
         self.running_actual = 0
         self.running_desc = ''
+        self.running_tc = None
+        self.running_ts = None
 
     def get_status_str(self):
         if self.bt_client.connection is None:
@@ -93,6 +95,8 @@ class BoardTester:
     async def run_test(self, tc: TestCase, ts: TestSuite):
         MAX_RETRY = 3
         retry = 0
+        self.running_tc = tc
+
         while retry < MAX_RETRY:
             if self.bt_client.should_reinit:
                 await self.bt_client.connect()
@@ -114,6 +118,7 @@ class BoardTester:
         self.test_failures += 1
         ts.stats['failed_tc'].append(tc)
         print('** TEST FAILURE', tc)
+        self.running_tc = None
         return False
 
     async def run_suites(self, test_suites):
@@ -125,6 +130,8 @@ class BoardTester:
             print('Starting', ts)
             if ts.pm is not None:
                 ts.pm.reset()
+            self.running_ts = ts
+
             ts.stats['start'] = time.ticks_ms()
             ts.stats['total'] = 0
             ts.stats['failures'] = 0
@@ -147,4 +154,6 @@ class BoardTester:
             Logger.save_results(ts, self.status)
 
         self.running = False
+        self.running_ts = None
+        self.running_tc = None
         print('Completed all test suites')

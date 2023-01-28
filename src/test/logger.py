@@ -1,6 +1,8 @@
 import time
 
 import uasyncio as asyncio
+from machine import Pin, SoftI2C
+import ssd1306
 
 from .test import STOP_FLAG
 
@@ -11,14 +13,47 @@ class Logger:
         self.tester = tester
         self.meter = meter
 
+        # using default address 0x3C
+        i2c = SoftI2C(sda=Pin(4), scl=Pin(6), freq=100000)
+        self.display = ssd1306.SSD1306_I2C(128, 64, i2c)
+        self.display.fill(0)
+        self.display.text('Starting...', 0, 0, 1)
+        self.display.show()
+
+    def message(self, str_out: str, line: int = 0):
+        if line >= 1: # skip line 1
+            line += 1
+        self.display.text(str_out, 0, line * 10, 1)
+        self.display.show()
+
     async def loop(self):
         while not STOP_FLAG:
+            self.display.fill(0)
+
+            if self.tester.bt_client.connection is None:
+                str_status = 'Connecting'
+            else:
+                str_status = 'Running' if self.tester.running else 'Idle'
+
+            str_status += ' ** ' + str(self.tester.test_failures)
+            self.message(str_status, 0)
+            self.message('Test:' + self.tester.running_desc, 1)
+            percent = round(100 * self.tester.running_actual / self.tester.running_total) if self.tester.running_total > 0 else '-'
+            self.message(f'{self.tester.running_actual}/{self.tester.running_total} ({percent} %)', 2)
+            self.message('' if self.tester.running_tc is None else self.tester.running_tc.description, 3)
+            if self.tester.running_ts is not None:
+                if self.tester.running_ts.pm is not None:
+                    summary = self.tester.running_ts.pm.get_summary()
+                    self.message(f'{round(summary["1h projected energy (mWh)"])} mWh Imax={round(summary["Peak current (mA)"])}', 4)
+            self.display.show()
+
             print('** STATUS **')
             print('\tTests', self.tester.test_total, ', failures ', self.tester.test_failures, 'status',
                   self.tester.get_status_str())
             print('\tLast status from device', self.tester.status)
             print('\tPower statistics', self.meter.get_summary())
             print('\tPower last values', self.meter.get_last_values())
+
             await asyncio.sleep_ms(3000)
         print('Logger loop terminating')
 
@@ -57,3 +92,4 @@ class Logger:
                 print("\t\tPeak current (mA):", round(summary["Peak current (mA)"]), file=f)
             f.close()
         print('Results saved to file')
+
