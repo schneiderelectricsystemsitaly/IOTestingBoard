@@ -10,12 +10,11 @@ from .test import STOP_FLAG
 
 class Logger:
 
-    def __init__(self, tester, meter):
+    def __init__(self, tester, meter, i2c):
         self.tester = tester
         self.meter = meter
 
         # using default address 0x3C
-        i2c = SoftI2C(sda=Pin(4), scl=Pin(6), freq=100000)
         self.display = ssd1306.SSD1306_I2C(128, 64, i2c)
         self.display.fill(0)
         self.display.text('Starting...', 0, 0, 1)
@@ -26,6 +25,17 @@ class Logger:
             line += 1
         self.display.text(str_out, 0, line * 10, 1)
         self.display.show()
+
+    def free(self, full=False):
+        gc.collect()
+        F = gc.mem_free()
+        A = gc.mem_alloc()
+        T = F + A
+        P = '{0:.2f}%'.format(F / T * 100)
+        if not full:
+            return P
+        else:
+            return ('Total:{0} Free:{1} ({2})'.format(T, F, P))
 
     async def loop(self):
         while not STOP_FLAG:
@@ -46,7 +56,8 @@ class Logger:
             if self.tester.running_ts is not None:
                 if self.tester.running_ts.pm is not None:
                     summary = self.tester.running_ts.pm.get_summary()
-                    self.message(f'{round(summary["1h projected energy (mWh)"])} mWh Imax={round(summary["Peak current (mA)"])}', 4)
+                    if "1h projected energy (mWh)" in summary:
+                        self.message(f'{round(summary["1h projected energy (mWh)"])} mWh Imax={round(summary["Peak current (mA)"])}', 4)
             self.display.show()
 
             print('** STATUS **')
@@ -55,7 +66,7 @@ class Logger:
             print('\tLast status from device', self.tester.status)
             print('\tPower statistics', self.meter.get_summary())
             print('\tPower last values', self.meter.get_last_values())
-
+            print('\t', self.free(True))
             await asyncio.sleep_ms(3000)
         print('Logger loop terminating')
 
@@ -95,3 +106,4 @@ class Logger:
             f.close()
         gc.collect()
         print('Results saved to file')
+
