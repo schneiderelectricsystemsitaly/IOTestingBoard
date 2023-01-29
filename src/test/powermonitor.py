@@ -2,7 +2,6 @@ import logging
 import time
 
 import uasyncio as asyncio
-from machine import SoftI2C
 
 from .ina219 import INA219
 from .test import STOP_FLAG

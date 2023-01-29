@@ -1,8 +1,6 @@
 # This module shall be run on a different ESP32 board with bluetooth
 # It will connect to the IOTesting board and run various commands to "stress test"
 #
-import gc
-import time
 
 import machine
 import neopixel

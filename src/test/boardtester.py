@@ -18,11 +18,11 @@ class BoardTester:
         self.test_failures = 0
         self.status = {}
         self.running = False
-        self.running_total = 0
-        self.running_actual = 0
+        self.running_total: int = 0
+        self.running_actual: int = 0
         self.running_desc = ''
-        self.running_tc = None
-        self.running_ts = None
+        self.running_tc: TestCase = None
+        self.running_ts: TestSuite = None
 
     def get_status_str(self):
         if self.bt_client.connection is None:
@@ -47,7 +47,7 @@ class BoardTester:
             finally:
                 self.running = False
 
-    def parse_status(self, packet: bytearray):
+    def parse_status(self, packet: bytearray) -> dict:
         if packet is None or len(packet) < 11:
             return None
         wifi_state = (packet[0] >> 6) & 3
@@ -79,7 +79,7 @@ class BoardTester:
                   'Verbose': verbose, 'Test mode': test_mode, 'Freq': freq}
         return retval
 
-    async def wait_for_confirmation(self, fun_chk, chk_value, timeout_ms=2000):
+    async def wait_for_confirmation(self, fun_chk, chk_value, timeout_ms=2000) -> bool:
         cpt_wait = 0
         setpoint = 0
 
@@ -93,7 +93,7 @@ class BoardTester:
         print(time.localtime(), f'*** timeout waiting for {str(fun_chk)} == {chk_value}')
         return False
 
-    async def run_test(self, tc: TestCase, ts: TestSuite):
+    async def run_test(self, tc: TestCase, ts: TestSuite) -> bool:
         MAX_RETRY = 3
         retry = 0
         self.running_tc = tc

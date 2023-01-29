@@ -3,14 +3,16 @@ import time
 
 import ssd1306
 import uasyncio as asyncio
-from machine import Pin, SoftI2C
+from machine import SoftI2C
 
+from .boardtester import BoardTester
+from .powermonitor import PowerMonitor
 from .test import STOP_FLAG
 
 
 class Logger:
 
-    def __init__(self, tester, meter, i2c):
+    def __init__(self, tester: BoardTester, meter: PowerMonitor, i2c: SoftI2C):
         self.tester = tester
         self.meter = meter
 
@@ -52,7 +54,7 @@ class Logger:
             self.message('Test:' + self.tester.running_desc, 1)
             percent = round(100 * self.tester.running_actual / self.tester.running_total) if self.tester.running_total > 0 else '-'
             self.message(f'{self.tester.running_actual}/{self.tester.running_total} ({percent} %)', 2)
-            self.message('' if self.tester.running_tc is None else self.tester.running_tc.description, 3)
+            self.message('' if self.tester.running_tc is None else self.tester.running_tc.get_description(), 3)
             if self.tester.running_ts is not None:
                 if self.tester.running_ts.pm is not None:
                     summary = self.tester.running_ts.pm.get_summary()

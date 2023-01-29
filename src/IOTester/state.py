@@ -28,24 +28,24 @@ class RelayState:
 
 class BoardState:
     def __init__(self):
-        self.relay = RelayState.unknown
-        self.bluetooth = BluetoothState.unknown
-        self.wifi = WifiState.unknown
-        self.setpoint_r = 0.0
-        self.actual_r = 0.0
-        self.meter_parallel = False
-        self.last_command_result = True
-        self.ip_config = ()
-        self.last_event = time.ticks_ms()
-        self.test_mode = False
-        self.meter_commands = True
-        self.error_cpt = 0
-        self.command_cpt = 0
-        self.VERBOSE = False
-        self.battery_percent = 0
-        self.last_error_msg = ''
-        self.bt_commands = 0
-        self.short_relay = False
+        self.relay: int = RelayState.unknown
+        self.bluetooth: int = BluetoothState.unknown
+        self.wifi: int = WifiState.unknown
+        self.setpoint_r: float = 0.0
+        self.actual_r: float = 0.0
+        self.meter_parallel: bool = False
+        self.last_command_result: bool = True
+        self.ip_config: tuple = ()
+        self.last_event: int = time.ticks_ms()
+        self.test_mode: bool = False
+        self.meter_commands: bool = True
+        self.error_cpt: int = 0
+        self.command_cpt: int = 0
+        self.VERBOSE: bool = False
+        self.battery_percent: int = 0
+        self.last_error_msg: str = ''
+        self.bt_commands: int = 0
+        self.short_relay: bool = False
 
     def __str__(self):
         if self.setpoint_r == R_OPEN:

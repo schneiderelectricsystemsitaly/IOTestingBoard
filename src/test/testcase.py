@@ -1,5 +1,6 @@
 # Represents a single test to be run
 class TestCase:
+    descriptions = []
 
     def __init__(self, command_packet, check_function=None, expected_value=None, timeout_ms=6000, delay_ms=0, desc='?'):
         if type(command_packet) is int:
@@ -15,10 +16,16 @@ class TestCase:
         self.expected = expected_value
         self.timeout_ms = timeout_ms
         self.delay_ms = delay_ms
-        self.description = desc
+
+        if desc not in TestCase.descriptions:
+            TestCase.descriptions.append(desc)
+        self.desc_idx = TestCase.index(desc)
 
     def __str__(self):
         return f'Command {self.command} expected {str(self.fun_chk)}={self.expected} timeout {self.timeout_ms}'
+
+    def get_description(self):
+        return TestCase.descriptions[self.desc_idx]
 
     @classmethod
     def chk_setpoint(cls, status, expected_value):

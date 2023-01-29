@@ -78,14 +78,14 @@ def find_best_r_with_opt(desired_r) -> tuple:
         return option2[0] + BOARD['R_SERIES'] + BOARD['OPTOCOUPLER_R'], option2[1], 1
 
 
-def print_configurations(available_values: dict, u_max: int = 24):
+def print_configurations(av_values: dict, u_max: int = 24):
     str_out = f'|R value\t|Resistors\t|Power @{u_max}V mW\t|Imax (mA)\t|P opto (mW)\t|\n'
     print(str_out)
-    for r in sorted(available_values.keys()):
+    for r in sorted(av_values.keys()):
         str_out = f'|{r}\t|'
         tot_power = 0
         for idx in range(0, len(BOARD['R_VALUES'])):
-            if (available_values[r] >> idx) & 1 == 1:
+            if (av_values[r] >> idx) & 1 == 1:
                 power = u_max**2 / BOARD['R_VALUES'][idx] * 1000
                 str_out += str(BOARD['R_VALUES'][idx])
                 if power > (BOARD['R_POWER'][idx] * 1000):
@@ -102,12 +102,12 @@ def print_configurations(available_values: dict, u_max: int = 24):
         print(str_out)
 
 
-def min_allowed_r(available_values: dict, u_max: int = 24) -> int:
+def min_allowed_r(av_values: dict, u_max: int = 24) -> int:
     min_r = 0xFFFF
-    for r in sorted(available_values.keys()):
+    for r in sorted(av_values.keys()):
         allowed = True
         for idx in range(0, len(BOARD['R_VALUES'])):
-            if (available_values[r] >> idx) & 1 == 1:
+            if (av_values[r] >> idx) & 1 == 1:
                 power = u_max**2 / BOARD['R_VALUES'][idx] * 1000  # P resistor = U^2 / R
                 if power > (BOARD['R_POWER'][idx] * 1000):  # Check if above power rating
                     allowed = False
