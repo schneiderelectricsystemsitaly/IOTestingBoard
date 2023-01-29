@@ -40,6 +40,7 @@ BOARD['RESISTORS'] = (Pin(19, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
 
 BOARD['OPTOCOUPLER_R'] = 5
 BOARD['R_VALUES'] = const((496, 21920, 1033.9, 2222, 5540, 7560, 8225, 11027))
+BOARD['R_POWER'] = const((1, .25, 1, 0.5, 0.25, 0.25, 0.25, 0.25))
 BOARD['R_SERIES'] = const(2550 - 5)
 
 # Resistor divider for Vsense
@@ -56,8 +57,3 @@ BOARD['GREEN_LED_DAC'].write(190)
 # R_MAX = the maximum value closed circuit obtainable by resistor network
 R_OPEN = const(0xFFFF)
 R_MAX = const(0xFFFE)
-
-# Do not accept R setpoints below this threshold
-# @24VDC Rload=600 => I=40mA. Power dissipated by resistor = .96 W
-# P opto = 40mA*40mA*35ohms = 56 mW < 100 mW limit
-MIN_LOAD = const(600)

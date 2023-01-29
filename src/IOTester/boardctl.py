@@ -4,14 +4,14 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-from .boardcfg import BOARD, R_OPEN, MIN_LOAD
+from .boardcfg import BOARD, R_OPEN
 from .boardsettings import Settings, get_settings
 from .boardstate import get_state, update_meter_commands, update_r_actual, update_testmode, update_v_parallel_state, \
     is_verbose, update_event_time, \
     update_last_result, update_r_setpoint, update_relay_state, update_short_relay_state
 from .boardwifi import disable_wifi, enable_wifi
 from .command import Command
-from .resistors import find_best_r_with_opt, k_divider
+from .resistors import find_best_r_with_opt, k_divider, MIN_LOAD
 from .state import RelayState
 
 last_red_value = 0

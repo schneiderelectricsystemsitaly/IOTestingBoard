@@ -26,7 +26,7 @@ async def __animate_leds() -> None:
     error = False
     cpt = 0
     current_state = get_state()
-    meter_pattern = [0]  # don't blink
+    meter_pattern = [165]  # light green
     _parallel_pattern = const((165, 165, 210, 165, 210, 165, 165, 165, 165))  # 2 fast blinks
     _resistor_pattern = const((165, 165, 165, 210, 210, 210, 165, 165, 165))  # 1 slow blink
     _error_pattern = const((190, 190, 0, 0))
@@ -131,8 +131,11 @@ async def __test_loop() -> None:
     cpt = 0
     _LOOP_SLEEP_MS = const(4000)
     ctype = Command.generate_r
+    previous_state = get_state()
     while True:
         current_state = get_state()
+        if current_state.test_mode and not previous_state.test_mode:  # restart from 0 every leading edge
+            cpt = 0
         if current_state.test_mode:
             chosen_r = test_cycle[cpt % len(test_cycle)]
             command = Command(ctype, chosen_r)
@@ -151,7 +154,7 @@ async def __test_loop() -> None:
             else:
                 update_last_result(result, True, 'Test')
             cpt += 1
-
+        previous_state = current_state
         await asyncio.sleep_ms(_LOOP_SLEEP_MS)
 
 
