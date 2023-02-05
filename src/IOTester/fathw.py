@@ -5,7 +5,7 @@ import uasyncio as asyncio
 from micropython import const
 
 import IOTester.state
-from boardwifi import enable_wifi, enable_webrepl
+from .boardwifi import enable_wifi, enable_webrepl
 from .boardcfg import BOARD, R_OPEN, R_MAX
 from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
                        light_sleep, board_hw_init)
