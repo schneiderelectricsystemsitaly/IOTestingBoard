@@ -44,7 +44,8 @@ async def parse_command_packet(command) -> None:
                           boardbtcfg.COMMAND_SET_INITIAL_WIFI,
                           boardbtcfg.COMMAND_SET_VERBOSE,
                           boardbtcfg.COMMAND_METER_COMMANDS,
-                          boardbtcfg.COMMAND_SET_OTA):
+                          boardbtcfg.COMMAND_SET_OTA,
+                          boardbtcfg.COMMAND_METER_COMMANDS):
         if len(command) == 2:
             launch(__bt_command_execute, (command_word, command[1:] != b'\x00'))
         else:
@@ -184,6 +185,12 @@ async def __bt_command_execute(command, setpoint) -> None:
             success = True
         elif command == boardbtcfg.COMMAND_CLEAR_FLAGS:
             clear_errors()
+            success = True
+        elif command == boardbtcfg.COMMAND_DEBUG_MODE:
+            settings.add_key(Settings.DEBUG_MODE, setpoint)
+            if setpoint:
+                settings.add_key(Settings.WIFI_ENABLED, True)
+                settings.add_key(Settings.OTA, False)
             success = True
         else:
             print('Unrecognized BT command', command, setpoint)

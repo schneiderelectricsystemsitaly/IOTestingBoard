@@ -24,6 +24,7 @@ class Settings:
     BLUETOOTH_NAME = 'BLUETOOTH_DEVICE'
     SERIAL = 'SERIAL'
     HW_REV = 'HW_REV'
+    DEBUG_MODE = 'DEBUG_MODE'
 
     def __init__(self, filename='saved_settings.hex'):
         print('Loading', filename)
@@ -55,6 +56,8 @@ class Settings:
             self.add_key(Settings.SERIAL, '1')
         if Settings.HW_REV not in self._db:
             self.add_key(Settings.HW_REV, '1.0')
+        if Settings.HW_REV not in self._db:
+            self.add_key(Settings.DEBUG_MODE, False)
 
     def save_changes(self):
         file_str = ujson.dumps(self._db)

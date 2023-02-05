@@ -45,3 +45,4 @@ COMMAND_CONFIGURE_METER_COMM = const(0x20)
 COMMAND_SET_BLUETOOTH_NAME = const(0x21)  # + UTF-8 string
 COMMAND_REFRESH = const(0x22)  # Force status update
 COMMAND_CLEAR_FLAGS = const(0x23)  # Reset bt command and error flag
+COMMAND_DEBUG_MODE = const(0x24)  # Boots into WEBREPL with WIFI on, OTA off

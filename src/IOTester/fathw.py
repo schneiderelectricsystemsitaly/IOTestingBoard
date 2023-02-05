@@ -5,6 +5,7 @@ import uasyncio as asyncio
 from micropython import const
 
 import IOTester.state
+from boardwifi import enable_wifi, enable_webrepl
 from .boardcfg import BOARD, R_OPEN, R_MAX
 from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
                        light_sleep, board_hw_init)
@@ -163,15 +164,20 @@ async def main() -> None:
 
     gc.collect()
 
-    # precompute possible R values
-    compute_all_r()
+    if not get_settings()[Settings.DEBUG_MODE]:
+        # precompute possible R values
+        compute_all_r()
 
-    await board_hw_init()
+        await board_hw_init()
 
-    t1 = asyncio.create_task(__animate_leds())
-    t2 = asyncio.create_task(__test_loop())
-    t3 = asyncio.create_task(__sleep_check())
-    t4 = asyncio.create_task(__meter_commands_check())
+        t1 = asyncio.create_task(__animate_leds())
+        t2 = asyncio.create_task(__test_loop())
+        t3 = asyncio.create_task(__sleep_check())
+        t4 = asyncio.create_task(__meter_commands_check())
 
-    print('Ready...')
-    await asyncio.gather(t1, t2, t3, t4)
+        print('Ready...')
+        await asyncio.gather(t1, t2, t3, t4)
+    else:
+        await enable_wifi()
+        await enable_webrepl()
+        print('Exiting due to DEBUG MODE')
