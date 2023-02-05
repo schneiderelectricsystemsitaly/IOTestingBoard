@@ -178,6 +178,7 @@ async def main() -> None:
         print('Ready...')
         await asyncio.gather(t1, t2, t3, t4)
     else:
+        get_settings().add_key(Settings.DEBUG_MODE, False)
         await enable_wifi()
         await enable_webrepl()
         print('Exiting due to DEBUG MODE')

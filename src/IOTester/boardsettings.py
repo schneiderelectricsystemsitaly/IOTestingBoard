@@ -56,7 +56,7 @@ class Settings:
             self.add_key(Settings.SERIAL, '1')
         if Settings.HW_REV not in self._db:
             self.add_key(Settings.HW_REV, '1.0')
-        if Settings.HW_REV not in self._db:
+        if Settings.DEBUG_MODE not in self._db:
             self.add_key(Settings.DEBUG_MODE, False)
 
     def save_changes(self):

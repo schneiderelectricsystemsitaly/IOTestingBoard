@@ -45,7 +45,7 @@ async def parse_command_packet(command) -> None:
                           boardbtcfg.COMMAND_SET_VERBOSE,
                           boardbtcfg.COMMAND_METER_COMMANDS,
                           boardbtcfg.COMMAND_SET_OTA,
-                          boardbtcfg.COMMAND_METER_COMMANDS):
+                          boardbtcfg.COMMAND_DEBUG_MODE):
         if len(command) == 2:
             launch(__bt_command_execute, (command_word, command[1:] != b'\x00'))
         else:
