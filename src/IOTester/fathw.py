@@ -164,7 +164,7 @@ async def main() -> None:
 
     gc.collect()
 
-    if not get_settings()[Settings.DEBUG_MODE]:
+    if not get_settings().get_value(Settings.DEBUG_MODE):
         # precompute possible R values
         compute_all_r()
 
