@@ -3,6 +3,7 @@ import time
 
 import uasyncio as asyncio
 from micropython import const
+from machine import Pin
 
 import IOTester.state
 from .boardwifi import enable_wifi, enable_webrepl
@@ -163,10 +164,15 @@ async def main() -> None:
     print("Starting IOTesting  module...")
 
     gc.collect()
+    settings = get_settings()
 
-    if not get_settings().get_value(Settings.DEBUG_MODE):
+    # Board 2 has a faulty pin32 replaced by pin 15
+    if settings.get_value(Settings.SERIAL) == "2":
+        BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
+
+    if not settings.get_value(Settings.DEBUG_MODE):
         # precompute possible R values
-        compute_all_r()
+        compute_all_r(settings)
 
         await board_hw_init()
 
@@ -178,7 +184,9 @@ async def main() -> None:
         print('Ready...')
         await asyncio.gather(t1, t2, t3, t4)
     else:
-        get_settings().add_key(Settings.DEBUG_MODE, False)
+        settings.add_key(Settings.DEBUG_MODE, False)
         await enable_wifi()
         await enable_webrepl()
-        print('Exiting due to DEBUG MODE')
+        print('Debug mode...')
+        while True:
+            await asyncio.sleep_ms(100)

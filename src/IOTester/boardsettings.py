@@ -186,6 +186,13 @@ class Settings:
         del enc
         del ucryptolib
 
+    def main_hw_ver(self) -> int:
+        hw_rev = self.get_value(Settings.HW_REV)
+        if hw_rev is None or len(hw_rev) == 0:
+            return 1
+        else:
+            return int(hw_rev[0])
+
 
 def get_settings():
     global __settings
