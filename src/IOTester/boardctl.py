@@ -67,7 +67,7 @@ async def execute(command) -> bool:
             # Now setup main relay and optos
             if await set_relay_pos(True, False):
                 if command.setpoint != R_OPEN and command.setpoint != 0:  # Nothing to do if open/short circuit command
-                    best_tuple = find_best_r_with_opt(command.setpoint)
+                    best_tuple = find_best_r_with_opt(command.setpoint, get_settings())
                     __set_v_parallel(command.ctype == Command.measure_with_load)
                     final_result = __configure_for_r(best_tuple)
                 else:
@@ -265,7 +265,7 @@ async def toggle_vmeter_load() -> bool:
     print("** toggle_vmeter_load called")
     update_event_time()
     update_testmode(False)
-    comm = Command(Command.measure_with_load, 500)
+    comm = Command(Command.measure_with_load, 1000)
     return await execute(comm)
 
 
