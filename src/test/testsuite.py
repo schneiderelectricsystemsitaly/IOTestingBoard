@@ -42,7 +42,7 @@ class TestSuite:
 
     @staticmethod
     def add_base_tests(test_list, additional_delay_ms=0):
-
+        gc.collect()
         test_list.append(TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_METER),
                                   TestCase.chk_relay, 1, delay_ms=additional_delay_ms, desc='CMD BYPASS'))
 
@@ -53,6 +53,7 @@ class TestSuite:
             test_list.append(
                 TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, r, 2), TestCase.chk_setpoint, r,
                          delay_ms=additional_delay_ms, desc=f'CMD R={r}'))
+            gc.collect()
 
         test_list.append(
             TestCase(TestSuite.make_array(boardbtcfg.COMMAND_MODE_RESISTORS, TestSuite.R_OPEN, 2),

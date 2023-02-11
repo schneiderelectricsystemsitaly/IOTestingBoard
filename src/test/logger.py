@@ -4,15 +4,12 @@ import time
 import ssd1306
 import uasyncio as asyncio
 from machine import SoftI2C
-
-from .boardtester import BoardTester
-from .powermonitor import PowerMonitor
 from .test import STOP_FLAG
 
 
 class Logger:
 
-    def __init__(self, tester: BoardTester, meter: PowerMonitor, i2c: SoftI2C):
+    def __init__(self, tester, meter, i2c: SoftI2C):
         self.tester = tester
         self.meter = meter
 
@@ -68,7 +65,7 @@ class Logger:
             print('\tLast status from device', self.tester.status)
             print('\tPower statistics', self.meter.get_summary())
             print('\tPower last values', self.meter.get_last_values())
-            print('\t', self.free(True))
+            print('\tTesting board memory', self.free(True))
             await asyncio.sleep_ms(3000)
         print('Logger loop terminating')
 
@@ -108,4 +105,3 @@ class Logger:
             f.close()
         gc.collect()
         print('Results saved to file')
-

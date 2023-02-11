@@ -19,7 +19,7 @@ class TestCase:
 
         if desc not in TestCase.descriptions:
             TestCase.descriptions.append(desc)
-        self.desc_idx = TestCase.index(desc)
+        self.desc_idx = TestCase.descriptions.index(desc)
 
     def __str__(self):
         return f'Command {self.command} expected {str(self.fun_chk)}={self.expected} timeout {self.timeout_ms}'
