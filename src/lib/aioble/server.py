@@ -335,10 +335,13 @@ def register_services(*services):
     for i in range(len(services)):
         service_handles = handles[i]
         service = services[i]
+        print('Service', service)
         n = 0
         for characteristic in service.characteristics:
+            print('\tcharacteristic', characteristic)
             characteristic._register(service_handles[n])
             n += 1
             for descriptor in characteristic.descriptors:
+                print('\t\tdescriptor', descriptor)
                 descriptor._register(service_handles[n])
                 n += 1

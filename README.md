@@ -17,7 +17,10 @@
 
 ## Firmware requirements
 * Micropython 1.19 (used v1.19.1 for ESP32 standard firmware from https://micropython.org/download/esp32/ )
-* aioble (copied manually from micropython-lib / bluetooth)
+* aioble (can be installed to the lib folder of the flash memory using MPREMOTE tool)
+```shell
+mpremote connect COMx mip install aioble
+```
 * ota_update (forked from https://github.com/rdehuyss/micropython-ota-updater with bugfix for semantic versioning comparison bug)
 
 ## Development environment
@@ -87,16 +90,16 @@ pip install esptool
 * When the board is RESISTORS mode AND commands by meter are enabled (see COMMAND_METER_COMMANDS, COMMAND_SET_INITIAL_METER_COMM), it will interpret voltage accross input terminals as commands.
 * The default values for the thresholds are as follows:
 
-| Threshold | Voltage (V) | Command | Notes |
-|---|---|---|---|
-| 0 | 3 | Resistor, 1k | -
-| 1 | 4 | Resistor, 4k69 | -
-| 2 | 5 | Resistor, 7k18 | -
-| 3 | 6 | Resistor, 11k | -
-| 4 | 7 | Resistor, short | Actual value <40 ohms
-| 5 | 8 | Resistor, open | Actual value >50Mohms
-| 6 | 9 | Voltmeter + load 550 ohms | Generator will be shortly put in parallel with the load.
-| 7 | 12 | Bypass mode | User will need to press again the switch button, to allow other commands
+| Threshold | Voltage (V) | Command | Notes                                                                     |
+|---|---|---|---------------------------------------------------------------------------|
+| 0 | 3 | Resistor, 1k | -                                                                         |
+| 1 | 4 | Resistor, 4k69 | -                                                                         |
+| 2 | 5 | Resistor, 7k18 | -                                                                         |
+| 3 | 6 | Resistor, 11k | -                                                                         |
+| 4 | 7 | Resistor, short | Actual value <40 ohms                                                     |
+| 5 | 8 | Resistor, open | Actual value >50Mohms                                                     |
+| 6 | 9 | Voltmeter + load 550 ohms | Generator will be shortly put in parallel with the load.                  |
+| 7 | 12 | Bypass mode | User will need to press again the switch button, to allow other commands  |
 
 * Up to 16 thresholds are supported, but the minimum voltage is 3V and the maximum voltage allowed is 20 V (ADC range limitation) 
 * ADC resolution of ESP32 is poor and not linear, especially with low values ; readings are rounded to nearest integer voltage.
