@@ -26,6 +26,7 @@ export class BTApiState {
   btDeviceInfoService: BluetoothRemoteGATTService = null
   charHWRev: BluetoothRemoteGATTCharacteristic = null
   charFirmware: BluetoothRemoteGATTCharacteristic = null
+  charIP: BluetoothRemoteGATTCharacteristic = null
 
   btBatteryService: BluetoothRemoteGATTService = null
   charBattery: BluetoothRemoteGATTCharacteristic = null

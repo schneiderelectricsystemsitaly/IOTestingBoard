@@ -242,7 +242,8 @@ export class Driver {
       log.info('\t\tSerial number:' + this.btState.meter.hw_rev)
       this.btState.meter.firmware = await this.iot.getFirmware()
       log.info('\t\tSerial number:' + this.btState.meter.firmware)
-
+      this.btState.meter.ip_address = await this.iot.getIPAddress()
+      log.info('\t\tIP address:' + this.btState.meter.ip_address)
       this.btState.meter.battery = await this.iot.getBatteryLevel()
       log.debug('\t\tBattery (%):' + this.btState.meter.battery)
 
@@ -443,6 +444,7 @@ export class Driver {
 
       this.btState.charFirmware = await this.btState.btDeviceInfoService.getCharacteristic(0x2a26)
       this.btState.charHWRev = await this.btState.btDeviceInfoService.getCharacteristic(0x2a27)
+      this.btState.charIP = await this.btState.btDeviceInfoService.getCharacteristic(0x2ac9)
 
       log.info('> Bluetooth interfaces ready.')
 

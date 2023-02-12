@@ -11,9 +11,11 @@ export class MeterState {
   actual: number
   free_bytes: number
   battery: number
+  ip_address: string
   constructor () {
-    this.firmware = '???' // Firmware version
-    this.hw_rev = '???' // Serial number
+    this.firmware = '???'
+    this.hw_rev = '???'
+    this.ip_address = '???'
     this.mode = BoardMode.MODE_UNDEFINED
     this.setpoint = -1
     this.actual = -1

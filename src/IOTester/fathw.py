@@ -45,7 +45,7 @@ async def __animate_leds() -> None:
         else:
             error = True
 
-        error |= not current_state.last_command_result
+        error = not current_state.last_command_result
 
         if error:
             red_val = _error_pattern[cpt % len(_error_pattern)]

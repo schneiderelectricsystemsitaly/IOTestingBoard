@@ -85,19 +85,21 @@
                             <td><i class="bi bi-lightbulb-fill text-success" id="ready"></i>
                                 <i class="bi bi-lightbulb-fill text-danger" id="notready"></i>
                             </td>
-                            <td><i class="bi bi-hourglass-split" id="connecting"></i></td>
+                            <td><i class="bi bi-hourglass-split" id="connecting"></i>
+                                <span id="not-ipaddress"></span>
+                            </td>
                         </tr>
                         <tr>
-                            <th scope="row">Setpoint</th>
+                            <th scope="row">Last setpoint</th>
                             <td><span id="setpoint-value"></span>&nbsp;<span id="setpoint-unit"></span></td>
-                            <td><strong>Actual</strong></td>
-                            <td><span id="act-value"></span>&nbsp;<span id="act-unit"></span></td>
+                            <td><strong><strong><span id="mode-desc">MODE</span></strong></strong></td>
+                            <td>Load:<span id="act-value"></span>&nbsp;<span id="act-unit"></span></td>
                         </tr>
                         <tr>
                             <th scope="row" id="device-name">Device info</th>
                             <td><i class="bi bi-battery"></i>&nbsp;<span id="battery">0 %</span></td>
                             <td>HW Rev <span id="hw-rev"></span><br />Firmware <span id="fw-ver"></span></td>
-                            <td>MODE</td>
+                            <td></td>
                         </tr>
                         <tr>
                             <th scope="row">Last notification</th>
@@ -442,6 +444,7 @@
             // Notification data
             document.getElementById("not-wifion").style.display = status.notification.WiFi == 2 ? 'inline' : 'none';
             document.getElementById("not-wifioff").style.display = status.notification.WiFi == 1 ? 'inline' : 'none';
+            document.getElementById("not-ipaddress").innerHTML = status.ip_address
 
             document.getElementById("not-unknown").style.display = status.notification.Relay == 0 ? 'inline' : 'none';
             document.getElementById("not-bypass").style.display = status.notification.Relay == 1 ? 'inline' : 'none';
@@ -458,6 +461,16 @@
             document.getElementById("not-error").style.display = status.notification.Error ? 'inline' : 'none';
             document.getElementById("not-memfree").innerHTML = 'RAM: ' + Math.round(status.notification.Memfree / 1024).toString() + " Kb (" + Math.round(status.notification.Memfree / 111168 * 100).toString() + " %)";
             document.getElementById("not-numcomm").innerHTML = status.notification.CommandCpt.toString();
+
+            if (status.notification.Relay == 1) {
+                document.getElementById("mode-desc").innerHTML = "BYPASS"
+            } else if (status.notification.Relay == 2) {
+                if (status.notification.V_with_load) {
+                    document.getElementById("mode-desc").innerHTML = "VOLTMETER + RESISTOR LOAD"
+                } else {
+                    document.getElementById("mode-desc").innerHTML = "RESISTOR LOAD"
+                }
+            }
         }
 
         // Buttons binding

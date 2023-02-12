@@ -66,9 +66,9 @@ async def execute(command) -> bool:
         else:
             # Now setup main relay and optos
             if await set_relay_pos(True, False):
+                __set_v_parallel(command.ctype == Command.measure_with_load)
                 if command.setpoint != R_OPEN and command.setpoint != 0:  # Nothing to do if open/short circuit command
                     best_tuple = find_best_r_with_opt(command.setpoint, get_settings())
-                    __set_v_parallel(command.ctype == Command.measure_with_load)
                     final_result = __configure_for_r(best_tuple)
                 else:
                     final_result = True

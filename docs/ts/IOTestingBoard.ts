@@ -48,6 +48,16 @@ export class IOTestingBoard {
   }
 
   /**
+     * Gets the meter serial number
+     * @returns {string}
+     */
+  async getIPAddress (): Promise<string> {
+    log.debug('\t\tReading IP Address')
+    const dv: DataView = await this.btState.charIP.readValue()
+    return this.uintToString(dv)
+  }
+
+  /**
      * Gets the battery level indication
      * @returns {number} percentage (%)
      */
