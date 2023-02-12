@@ -1,7 +1,7 @@
 import { State, CommandType, BoardMode } from './constants'
 import { Command } from './Command'
 import { setLevel, levels } from 'loglevel'
-import { Stop, Pair, SimpleExecute, GetState, GetStateJSON, SimpleExecuteJSON, driver } from './meterPublicAPI'
+import { Stop, Pair, SimpleExecute, GetState, GetStateJSON, SimpleExecuteJSON, driver } from './meterApiImpl'
 import { CommandResult } from './CommandResult'
 
 // Defines default level on startup

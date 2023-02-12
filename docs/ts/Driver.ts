@@ -5,7 +5,7 @@
  *  This module interacts with browser for bluetooth comunications and pairing, and with SenecaMSC object.
  */
 
-import { BTApiState } from './APIState'
+import { BTApiState } from './BTAPIState'
 import { State, BlueToothIOTUUID, ResultCode, CommandType, BoardMode, RelayPosition } from './constants'
 import { IOTestingBoard } from './IOTestingBoard'
 import { Command } from './Command'
@@ -344,7 +344,7 @@ export class Driver {
           .requestDevice({
             acceptAllDevices: false,
             filters: [{ services: [BlueToothIOTUUID.ServiceUuid.toLowerCase()] }],
-            optionalServices: ['battery_service', 'generic_access', 'device_information', BlueToothIOTUUID.ServiceUuid.toLowerCase(), ]
+            optionalServices: ['battery_service', 'generic_access', 'device_information', BlueToothIOTUUID.ServiceUuid.toLowerCase()]
           })
       }
       this.btState.btDevice = device
@@ -428,21 +428,21 @@ export class Driver {
       this.btState.charRead = await this.btState.btIOTService.getCharacteristic(BlueToothIOTUUID.StatusCharUuid)
       log.debug('> Found notifications characteristic')
 
-      this.btState.btBatteryService = await this.btState.btGATTServer.getPrimaryService('battery_service')
-      log.debug('> Found battery service')
-      this.btState.charBattery = await this.btState.btBatteryService.getCharacteristic(0x2A19)
-
-      /*
-      this.btState.btDeviceInfoService = await this.btState.btGATTServer.getPrimaryService('device_information')
-      log.debug('> Found device information service')
-
-      this.btState.charFirmware = await this.btState.btDeviceInfoService.getCharacteristic(0x2A26)
-      this.btState.charHWRev = await this.btState.btDeviceInfoService.getCharacteristic(0x2a27)
-      */
+      await sleep_ms(10)
       this.btState.response = null
       this.btState.charRead.addEventListener('characteristicvaluechanged', this.handleNotifications.bind(this))
       log.debug('> Starting notifications...')
       await this.btState.charRead.startNotifications()
+
+      this.btState.btBatteryService = await this.btState.btGATTServer.getPrimaryService('battery_service')
+      log.debug('> Found battery service')
+      this.btState.charBattery = await this.btState.btBatteryService.getCharacteristic(0x2a19)
+
+      this.btState.btDeviceInfoService = await this.btState.btGATTServer.getPrimaryService('device_information')
+      log.debug('> Found device information service')
+
+      this.btState.charFirmware = await this.btState.btDeviceInfoService.getCharacteristic(0x2a26)
+      this.btState.charHWRev = await this.btState.btDeviceInfoService.getCharacteristic(0x2a27)
 
       log.info('> Bluetooth interfaces ready.')
 

@@ -96,7 +96,7 @@
                         <tr>
                             <th scope="row" id="device-name">Device info</th>
                             <td><i class="bi bi-battery"></i>&nbsp;<span id="battery">0 %</span></td>
-                            <td>HW REV:<span id="hw-rev"></span>&nbsp;FW:<span id="fw-ver"></span></td>
+                            <td>HW Rev <span id="hw-rev"></span><br />Firmware <span id="fw-ver"></span></td>
                             <td>MODE</td>
                         </tr>
                         <tr>
@@ -115,8 +115,9 @@
                                     class="bi bi-3-circle-fill" id="not-speed3" alt="240 Mhz"></i>-
                                 Result <i class="bi bi-x-circle text-warning" id="not-result-ko"></i><i
                                     class="bi bi-check2-circle text-success" id="not-result-ok"></i> -
-                                <span id="not-memfree"></span> -
-                                <i class="bi bi-exclamation-circle text-danger" id="not-error" alt="Board error"></i> -
+                                <span id="not-memfree"></span>
+                                <span id="not-error">Board error <i class="bi bi-exclamation-circle text-danger"
+                                        alt="Board error"></i>&nbsp;</span>
                                 #Com:<span id="not-numcomm"></span>
                             </td>
                         </tr>
@@ -366,10 +367,6 @@
     </div>
 
     <script language="javascript">
-        function time(text) {
-            log('[' + new Date().toJSON().substr(11, 8) + '] ' + text);
-        }
-
         const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
 
         const alert = (message, type) => {
@@ -385,16 +382,17 @@
         }
 
         async function execute(command) {
+            console.log('Executing ' + command.toString())
             result = await IOTestingBT.SimpleExecute(command)
             if (!result.success) {
-                alert('The command has failed:' + result.message, 'info')
+                alert('The command has failed, error:' + result.message, 'warning')
             } else {
-                alert('Command successfully executed', 'warning')
+                alert('Command successfully executed. Details: ' + command.toString(), 'info')
             }
         }
 
-        function bindButton(elementId, command) {
-            document.getElementById(elementId).onclick = async () => { await execute(command) }
+        function bindButton(elementId, fn_command) {
+            document.getElementById(elementId).onclick = async () => { await execute(fn_command()) }
         }
 
         async function refreshStatus() {
@@ -407,10 +405,10 @@
             document.getElementById("ready").style.display = status.ready ? 'block' : 'none';
             document.getElementById("connecting").style.display = status.initializing ? 'block' : 'none';
             switch (status.lastSetpoint?.Value) {
-                case 0xFF:
+                case 0xFFFF:
                     document.getElementById("setpoint-value").innerHTML = 'OPEN - ∞';
                     break;
-                case 0xFE:
+                case 0xFFFE:
                     document.getElementById("setpoint-value").innerHTML = 'MAX';
                     break;
                 case 0:
@@ -425,7 +423,7 @@
             document.getElementById("setpoint-unit").innerHTML = status.lastSetpoint?.Units;
             document.getElementById("ts").innerHTML = status.lastMeasure?.Timestamp;
             switch (status.lastMeasure?.Value) {
-                case 0xFF:
+                case 0xFFFF:
                     document.getElementById("act-value").innerHTML = 'OPEN - ∞';
                     break;
                 case 0:
@@ -451,13 +449,14 @@
             document.getElementById("not-vload").style.display = status.notification.V_with_load ? 'inline' : 'none';
 
             document.getElementById("not-bt").style.display = status.notification.Bluetooth == 2 || status.notification.Bluetooth == 3 ? 'inline' : 'none';
-            document.getElementById("not-speed1").style.display = status.notification.Frequency == 1 ? 'inline' : 'none';
-            document.getElementById("not-speed2").style.display = status.notification.Frequency == 2 ? 'inline' : 'none';
-            document.getElementById("not-speed3").style.display = status.notification.Frequency == 3 ? 'inline' : 'none';
+            document.getElementById("not-speed1").style.display = status.notification.Frequency == 0 ? 'inline' : 'none';
+            document.getElementById("not-speed2").style.display = status.notification.Frequency == 1 ? 'inline' : 'none';
+            document.getElementById("not-speed3").style.display = status.notification.Frequency == 2 ? 'inline' : 'none';
             document.getElementById("not-testmode").style.display = status.notification.Test ? 'inline' : 'none'
             document.getElementById("not-result-ok").style.display = status.notification.LastResult ? 'inline' : 'none';
-            document.getElementById("not-result-ko").style.display = !status.notification.LastResult ? 'inline' : 'none';
-            document.getElementById("not-memfree").innerHTML = 'RAM: ' + Math.round(status.notification.Memfree / 1024).toString() + " Kb";
+            document.getElementById("not-result-ko").style.display = (!status.notification.LastResult) ? 'inline' : 'none';
+            document.getElementById("not-error").style.display = status.notification.Error ? 'inline' : 'none';
+            document.getElementById("not-memfree").innerHTML = 'RAM: ' + Math.round(status.notification.Memfree / 1024).toString() + " Kb (" + Math.round(status.notification.Memfree / 111168 * 100).toString() + " %)";
             document.getElementById("not-numcomm").innerHTML = status.notification.CommandCpt.toString();
         }
 
@@ -467,61 +466,90 @@
         document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
 
         // Commands button binding
-        bindButton("btnExecuteM", IOTestingBT.Command.CreateNoSP(
-            IOTestingBT.CommandType.COMMAND_MODE_METER))
-        bindButton("btnExecuteR", IOTestingBT.Command.CreateOneSP(
-            IOTestingBT.CommandType.COMMAND_MODE_RESISTORS,
-            document.getElementById("r_value").value));
+        bindButton("btnExecuteM", function () {
+            return IOTestingBT.Command.CreateNoSP(
+                IOTestingBT.CommandType.COMMAND_MODE_METER)
+        })
+        bindButton("btnExecuteR", function () {
+            return IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_MODE_RESISTORS,
+                document.getElementById("r_value").value)
+        });
 
-        bindButton("btnExecuteV", IOTestingBT.Command.CreateOneSP(
-            IOTestingBT.CommandType.COMMAND_MODE_V_LOAD,
-            document.getElementById("r_load").value));
+        bindButton("btnExecuteV", function () {
+            return IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_MODE_V_LOAD,
+                document.getElementById("r_load").value)
+        });
 
-        bindButton("btnExecuteWS", IOTestingBT.Command.CreateOneSP(
-            IOTestingBT.CommandType.COMMAND_SET_WIFI_NETWORK,
-            document.getElementById("wifissid").value))
-        bindButton("btnExecuteWP", IOTestingBT.Command.CreateOneSP(
-            IOTestingBT.CommandType.COMMAND_SET_WIFI_PASSWORD,
-            document.getElementById("wifipwd").value))
-        bindButton("btnReboot", IOTestingBT.Command.CreateNoSP(
-            IOTestingBT.CommandType.COMMAND_REBOOT))
+        bindButton("btnExecuteWS", function () {
+            return IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_SET_WIFI_NETWORK,
+                document.getElementById("wifissid").value)
+        })
+        bindButton("btnExecuteWP", function () {
+            return IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_WIFI_PASSWORD, document.getElementById("wifipwd").value)
+        })
+        bindButton("btnReboot", function () {
+            return IOTestingBT.Command.CreateNoSP(
+                IOTestingBT.CommandType.COMMAND_REBOOT)
+        })
 
-        bindButton("btnBreak", IOTestingBT.Command.CreateNoSP(
-            IOTestingBT.CommandType.COMMAND_BREAK));
+        bindButton("btnBreak", function () {
+            return IOTestingBT.Command.CreateNoSP(
+                IOTestingBT.CommandType.COMMAND_BREAK)
+        });
 
-        bindButton("btnChangeName", IOTestingBT.Command.CreateOneSP(
-            IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME,
-            document.getElementById("bt-name").value))
+        bindButton("btnChangeName", function () {
+            return IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME,
+                document.getElementById("bt-name").value)
+        })
 
-        bindButton("btnChangeName", IOTestingBT.Command.CreateOneSP(
-            IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME,
-            document.getElementById("bt-name").value))
+        bindButton("btnChangeName", function () {
+            return IOTestingBT.Command.CreateOneSP(
+                IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME,
+                document.getElementById("bt-name").value)
+        })
 
-        bindButton("btnWifiOnce", IOTestingBT.Command.CreateNoSP(
-            document.getElementById("en_wifi").checked ? IOTestingBT.CommandType.COMMAND_ENABLE_WIFI : IOTestingBT.CommandType.COMMAND_DISABLE_WIFI))
+        bindButton("btnWifiOnce", function () {
+            return IOTestingBT.Command.CreateNoSP(
+                document.getElementById("en_wifi").checked ? IOTestingBT.CommandType.COMMAND_ENABLE_WIFI : IOTestingBT.CommandType.COMMAND_DISABLE_WIFI)
+        })
 
-        bindButton("btnWifiBoot", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_WIFI,
-            document.getElementById("en_wifi_boot").checked))
+        bindButton("btnWifiBoot", function () { return IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_WIFI, document.getElementById("en_wifi_boot").checked) })
 
-        bindButton("btnOTA", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_OTA,
-            document.getElementById("en_ota").checked))
+        bindButton("btnOTA", function () {
+            return IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_OTA,
+                document.getElementById("en_ota").checked)
+        })
 
-        bindButton("btnChangeCPU", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_CPU,
-            document.getElementById("speed").value))
+        bindButton("btnChangeCPU", function () {
+            return IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_CPU,
+                document.getElementById("speed").value)
+        })
 
-        bindButton("btnMeterCommands", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_METER_COMM,
-            document.getElementById("bt-voltage").checked))
+        bindButton("btnMeterCommands", function () {
+            return IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_METER_COMM,
+                document.getElementById("bt-voltage").checked)
+        })
 
-        bindButton("btnDelay", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_DEEPSLEEP_MIN,
-            document.getElementById("minutes").value))
+        bindButton("btnDelay", function () {
+            return IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_DEEPSLEEP_MIN,
+                document.getElementById("minutes").value)
+        })
 
-        bindButton("btnTest", IOTestingBT.Command.CreateNoSP(
-            IOTestingBT.CommandType.COMMAND_RUN_TEST))
+        bindButton("btnTest", function () {
+            return IOTestingBT.Command.CreateNoSP(
+                IOTestingBT.CommandType.COMMAND_RUN_TEST)
+        })
 
-        bindButton("btnDeepsleep", IOTestingBT.Command.CreateNoSP(
-            IOTestingBT.CommandType.COMMAND_DEEP_SLEEP))
+        bindButton("btnDeepsleep", function () {
+            return IOTestingBT.Command.CreateNoSP(
+                IOTestingBT.CommandType.COMMAND_DEEP_SLEEP)
+        })
 
-        bindButton("btnREPL", IOTestingBT.Command.CreateNoSP(
+        bindButton("btnREPL", () => IOTestingBT.Command.CreateNoSP(
             IOTestingBT.CommandType.COMMAND_ENABLE_WEBREPL))
 
     </script>

@@ -3,7 +3,7 @@
  *  It uses the modbus helper functions from senecaModbus / modbusRtu to interact with the meter with SendAndResponse function
  */
 import { Command } from './Command'
-import { BTApiState } from './APIState'
+import { BTApiState } from './BTAPIState'
 import log = require('loglevel')
 import { CommandType } from './constants'
 import { NotificationData } from './NotificationData'
@@ -54,7 +54,8 @@ export class IOTestingBoard {
   async getBatteryLevel (): Promise<number> {
     log.debug('\t\tReading battery voltage')
     const dv: DataView = await this.btState.charBattery.readValue()
-    return dv.getUint8(0)
+    if (dv.byteLength > 0) { return dv.getUint8(0) }
+    return -1
   }
 
   static parseNotification (buf: ArrayBuffer): NotificationData {
@@ -68,8 +69,8 @@ export class IOTestingBoard {
     output.WiFi = (status1 >> 6) & 3
     output.Relay = (status1 >> 4) & 3
     output.Bluetooth = (status1 >> 1) & 7
-    output.Error = (status2 & 64) != 0
-    output.Frequency = (status2 >> 5) & 3
+    output.Error = (status2 & 64) == 1
+    output.Frequency = (status2 >> 4) & 3
     output.Verbose = (status2 & 8) != 0
     output.Test = (status2 & 4) != 0
     output.V_with_load = (status2 & 2) != 0

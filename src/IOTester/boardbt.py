@@ -1,12 +1,12 @@
 import gc
 import time
 
-import aioble
 import bluetooth
 import uasyncio as asyncio
 from machine import freq
 from micropython import const
 
+import aioble
 from . import boardbtcfg
 from .boardctl import (get_battery_percent)
 from .boardsettings import get_settings, Settings
@@ -173,7 +173,6 @@ async def __peripheral_task() -> None:
                     boardbtcfg.ADV_INTERVAL_MS,
                     name=device_name,
                     services=[boardbtcfg.BOARD_SERVICE_UUID],
-                    appearance=boardbtcfg.GENERIC_REMOTE_CONTROL,
                     timeout_ms=None)
                 __clients.append(asyncio.create_task(__client_task(connection)))
                 await asyncio.sleep_ms(200)
@@ -272,8 +271,8 @@ def __get_notification_data() -> bytearray:
     else:
         i_freq = 0
 
-    status_b2 = (0b1 if state.error_cpt > 0 else 0b0) << 6 | \
-                int(i_freq) << 5 | \
+    status_b2 = (0b1 if (state.error_cpt > 0) else 0b0) << 6 | \
+                int(i_freq) << 4 | \
                 (0b1 if state.VERBOSE else 0b0) << 3 | \
                 (0b1 if state.test_mode else 0b0) << 2 | \
                 (0b1 if state.meter_parallel else 0b0) << 1 | \
@@ -343,7 +342,7 @@ async def __enable_bt() -> bool:
     await asyncio.sleep_ms(0)
 
     service1 = aioble.Service(boardbtcfg.BOARD_SERVICE_UUID)
-    __status_characteristic = aioble.Characteristic(service1, boardbtcfg.BOARD_STATUS_UUID, read=False, notify=True,
+    __status_characteristic = aioble.Characteristic(service1, boardbtcfg.BOARD_STATUS_UUID, read=True, notify=True,
                                                     capture=False)
     board_command_char = aioble.Characteristic(service1, boardbtcfg.BOARD_COMMAND_UUID, write_no_response=True,
                                                notify=False, capture=False)
@@ -357,6 +356,7 @@ async def __enable_bt() -> bool:
     aioble.register_services(service1, service2, service3)
 
     gc.collect()
+    await asyncio.sleep(0)
 
     __bt_stop_flag = False
 

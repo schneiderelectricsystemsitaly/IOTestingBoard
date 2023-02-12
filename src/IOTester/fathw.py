@@ -2,16 +2,16 @@ import gc
 import time
 
 import uasyncio as asyncio
-from micropython import const
 from machine import Pin
+from micropython import const
 
 import IOTester.state
-from .boardwifi import enable_wifi, enable_webrepl
 from .boardcfg import BOARD, R_OPEN, R_MAX
 from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
                        light_sleep, board_hw_init)
 from .boardsettings import get_settings, Settings
 from .boardstate import get_state, runtime_memory_info, update_testmode, update_last_result, get_current_command
+from .boardwifi import enable_wifi, enable_webrepl
 from .command import Command
 from .resistors import compute_all_r
 from .state import WifiState, BluetoothState
