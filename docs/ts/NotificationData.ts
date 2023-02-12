@@ -10,8 +10,8 @@ export class NotificationData {
   Test: boolean = false
   V_with_load: boolean = false
   LastResult: boolean = false
-  Actual_R: number = 0
-  Setpoint_R: number = 0
+  Actual_R: number = -1
+  Setpoint_R: number = -1
   Memfree: number = 0
   Error: boolean = false
   CommandCpt: number = 0

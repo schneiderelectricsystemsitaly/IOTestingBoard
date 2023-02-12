@@ -51,8 +51,8 @@ export async function GetState (): Promise<any> {
       initializing = false
   }
   return {
-    lastSetpoint: {'Value':driver.btState.lastMeasure.Setpoint_R, 'Units':'Ohms', 'Timestamp': driver.btState.lastMeasure?.Timestamp},
-    lastMeasure: {'Value':driver.btState.lastMeasure.Actual_R, 'Units':'Ohms', 'Timestamp': driver.btState.lastMeasure?.Timestamp},
+    lastSetpoint: { Value: driver.btState.lastMeasure.Setpoint_R, Units: 'Ohms', Timestamp: driver.btState.lastMeasure?.Timestamp },
+    lastMeasure: { Value: driver.btState.lastMeasure.Actual_R, Units: 'Ohms', Timestamp: driver.btState.lastMeasure?.Timestamp },
     deviceName: driver.btState.btDevice ? driver.btState.btDevice.name : '',
     deviceSerial: '',
     deviceHwRev: driver.btState.meter?.hw_rev,
@@ -74,7 +74,6 @@ export async function GetState (): Promise<any> {
 export async function GetStateJSON (): Promise<string> {
   return JSON.stringify(await GetState())
 }
-
 
 export async function SimpleExecuteJSON (jsonCommand: string): Promise<string> {
   const command = JSON.parse(jsonCommand)
@@ -135,20 +134,17 @@ export async function SimpleExecute (command: Command): Promise<CommandResult> {
 
   // State is updated by execute command, so we can use btState right away
   cr.value = driver.btState.lastMeasure.Setpoint_R
-  if (cr.value == 0xFFFF)
-    cr.value = Infinity
+  if (cr.value == 0xFFFF) { cr.value = Infinity }
 
   cr.unit = 'Ohms'
   cr.secondary_value = driver.btState.lastMeasure.Actual_R
-  if (cr.secondary_value == 0xFFFF)
-    cr.secondary_value = Infinity
+  if (cr.secondary_value == 0xFFFF) { cr.secondary_value = Infinity }
 
   cr.secondary_unit = 'Ohms'
   cr.success = true
   cr.message = 'Command executed successfully'
   return cr
 }
-
 
 /**
  * MUST BE CALLED FROM A USER GESTURE EVENT HANDLER

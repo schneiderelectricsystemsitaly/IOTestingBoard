@@ -13,7 +13,7 @@ export class Command {
   pending: boolean
   request: ArrayBuffer | null
   response: ArrayBuffer | null
-  
+
   /**
      * Creates a new command
      * @param {CommandType} ctype
@@ -54,18 +54,22 @@ export class Command {
     return 'Type: ' + this.type + ', setpoint:' + this.setpoint + ', setpoint2: ' + this.setpoint2 + ', pending:' + this.pending + ', error:' + this.error
   }
 
-  isGeneration(): boolean {
+  isGeneration (): boolean {
     return true
   }
-  isMeasurement(): boolean {
+
+  isMeasurement (): boolean {
     return false
   }
-  isSetting(): boolean {
+
+  isSetting (): boolean {
     return false
   }
-  isValid(): boolean {
+
+  isValid (): boolean {
     return true
   }
+
   /**
      * Gets the default setpoint for this command type
      * @returns {Object} setpoint(s) expected

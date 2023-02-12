@@ -9,11 +9,14 @@
     <title>IOTesting Board test page</title>
     <script src="./dist/bt-iotesting.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
-        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 </head>
 
 <body onload="setInterval(refreshStatus, 450)">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
     <style>
         .output {
             background-color: #f0f0f0;
@@ -61,6 +64,7 @@
         }
     </style>
     <h1>IOTesting<br /></h1>
+    <div id="liveAlertPlaceholder"></div>
     <div class="container-fluid">
         <div class="row">
             <div class="col">
@@ -76,48 +80,51 @@
                 <table class="table">
                     <tbody>
                         <tr>
-                            <th scope="row" id="device-name">Device name</th>
-                            <td>NAME</td>
-                            <td><i class="bi bi-lightbulb-fill text-success" id="ready"></i></td>
+                            <th scope="row" id="device-name">Device</th>
+                            <td><span id="devicename">?</span></td>
+                            <td><i class="bi bi-lightbulb-fill text-success" id="ready"></i>
+                                <i class="bi bi-lightbulb-fill text-danger" id="notready"></i>
+                            </td>
                             <td><i class="bi bi-hourglass-split" id="connecting"></i></td>
                         </tr>
                         <tr>
                             <th scope="row">Setpoint</th>
-                            <td id="setpoint-value">???</td>
-                            <td id="setpoint-unit">Unit</td>
-                            <td id="setpoint-ts">Timestamp</td>
+                            <td><span id="setpoint-value"></span>&nbsp;<span id="setpoint-unit"></span></td>
+                            <td><strong>Actual</strong></td>
+                            <td><span id="act-value"></span>&nbsp;<span id="act-unit"></span></td>
                         </tr>
                         <tr>
-                            <th scope="row">Actual</th>
-                            <td id="act-value">???</td>
-                            <td id="act-unit">Unit</td>
-                            <td id="act-ts">Timestamp</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" id="device-name">Details</th>
-                            <td>BATTERY</td>
-                            <td>HW REV FW REV</td>
+                            <th scope="row" id="device-name">Device info</th>
+                            <td><i class="bi bi-battery"></i>&nbsp;<span id="battery">0 %</span></td>
+                            <td>HW REV:<span id="hw-rev"></span>&nbsp;FW:<span id="fw-ver"></span></td>
                             <td>MODE</td>
                         </tr>
                         <tr>
-                            <th scope="row">Notification</th>
+                            <th scope="row">Last notification</th>
                             <td id="notification" colspan="3">
-                                Mode:<i class="bi bi-box-arrow-right" id="not-bypass"></i>
-                                <i class="bi bi-toggles2" id="not-r"></i>
-                                <i class="bi bi-speedometer2" id="not-vload"></i>
-                                <i class="bi bi-list-check text-info" id="not-testmode"></i> -
-                                <i class="bi bi-wifi text-success" id="not-wifion"></i>
-                                <i class="bi bi-wifi-off text-warning" id="not-wifioff"></i>
-                                <i class="bi bi-bluetooth text-primary" id="not-bt"></i> - 
-                                Speed <i class="bi bi-1-circle-fill"></i><i class="bi bi-2-circle-fill"></i><i class="bi bi-3-circle-fill"></i>
-                                -
-                                Result <i class="bi bi-x-circle text-warning"></i><i class="bi bi-check2-circle text-success"></i> -
-                                Memfree -
-                                Error <i class="bi bi-exclamation-circle text-danger"></i> -
-                                #Com:0 -
-                                Timestamp
+                                Mode:<i class="bi bi-box-arrow-right" id="not-bypass" alt="bypass"></i>
+                                <i class="bi bi-toggles2" id="not-r" alt="resistor"></i>
+                                <i class="bi bi-speedometer2" id="not-vload" alt="voltmeter with load"></i>
+                                <i class="bi bi-question-circle" id="not-unknown"></i>&nbsp;
+                                <i class="bi bi-list-check text-info" id="not-testmode" alt="test mode"></i>
+                                <i class="bi bi-wifi text-success" id="not-wifion" alt="WiFi enabled"></i>
+                                <i class="bi bi-wifi-off text-warning" id="not-wifioff" alt="WiFi disabled"></i>
+                                <i class="bi bi-bluetooth text-primary" id="not-bt" alt="Bluetooth enabled"></i> -
+                                Clock <i class="bi bi-1-circle-fill" id="not-speed1" alt="80 Mhz"></i><i
+                                    class="bi bi-2-circle-fill" id="not-speed2" alt="160 Mhz"></i><i
+                                    class="bi bi-3-circle-fill" id="not-speed3" alt="240 Mhz"></i>-
+                                Result <i class="bi bi-x-circle text-warning" id="not-result-ko"></i><i
+                                    class="bi bi-check2-circle text-success" id="not-result-ok"></i> -
+                                <span id="not-memfree"></span> -
+                                <i class="bi bi-exclamation-circle text-danger" id="not-error" alt="Board error"></i> -
+                                #Com:<span id="not-numcomm"></span>
                             </td>
                         </tr>
+                        <tr>
+                            <th scope="row">Last refresh</th>
+                            <td colspan="3">
+                                <span id="ts"></span>
+                            </td>
                     </tbody>
                 </table>
             </div>
@@ -128,7 +135,8 @@
                 <button id="btnStop" class="btn btn-danger">STOP</button>
                 &nbsp;
                 <button id="btnDebugLog" class="btn btn-info">LOG (Debug)</button>
-                <a class="btn btn-info" data-toggle="collapse" href="#detailsCollapse" role="button" aria-expanded="false" aria-controls="detailsCollapse">Details</a>
+                <a class="btn btn-info" data-bs-toggle="collapse" href="#detailsCollapse" role="button"
+                    aria-expanded="false" aria-controls="detailsCollapse">Details</a>
             </div>
         </div>
     </div>
@@ -358,21 +366,99 @@
     </div>
 
     <script language="javascript">
-        chartData = [];
-        lastData = null;
-        previousData = null;
-        /* HELPERS */
         function time(text) {
             log('[' + new Date().toJSON().substr(11, 8) + '] ' + text);
         }
-        var init = 0;
+
+        const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
+
+        const alert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceholder.append(wrapper)
+        }
+
+        async function execute(command) {
+            result = await IOTestingBT.SimpleExecute(command)
+            if (!result.success) {
+                alert('The command has failed:' + result.message, 'info')
+            } else {
+                alert('Command successfully executed', 'warning')
+            }
+        }
+
+        function bindButton(elementId, command) {
+            document.getElementById(elementId).onclick = async () => { await execute(command) }
+        }
 
         async function refreshStatus() {
             var new_sample = false;
             var status = await IOTestingBT.GetState();
             var driver = IOTestingBT.driver;
             document.getElementById("status").innerHTML = JSON.stringify(status);
-            document.getElementById("stats").innerHTML = JSON.stringify(driver.btState?.stats).replaceAll(',', '<br/>');
+            document.getElementById("devicename").innerHTML = status.deviceName
+            document.getElementById("notready").style.display = status.ready ? 'none' : 'block';
+            document.getElementById("ready").style.display = status.ready ? 'block' : 'none';
+            document.getElementById("connecting").style.display = status.initializing ? 'block' : 'none';
+            switch (status.lastSetpoint?.Value) {
+                case 0xFF:
+                    document.getElementById("setpoint-value").innerHTML = 'OPEN - ∞';
+                    break;
+                case 0xFE:
+                    document.getElementById("setpoint-value").innerHTML = 'MAX';
+                    break;
+                case 0:
+                    document.getElementById("setpoint-value").innerHTML = 'CLOSED (0)';
+                    break;
+                case -1:
+                    document.getElementById("setpoint-value").innerHTML = '???';
+                    break;
+                default:
+                    document.getElementById("setpoint-value").innerHTML = status.lastSetpoint?.Value;
+            }
+            document.getElementById("setpoint-unit").innerHTML = status.lastSetpoint?.Units;
+            document.getElementById("ts").innerHTML = status.lastMeasure?.Timestamp;
+            switch (status.lastMeasure?.Value) {
+                case 0xFF:
+                    document.getElementById("act-value").innerHTML = 'OPEN - ∞';
+                    break;
+                case 0:
+                    document.getElementById("act-value").innerHTML = 'CLOSED - 0';
+                    break;
+                case -1:
+                    document.getElementById("act-value").innerHTML = '???';
+                    break;
+                default:
+                    document.getElementById("act-value").innerHTML = status.lastMeasure?.Value;
+            }
+            document.getElementById("act-unit").innerHTML = status.lastMeasure?.Units;
+            document.getElementById("battery").innerHTML = status.batteryLevel + "%";
+            document.getElementById("hw-rev").innerHTML = status.deviceHwRev;
+            document.getElementById("fw-ver").innerHTML = status.firmware;
+            // Notification data
+            document.getElementById("not-wifion").style.display = status.notification.WiFi == 2 ? 'inline' : 'none';
+            document.getElementById("not-wifioff").style.display = status.notification.WiFi == 1 ? 'inline' : 'none';
+
+            document.getElementById("not-unknown").style.display = status.notification.Relay == 0 ? 'inline' : 'none';
+            document.getElementById("not-bypass").style.display = status.notification.Relay == 1 ? 'inline' : 'none';
+            document.getElementById("not-r").style.display = status.notification.Relay == 2 && !status.notification.V_with_load ? 'inline' : 'none';
+            document.getElementById("not-vload").style.display = status.notification.V_with_load ? 'inline' : 'none';
+
+            document.getElementById("not-bt").style.display = status.notification.Bluetooth == 2 || status.notification.Bluetooth == 3 ? 'inline' : 'none';
+            document.getElementById("not-speed1").style.display = status.notification.Frequency == 1 ? 'inline' : 'none';
+            document.getElementById("not-speed2").style.display = status.notification.Frequency == 2 ? 'inline' : 'none';
+            document.getElementById("not-speed3").style.display = status.notification.Frequency == 3 ? 'inline' : 'none';
+            document.getElementById("not-testmode").style.display = status.notification.Test ? 'inline' : 'none'
+            document.getElementById("not-result-ok").style.display = status.notification.LastResult ? 'inline' : 'none';
+            document.getElementById("not-result-ko").style.display = !status.notification.LastResult ? 'inline' : 'none';
+            document.getElementById("not-memfree").innerHTML = 'RAM: ' + Math.round(status.notification.Memfree / 1024).toString() + " Kb";
+            document.getElementById("not-numcomm").innerHTML = status.notification.CommandCpt.toString();
         }
 
         // Buttons binding
@@ -380,97 +466,65 @@
         document.getElementById("btnStop").onclick = async () => { await IOTestingBT.Stop() };
         document.getElementById("btnDebugLog").onclick = async () => { await IOTestingBT.setLevel(1) };
 
-        document.getElementById("btnExecuteM").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateNoSP(IOTestingBT.CommandType.COMMAND_MODE_METER))
-        };
-        document.getElementById("btnExecuteR").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(
-                    IOTestingBT.CommandType.COMMAND_MODE_RESISTORS,
-                    document.getElementById("r_value").value))
-        };
-        document.getElementById("btnExecuteV").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(
-                    IOTestingBT.CommandType.COMMAND_MODE_V_LOAD,
-                    document.getElementById("r_load").value))
-        };
-        document.getElementById("btnExecuteWS").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(
-                    IOTestingBT.CommandType.COMMAND_SET_WIFI_NETWORK,
-                    document.getElementById("wifissid").value))
-        };
-        document.getElementById("btnExecuteWP").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(
-                    IOTestingBT.CommandType.COMMAND_SET_WIFI_PASSWORD,
-                    document.getElementById("wifipwd").value))
-        };
-        document.getElementById("btnReboot").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateNoSP(
-                    IOTestingBT.CommandType.COMMAND_REBOOT))
-        };
-        document.getElementById("btnBreak").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateNoSP(
-                    IOTestingBT.CommandType.COMMAND_BREAK))
-        };
-        document.getElementById("btnChangeName").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(
-                    IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME,
-                    document.getElementById("bt-name").value))
-        };
-        document.getElementById("btnWifiOnce").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateNoSP(
-                    document.getElementById("en_wifi").checked ? IOTestingBT.CommandType.COMMAND_ENABLE_WIFI : IOTestingBT.CommandType.COMMAND_DISABLE_WIFI))
-        };
-        document.getElementById("btnWifiBoot").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_WIFI,
-                    document.getElementById("en_wifi_boot").checked))
-        };
-        document.getElementById("btnOTA").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_OTA,
-                    document.getElementById("en_ota").checked))
-        };
-        document.getElementById("btnChangeCPU").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_CPU,
-                    document.getElementById("speed").value))
-        };
-        document.getElementById("btnMeterCommands").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_METER_COMM,
-                    document.getElementById("bt-voltage").checked))
-        };
-        document.getElementById("btnDelay").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_DEEPSLEEP_MIN,
-                    document.getElementById("minutes").value))
-        };
-        document.getElementById("btnTest").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateNoSP(
-                    IOTestingBT.CommandType.COMMAND_RUN_TEST))
-        };
-        document.getElementById("btnDeepsleep").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateNoSP(
-                    IOTestingBT.CommandType.COMMAND_DEEP_SLEEP))
-        };
-        document.getElementById("btnREPL").onclick = async () => {
-            await IOTestingBT.SimpleExecute(
-                IOTestingBT.Command.CreateNoSP(
-                    IOTestingBT.CommandType.COMMAND_ENABLE_WEBREPL))
-        };  
-    </script>
+        // Commands button binding
+        bindButton("btnExecuteM", IOTestingBT.Command.CreateNoSP(
+            IOTestingBT.CommandType.COMMAND_MODE_METER))
+        bindButton("btnExecuteR", IOTestingBT.Command.CreateOneSP(
+            IOTestingBT.CommandType.COMMAND_MODE_RESISTORS,
+            document.getElementById("r_value").value));
 
+        bindButton("btnExecuteV", IOTestingBT.Command.CreateOneSP(
+            IOTestingBT.CommandType.COMMAND_MODE_V_LOAD,
+            document.getElementById("r_load").value));
+
+        bindButton("btnExecuteWS", IOTestingBT.Command.CreateOneSP(
+            IOTestingBT.CommandType.COMMAND_SET_WIFI_NETWORK,
+            document.getElementById("wifissid").value))
+        bindButton("btnExecuteWP", IOTestingBT.Command.CreateOneSP(
+            IOTestingBT.CommandType.COMMAND_SET_WIFI_PASSWORD,
+            document.getElementById("wifipwd").value))
+        bindButton("btnReboot", IOTestingBT.Command.CreateNoSP(
+            IOTestingBT.CommandType.COMMAND_REBOOT))
+
+        bindButton("btnBreak", IOTestingBT.Command.CreateNoSP(
+            IOTestingBT.CommandType.COMMAND_BREAK));
+
+        bindButton("btnChangeName", IOTestingBT.Command.CreateOneSP(
+            IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME,
+            document.getElementById("bt-name").value))
+
+        bindButton("btnChangeName", IOTestingBT.Command.CreateOneSP(
+            IOTestingBT.CommandType.COMMAND_SET_BLUETOOTH_NAME,
+            document.getElementById("bt-name").value))
+
+        bindButton("btnWifiOnce", IOTestingBT.Command.CreateNoSP(
+            document.getElementById("en_wifi").checked ? IOTestingBT.CommandType.COMMAND_ENABLE_WIFI : IOTestingBT.CommandType.COMMAND_DISABLE_WIFI))
+
+        bindButton("btnWifiBoot", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_WIFI,
+            document.getElementById("en_wifi_boot").checked))
+
+        bindButton("btnOTA", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_OTA,
+            document.getElementById("en_ota").checked))
+
+        bindButton("btnChangeCPU", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_CPU,
+            document.getElementById("speed").value))
+
+        bindButton("btnMeterCommands", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_INITIAL_METER_COMM,
+            document.getElementById("bt-voltage").checked))
+
+        bindButton("btnDelay", IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_SET_DEEPSLEEP_MIN,
+            document.getElementById("minutes").value))
+
+        bindButton("btnTest", IOTestingBT.Command.CreateNoSP(
+            IOTestingBT.CommandType.COMMAND_RUN_TEST))
+
+        bindButton("btnDeepsleep", IOTestingBT.Command.CreateNoSP(
+            IOTestingBT.CommandType.COMMAND_DEEP_SLEEP))
+
+        bindButton("btnREPL", IOTestingBT.Command.CreateNoSP(
+            IOTestingBT.CommandType.COMMAND_ENABLE_WEBREPL))
+
+    </script>
 </body>
 
 </html>
