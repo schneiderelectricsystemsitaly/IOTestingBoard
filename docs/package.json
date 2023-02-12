@@ -1,6 +1,6 @@
 {
   "name": "bt-iotester",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A browser-friendly Javascript API for the IOTester custom board, using web bluetooth.",
   "main": "js/meterApi.js",
   "keywords": [
