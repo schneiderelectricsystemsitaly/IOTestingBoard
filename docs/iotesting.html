@@ -95,7 +95,7 @@
                         </tr>
                         <tr>
                             <th scope="row" id="device-name">Device info</th>
-                            <td><span id="battery">0 %</span></td>
+                            <td><i class="bi bi-battery"></i>&nbsp;<span id="battery">0 %</span></td>
                             <td>HW REV:<span id="hw-rev"></span>&nbsp;FW:<span id="fw-ver"></span></td>
                             <td>MODE</td>
                         </tr>
@@ -406,10 +406,37 @@
             document.getElementById("notready").style.display = status.ready ? 'none' : 'block';
             document.getElementById("ready").style.display = status.ready ? 'block' : 'none';
             document.getElementById("connecting").style.display = status.initializing ? 'block' : 'none';
-            document.getElementById("setpoint-value").innerHTML = status.lastSetpoint?.Value;
+            switch (status.lastSetpoint?.Value) {
+                case 0xFF:
+                    document.getElementById("setpoint-value").innerHTML = 'OPEN - ∞';
+                    break;
+                case 0xFE:
+                    document.getElementById("setpoint-value").innerHTML = 'MAX';
+                    break;
+                case 0:
+                    document.getElementById("setpoint-value").innerHTML = 'CLOSED (0)';
+                    break;
+                case -1:
+                    document.getElementById("setpoint-value").innerHTML = '???';
+                    break;
+                default:
+                    document.getElementById("setpoint-value").innerHTML = status.lastSetpoint?.Value;
+            }
             document.getElementById("setpoint-unit").innerHTML = status.lastSetpoint?.Units;
             document.getElementById("ts").innerHTML = status.lastMeasure?.Timestamp;
-            document.getElementById("act-value").innerHTML = status.lastMeasure?.Value;
+            switch (status.lastMeasure?.Value) {
+                case 0xFF:
+                    document.getElementById("act-value").innerHTML = 'OPEN - ∞';
+                    break;
+                case 0:
+                    document.getElementById("act-value").innerHTML = 'CLOSED - 0';
+                    break;
+                case -1:
+                    document.getElementById("act-value").innerHTML = '???';
+                    break;
+                default:
+                    document.getElementById("act-value").innerHTML = status.lastMeasure?.Value;
+            }
             document.getElementById("act-unit").innerHTML = status.lastMeasure?.Units;
             document.getElementById("battery").innerHTML = status.batteryLevel + "%";
             document.getElementById("hw-rev").innerHTML = status.deviceHwRev;
@@ -418,10 +445,10 @@
             document.getElementById("not-wifion").style.display = status.notification.WiFi == 2 ? 'inline' : 'none';
             document.getElementById("not-wifioff").style.display = status.notification.WiFi == 1 ? 'inline' : 'none';
 
-            document.getElementById("not-unknown").style.display = status.notification.Relay == 0 ? 'inline' : 'none'
+            document.getElementById("not-unknown").style.display = status.notification.Relay == 0 ? 'inline' : 'none';
             document.getElementById("not-bypass").style.display = status.notification.Relay == 1 ? 'inline' : 'none';
             document.getElementById("not-r").style.display = status.notification.Relay == 2 && !status.notification.V_with_load ? 'inline' : 'none';
-            document.getElementById("not-vload").style.display = status.notification.V_with_load ? 'inline' : 'none'
+            document.getElementById("not-vload").style.display = status.notification.V_with_load ? 'inline' : 'none';
 
             document.getElementById("not-bt").style.display = status.notification.Bluetooth == 2 || status.notification.Bluetooth == 3 ? 'inline' : 'none';
             document.getElementById("not-speed1").style.display = status.notification.Frequency == 1 ? 'inline' : 'none';
