@@ -3,6 +3,8 @@ from micropython import const
 
 from .abutton import Pushbutton
 
+# HW REV 1 configuration
+
 BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN),
          'KRESET_CMD': Pin(33, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN),
          'VMETER_EN': Pin(17, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
@@ -52,8 +54,20 @@ assert (len(BOARD['RESISTORS']) == len(BOARD['R_VALUES']))
 BOARD['RED_LED_DAC'].write(160)
 BOARD['GREEN_LED_DAC'].write(190)
 
-# special values for resistor settings
-# R_OPEN = open opto-couplers resistance >10 MΩ
-# R_MAX = the maximum value closed circuit obtainable by resistor network
-R_OPEN = const(0xFFFF)
-R_MAX = const(0xFFFE)
+last_red_value = 0
+last_green_value = 0
+
+def set_red_led(value) -> int:
+    global last_red_value
+    previous = last_red_value
+    BOARD['RED_LED_DAC'].write(value)
+    last_red_value = value
+    return previous
+
+
+def set_green_led(value) -> int:
+    global last_green_value
+    previous = last_green_value
+    BOARD['GREEN_LED_DAC'].write(value)
+    last_green_value = value
+    return previous

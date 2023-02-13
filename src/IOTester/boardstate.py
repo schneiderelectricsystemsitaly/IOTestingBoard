@@ -2,7 +2,7 @@ import time
 
 import machine
 
-from .boardcfg import R_OPEN
+from .constants import R_OPEN
 from .state import BluetoothState, WifiState, BoardState, RelayState
 
 __state = BoardState()

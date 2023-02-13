@@ -249,7 +249,6 @@ async def __board_command_loop(board_command_char) -> None:
     print('\tBoard command task terminating.')
 
 
-@micropython.native
 def __get_notification_data() -> bytearray:
     gc.collect()
     # 0 - WIFI b7 b6 RELAY b5 b4 BLUETOOTH b3 b2 b1 UNUSED b0

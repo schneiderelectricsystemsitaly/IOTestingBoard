@@ -4,8 +4,14 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-from .boardcfg import BOARD, R_OPEN
 from .boardsettings import Settings, get_settings
+from .constants import R_OPEN
+
+if get_settings().main_hw_ver() == 1:
+    from .boardcfg import BOARD, set_red_led, set_green_led
+else:
+    from .boardcfgv2 import BOARD, set_red_led, set_green_led
+
 from .boardstate import get_state, update_meter_commands, update_r_actual, update_testmode, update_v_parallel_state, \
     is_verbose, update_event_time, \
     update_last_result, update_r_setpoint, update_relay_state, update_short_relay_state
@@ -13,25 +19,6 @@ from .boardwifi import disable_wifi, enable_wifi
 from .command import Command
 from .resistors import find_best_r_with_opt, k_divider, MIN_LOAD
 from .state import RelayState
-
-last_red_value = 0
-last_green_value = 0
-
-
-def set_red_led(value) -> int:
-    global last_red_value
-    previous = last_red_value
-    BOARD['RED_LED_DAC'].write(value)
-    last_red_value = value
-    return previous
-
-
-def set_green_led(value) -> int:
-    global last_green_value
-    previous = last_green_value
-    BOARD['GREEN_LED_DAC'].write(value)
-    last_green_value = value
-    return previous
 
 
 async def execute(command) -> bool:

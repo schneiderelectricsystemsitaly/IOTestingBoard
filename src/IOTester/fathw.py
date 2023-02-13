@@ -6,10 +6,18 @@ from machine import Pin
 from micropython import const
 
 import IOTester.state
-from .boardcfg import BOARD, R_OPEN, R_MAX
-from .boardctl import (set_green_led, set_red_led, get_vmeter, execute, deep_sleep,
-                       light_sleep, board_hw_init)
 from .boardsettings import get_settings, Settings
+from .constants import R_OPEN, R_MAX
+
+if get_settings().main_hw_ver() == 1:
+    from .boardcfg import BOARD, set_green_led, set_red_led
+    # Board 2 has a faulty pin32 replaced by pin 15
+    if get_settings.get_value(Settings.SERIAL) == "2":
+        BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
+else:
+    from .boardcfgv2 import BOARD, set_green_led, set_red_led
+
+from .boardctl import (get_vmeter, execute, deep_sleep, light_sleep, board_hw_init)
 from .boardstate import get_state, runtime_memory_info, update_testmode, update_last_result, get_current_command
 from .boardwifi import enable_wifi, enable_webrepl
 from .command import Command
@@ -165,10 +173,6 @@ async def main() -> None:
 
     gc.collect()
     settings = get_settings()
-
-    # Board 2 has a faulty pin32 replaced by pin 15
-    if settings.get_value(Settings.SERIAL) == "2":
-        BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
 
     if not settings.get_value(Settings.DEBUG_MODE):
         # precompute possible R values

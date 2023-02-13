@@ -1,7 +1,11 @@
 import gc
 
-from .boardcfg import BOARD
-from .boardsettings import Settings
+from .boardsettings import Settings, get_settings
+
+if get_settings().main_hw_ver() == 1:
+    from .boardcfg import BOARD
+else:
+    from .boardcfgv2 import BOARD
 
 available_values = {}
 MIN_LOAD = 600
@@ -36,8 +40,9 @@ def __num_bits_set(bitmask) -> int:
 
 
 def compute_all_r(settings: Settings) -> dict:
+    global MIN_LOAD
     if settings.main_hw_ver() == 1:
-        global available_values, MIN_LOAD
+        global available_values
         r_values = BOARD['R_VALUES']
         output = {}
         # to generate all subsets we use a bit mask b1,b2,...,bn where (bn ==1) implies (R_VALUES[n] is in the set)
@@ -54,7 +59,7 @@ def compute_all_r(settings: Settings) -> dict:
         print(f"{len(output)} resistors combinations, minimum allowed R @ 27V = {MIN_LOAD}")
         return output
     else:
-        MIN_LOAD = 500  # TODO BOARD constant
+        MIN_LOAD = BOARD['R_SERIES']
         pass
 
 
@@ -83,7 +88,7 @@ def find_best_r_with_opt(desired_r: float, settings: Settings) -> tuple:
         else:
             return option2[0] + BOARD['R_SERIES'] + BOARD['OPTOCOUPLER_R'], option2[1], 1
     else:
-        return __decade_configuration(desired_r, 500)  # TODO BOARD constant
+        return __decade_configuration(desired_r, BOARD['R_SERIES'])
 
 
 def __decade_configuration(desired_r: int, series_r: int) -> tuple:
@@ -93,7 +98,7 @@ def __decade_configuration(desired_r: int, series_r: int) -> tuple:
 
     # Cashier algorithm
     for r in r_val:
-        if r >= setpoint:
+        if r <= setpoint:
             setpoint -= r
             selected.append(r)
         if setpoint <= 0:
@@ -110,7 +115,7 @@ def __decade_configuration(desired_r: int, series_r: int) -> tuple:
     for idx in range(0, len(BOARD['R_VALUES'])):
         if BOARD['R_VALUES'][idx] in selected:
             result += 1 << idx
-    return (desired_r - setpoint - series_r), result, 0
+    return (desired_r - setpoint - series_r), result, 1  # Must be 1 to connect R network to GND
 
 
 def __print_configurations(av_values: dict, u_max: int = 24):
