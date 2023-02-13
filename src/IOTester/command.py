@@ -1,4 +1,4 @@
-from .boardcfg import R_OPEN, R_MAX
+from .constants import R_OPEN, R_MAX
 
 
 class Command:

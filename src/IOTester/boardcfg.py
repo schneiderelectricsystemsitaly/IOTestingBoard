@@ -3,6 +3,8 @@ from micropython import const
 
 from .abutton import Pushbutton
 
+# HW REV 1 configuration
+
 BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN),
          'KRESET_CMD': Pin(33, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN),
          'VMETER_EN': Pin(17, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
@@ -48,12 +50,17 @@ BOARD['R1'] = const(148000)
 BOARD['R2'] = const(8200)
 assert (len(BOARD['RESISTORS']) == len(BOARD['R_VALUES']))
 
-# Set orange during startup
-BOARD['RED_LED_DAC'].write(160)
-BOARD['GREEN_LED_DAC'].write(190)
+last_rgb_value = (0, 0, 0)
 
-# special values for resistor settings
-# R_OPEN = open opto-couplers resistance >10 MΩ
-# R_MAX = the maximum value closed circuit obtainable by resistor network
-R_OPEN = const(0xFFFF)
-R_MAX = const(0xFFFE)
+
+def set_rgb(rgb: tuple) -> tuple:
+    global last_rgb_value
+    previous = last_rgb_value
+    BOARD['RED_LED_DAC'].write(rgb[0])
+    BOARD['GREEN_LED_DAC'].write(rgb[1])
+    last_rgb_value = rgb
+    return previous
+
+
+# Set orange during startup
+set_rgb((255, 94, 5))

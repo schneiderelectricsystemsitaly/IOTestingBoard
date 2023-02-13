@@ -4,8 +4,14 @@ import machine
 import uasyncio as asyncio
 from micropython import const
 
-from .boardcfg import BOARD, R_OPEN
 from .boardsettings import Settings, get_settings
+from .constants import R_OPEN
+
+if get_settings().main_hw_ver() == 1:
+    from .boardcfg import BOARD, set_rgb
+else:
+    from .boardcfgv2 import BOARD, set_rgb
+
 from .boardstate import get_state, update_meter_commands, update_r_actual, update_testmode, update_v_parallel_state, \
     is_verbose, update_event_time, \
     update_last_result, update_r_setpoint, update_relay_state, update_short_relay_state
@@ -14,33 +20,13 @@ from .command import Command
 from .resistors import find_best_r_with_opt, k_divider, MIN_LOAD
 from .state import RelayState
 
-last_red_value = 0
-last_green_value = 0
-
-
-def set_red_led(value) -> int:
-    global last_red_value
-    previous = last_red_value
-    BOARD['RED_LED_DAC'].write(value)
-    last_red_value = value
-    return previous
-
-
-def set_green_led(value) -> int:
-    global last_green_value
-    previous = last_green_value
-    BOARD['GREEN_LED_DAC'].write(value)
-    last_green_value = value
-    return previous
-
 
 async def execute(command) -> bool:
     update_event_time()
     final_result = False
 
     # flash briefly the RED LED when executing commands
-    prev1 = set_red_led(220)
-    prev2 = set_green_led(250)
+    prev1 = set_rgb((220, 250, 0))
 
     if command.ctype == Command.invalid:
         print('Invalid command', command)
@@ -85,8 +71,7 @@ async def execute(command) -> bool:
     print('Executed', command, 'result', final_result, 'state', get_state())
 
     # restore LED
-    set_red_led(prev1)
-    set_green_led(prev2)
+    set_rgb(prev1)
 
     return final_result
 
@@ -429,8 +414,7 @@ async def deep_sleep() -> None:
     # Make sure shorting relay is off
     BOARD['SHORT'].off()
 
-    set_red_led(0)
-    set_green_led(0)
+    set_rgb((0, 0, 0))
 
     BOARD['BUILTIN_LED'].on()  # inverted on board
 

@@ -1,6 +1,6 @@
 import time
 
-from .boardcfg import R_MAX, R_OPEN
+from .constants import R_MAX, R_OPEN
 
 
 class BluetoothState:
