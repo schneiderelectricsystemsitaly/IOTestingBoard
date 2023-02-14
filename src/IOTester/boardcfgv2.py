@@ -41,7 +41,7 @@ BOARD['RESISTORS'] = (Pin(23, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
                       Pin(4, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN))
 
 BOARD['OPTOCOUPLER_R'] = 2.5
-BOARD['R_VALUES'] = const((100, 200, 300, 400, 1000, 2000, 3000, 4000))
+BOARD['R_VALUES'] = const((100, 200, 300, 400, 1000, 2000, 3000, 4990))
 BOARD['R_POWER'] = const((.5, .5, .5, .5, 0.25, 0.25, 0.25, 0.25))
 BOARD['R_SERIES'] = const(500)  # Unlike HW REV1, this resistor is always in the network and can't be disabled. P = 1 W
 

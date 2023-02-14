@@ -63,7 +63,6 @@ def compute_all_r(settings: Settings) -> dict:
         pass
 
 
-# micropython.native
 def __find_best_r(desired_r, av_values) -> tuple:
     if len(av_values) == 0:
         raise Exception('Call compute_all_r first')
@@ -104,18 +103,17 @@ def __decade_configuration(desired_r: int, series_r: int) -> tuple:
         if setpoint <= 0:
             break
 
-    # If remaining error is more than half the smallest resistor, add it
-    # We want to be as close as possible to the desired value, even if we exceed it.
-    if desired_r - setpoint - series_r > r_val[-1] / 2:
-        setpoint -= r_val[-1]
-        selected.append(r_val[-1])
-
     # Translate selected R values into a bitmask value for optocouplers setting
     result = 0
+    cpt_not_sel = 0
     for idx in range(0, len(BOARD['R_VALUES'])):
         if BOARD['R_VALUES'][idx] in selected:
-            result += 1 << idx
-    return (desired_r - setpoint - series_r), result, 1  # Must be 1 to connect R network to GND
+            result += (1 << idx)
+        else:
+            cpt_not_sel += 1
+
+    actual_r = sum(selected) + cpt_not_sel * BOARD['OPTOCOUPLER_R'] + series_r
+    return actual_r, result, 1  # Must be 1 to connect R network to GND
 
 
 def __print_configurations(av_values: dict, u_max: int = 24):
@@ -143,6 +141,9 @@ def __print_configurations(av_values: dict, u_max: int = 24):
 
 
 def __min_allowed_r(av_values: dict, u_max: int = 24) -> int:
+    if get_settings().main_hw_ver() != 1:
+        return BOARD['R_SERIES']
+
     min_r = 0xFFFF
     for r in sorted(av_values.keys()):
         allowed = True
