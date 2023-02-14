@@ -8,9 +8,9 @@ from .boardsettings import Settings, get_settings
 from .constants import R_OPEN
 
 if get_settings().main_hw_ver() == 1:
-    from .boardcfg import BOARD, set_red_led, set_green_led
+    from .boardcfg import BOARD, set_rgb
 else:
-    from .boardcfgv2 import BOARD, set_red_led, set_green_led
+    from .boardcfgv2 import BOARD, set_rgb
 
 from .boardstate import get_state, update_meter_commands, update_r_actual, update_testmode, update_v_parallel_state, \
     is_verbose, update_event_time, \
@@ -26,8 +26,7 @@ async def execute(command) -> bool:
     final_result = False
 
     # flash briefly the RED LED when executing commands
-    prev1 = set_red_led(220)
-    prev2 = set_green_led(250)
+    prev1 = set_rgb((220, 250, 0))
 
     if command.ctype == Command.invalid:
         print('Invalid command', command)
@@ -72,8 +71,7 @@ async def execute(command) -> bool:
     print('Executed', command, 'result', final_result, 'state', get_state())
 
     # restore LED
-    set_red_led(prev1)
-    set_green_led(prev2)
+    set_rgb(prev1)
 
     return final_result
 
@@ -416,8 +414,7 @@ async def deep_sleep() -> None:
     # Make sure shorting relay is off
     BOARD['SHORT'].off()
 
-    set_red_led(0)
-    set_green_led(0)
+    set_rgb((0, 0, 0))
 
     BOARD['BUILTIN_LED'].on()  # inverted on board
 

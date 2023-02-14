@@ -10,12 +10,12 @@ from .boardsettings import get_settings, Settings
 from .constants import R_OPEN, R_MAX
 
 if get_settings().main_hw_ver() == 1:
-    from .boardcfg import BOARD, set_green_led, set_red_led
+    from .boardcfg import BOARD, set_rgb
     # Board 2 has a faulty pin32 replaced by pin 15
     if get_settings.get_value(Settings.SERIAL) == "2":
         BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
 else:
-    from .boardcfgv2 import BOARD, set_green_led, set_red_led
+    from .boardcfgv2 import BOARD, set_rgb
 
 from .boardctl import (get_vmeter, execute, deep_sleep, light_sleep, board_hw_init)
 from .boardstate import get_state, runtime_memory_info, update_testmode, update_last_result, get_current_command
@@ -64,8 +64,7 @@ async def __animate_leds() -> None:
         if green_val > 0 and red_val == 0 and current_state.test_mode and False:
             red_val = 155
 
-        set_green_led(green_val)
-        set_red_led(red_val)
+        set_rgb((red_val, green_val, 0))
 
         network_active = current_state.bluetooth == IOTester.state.BluetoothState.enabled_with_client or \
                          current_state.wifi == IOTester.state.WifiState.enabled

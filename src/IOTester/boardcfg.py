@@ -50,24 +50,17 @@ BOARD['R1'] = const(148000)
 BOARD['R2'] = const(8200)
 assert (len(BOARD['RESISTORS']) == len(BOARD['R_VALUES']))
 
+last_rgb_value = (0, 0, 0)
+
+
+def set_rgb(rgb: tuple) -> tuple:
+    global last_rgb_value
+    previous = last_rgb_value
+    BOARD['RED_LED_DAC'].write(rgb[0])
+    BOARD['GREEN_LED_DAC'].write(rgb[1])
+    last_rgb_value = rgb
+    return previous
+
+
 # Set orange during startup
-BOARD['RED_LED_DAC'].write(160)
-BOARD['GREEN_LED_DAC'].write(190)
-
-last_red_value = 0
-last_green_value = 0
-
-def set_red_led(value) -> int:
-    global last_red_value
-    previous = last_red_value
-    BOARD['RED_LED_DAC'].write(value)
-    last_red_value = value
-    return previous
-
-
-def set_green_led(value) -> int:
-    global last_green_value
-    previous = last_green_value
-    BOARD['GREEN_LED_DAC'].write(value)
-    last_green_value = value
-    return previous
+set_rgb((255, 94, 5))

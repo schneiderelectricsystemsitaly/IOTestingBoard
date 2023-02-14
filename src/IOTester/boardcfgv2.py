@@ -50,30 +50,17 @@ BOARD['R1'] = const(150000)
 BOARD['R2'] = const(82000)
 assert (len(BOARD['RESISTORS']) == len(BOARD['R_VALUES']))
 
-# Set orange during startup
-BOARD['NEOPIXEL'][0] = (255, 94, 5)
-BOARD['NEOPIXEL'].write()
-
-last_red_value = 0
-last_green_value = 0
+last_rgb_value = (0, 0, 0)
 
 
-def set_red_led(value: int) -> int:
-    global last_red_value
-    previous = last_red_value
-    current_rgb = BOARD['NEOPIXEL'][0]
-    current_rgb[0] = value
-    BOARD['NEOPIXEL'][0] = current_rgb
+def set_rgb(rgb: tuple) -> tuple:
+    global last_rgb_value
+    previous = last_rgb_value
+    BOARD['NEOPIXEL'][0] = rgb
     BOARD['NEOPIXEL'].write()
-    last_red_value = value
+    last_rgb_value = rgb
     return previous
 
 
-def set_green_led(value: int) -> int:
-    global last_green_value
-    previous = last_green_value
-    current_rgb = BOARD['NEOPIXEL'][0]
-    current_rgb[1] = value
-    BOARD['NEOPIXEL'][0] = current_rgb
-    last_green_value = value
-    return previous
+# Set orange during startup
+set_rgb((255, 94, 5))
