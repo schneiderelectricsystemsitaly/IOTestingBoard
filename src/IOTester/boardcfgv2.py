@@ -8,7 +8,8 @@ from .abutton import Pushbutton
 BOARD = {'KSET_CMD': Pin(32, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN),
          'KRESET_CMD': Pin(33, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN),
          'VMETER_EN': Pin(12, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
-         'SERIESR_CMD': Pin(13, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),  # Must be 1 to connect R network to GND
+         'SERIESR_CMD': Pin(13, Pin.OUT, drive=Pin.DRIVE_1, pull=Pin.PULL_DOWN),
+         # Must be 1 to connect R network to GND
          'VSENSE': Pin(34, Pin.IN, pull=None),
          'SHORT': Pin(26, Pin.OUT, drive=Pin.DRIVE_2, pull=Pin.PULL_DOWN)}
 
@@ -46,8 +47,8 @@ BOARD['R_POWER'] = const((.5, .5, .5, .5, 0.25, 0.25, 0.25, 0.25))
 BOARD['R_SERIES'] = const(500)  # Unlike HW REV1, this resistor is always in the network and can't be disabled. P = 1 W
 
 # Resistor divider for Vsense
-BOARD['R1'] = const(150000)
-BOARD['R2'] = const(82000)
+BOARD['R1'] = const(1_500_000)
+BOARD['R2'] = const(820_000)
 assert (len(BOARD['RESISTORS']) == len(BOARD['R_VALUES']))
 
 last_rgb_value = (0, 0, 0)

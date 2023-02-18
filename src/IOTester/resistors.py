@@ -105,14 +105,13 @@ def __decade_configuration(desired_r: int, series_r: int) -> tuple:
 
     # Translate selected R values into a bitmask value for optocouplers setting
     result = 0
-    cpt_not_sel = 0
+    active = 0
     for idx in range(0, len(BOARD['R_VALUES'])):
-        if BOARD['R_VALUES'][idx] in selected:
+        if BOARD['R_VALUES'][idx] not in selected:  # IF set to 1, fixed resistor is bypassed by optocoupler
             result += (1 << idx)
-        else:
-            cpt_not_sel += 1
+            active += BOARD['OPTOCOUPLER_R']
 
-    actual_r = sum(selected) + cpt_not_sel * BOARD['OPTOCOUPLER_R'] + series_r
+    actual_r = sum(selected) + active + series_r
     return actual_r, result, 1  # Must be 1 to connect R network to GND
 
 
