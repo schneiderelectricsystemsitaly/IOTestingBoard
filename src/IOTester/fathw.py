@@ -11,8 +11,8 @@ from .constants import R_OPEN, R_MAX
 
 if get_settings().main_hw_ver() == 1:
     from .boardcfg import BOARD, set_rgb
-    # Board 2 has a faulty pin32 replaced by pin 15
-    if get_settings.get_value(Settings.SERIAL) == "2":
+    # Board 2 has a faulty pin32 replaced by pin 15 (HW REV 1.1)
+    if get_settings().get_value(Settings.SERIAL) == "2":
         BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
 else:
     from .boardcfgv2 import BOARD, set_rgb
@@ -173,6 +173,10 @@ async def main() -> None:
     gc.collect()
     settings = get_settings()
 
+    print('HW_REV', settings.get_value(Settings.HW_REV),
+          'SERIAL', settings.get_value(Settings.SERIAL),
+          'debug mode', settings.get_value(Settings.DEBUG_MODE))
+    
     if not settings.get_value(Settings.DEBUG_MODE):
         # precompute possible R values
         compute_all_r(settings)
