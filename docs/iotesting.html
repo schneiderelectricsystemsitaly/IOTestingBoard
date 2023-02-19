@@ -366,6 +366,21 @@
                 <br />
             </div>
         </div>
+        <div class="row">
+            <div class="col">
+                Debug/WebREPL on reboot
+            </div>
+            <div class="col">
+                <div class="checkbox">
+                    <label><input id="en_debug" type="checkbox" value="">tick to enable</label>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <button id="btnDebug" class="btn btn-primary">Set Debug on reboot (once)</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script language="javascript">
@@ -564,7 +579,11 @@
 
         bindButton("btnREPL", () => IOTestingBT.Command.CreateNoSP(
             IOTestingBT.CommandType.COMMAND_ENABLE_WEBREPL))
-
+        
+        bindButton("btnDebug", function () {
+            return IOTestingBT.Command.CreateOneSP(IOTestingBT.CommandType.COMMAND_DEBUG_MODE,
+                document.getElementById("en_debug").checked)
+        })
     </script>
 </body>
 
