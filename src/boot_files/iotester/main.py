@@ -2,12 +2,13 @@ import gc
 import time
 import machine
 import network
+from settings.boardsettings import get_settings, Settings
+
 gc.collect()
 
 def download_and_install_update_if_available():
-    from settings.boardsettings import get_settings, Settings
-    gc.collect()
 
+    gc.collect()
     sta_if = network.WLAN(network.STA_IF)
     settings = get_settings()
     if settings[Settings.OTA] and settings[Settings.WIFI_ENABLED]: # if wifi is enabled
@@ -46,6 +47,20 @@ def start():
     asyncio.run(IOTester.fathw.main())
 
 
+def led_on():
+    from machine import Pin
+    if get_settings().main_hw_ver() == 1:
+        from machine import DAC
+        __green_led = DAC(Pin(26, pull=Pin.PULL_DOWN, hold=False), bits=8, buffering=False)
+        __red_led = DAC(Pin(25, pull=Pin.PULL_DOWN, hold=False), bits=8, buffering=False)
+        __green_led.write(190)
+        __red_led.write(160)
+    else:
+        from apa106 import APA106
+        neopix = APA106(Pin(25, Pin.OUT), 1)
+        neopix[0] = (255, 140, 0)
+        neopix.write()
+
 def boot():
     try:
         download_and_install_update_if_available()
@@ -56,5 +71,6 @@ def boot():
     start()
 
 
+led_on()
 boot()
 

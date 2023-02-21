@@ -1,4 +1,5 @@
 import gc
+
 import ujson
 from micropython import const
 
@@ -6,6 +7,7 @@ gc.collect()
 
 __settings = None
 _AES_KEY = const('IOTesting2023!!!')
+
 
 class Settings:
     WIFI_ENABLED = 'WIFI'
@@ -20,6 +22,9 @@ class Settings:
     OTA = 'OTA'
     GITHUB_TOKEN = 'GITHUB_TOKEN'
     BLUETOOTH_NAME = 'BLUETOOTH_DEVICE'
+    SERIAL = 'SERIAL'
+    HW_REV = 'HW_REV'
+    DEBUG_MODE = 'DEBUG_MODE'
 
     def __init__(self, filename='saved_settings.hex'):
         print('Loading', filename)
@@ -47,6 +52,12 @@ class Settings:
             self.add_key(Settings.GITHUB_TOKEN, '')
         if Settings.BLUETOOTH_NAME not in self._db:
             self.add_key(Settings.BLUETOOTH_NAME, 'IOTesting')
+        if Settings.SERIAL not in self._db:
+            self.add_key(Settings.SERIAL, '1')
+        if Settings.HW_REV not in self._db:
+            self.add_key(Settings.HW_REV, '1.0')
+        if Settings.DEBUG_MODE not in self._db:
+            self.add_key(Settings.DEBUG_MODE, False)
 
     def save_changes(self):
         file_str = ujson.dumps(self._db)
@@ -86,7 +97,7 @@ class Settings:
             val = self.get_value(Settings.THRESHOLD + str(i))
             if val is not None:
                 output.append(val)
-        return val
+        return output
 
     def factory_defaults(self):
         self.add_key(Settings.WIFI_ENABLED, False)
@@ -97,17 +108,18 @@ class Settings:
         self.add_key(Settings.WIFI_NETWORK, '')
         self.add_key(Settings.WIFI_PASSWORD, '')
         self.add_key(Settings.DEEPSLEEP_MIN, 15)  # 15 minutes
-        self.add_v_threshold(0, 8, 2, 1000)
-        self.add_v_threshold(1, 10, 2, 4690)
-        self.add_v_threshold(2, 12, 2, 7180)
-        self.add_v_threshold(3, 14, 2, 11000)
-        self.add_v_threshold(4, 16, 2, 0)
-        self.add_v_threshold(5, 18, 2, 0xFFFE)
-        self.add_v_threshold(6, 20, 3, 550)
-        self.add_v_threshold(7, 22, 1, 0xFFFF)
+        self.add_v_threshold(0, 3, 2, 1000)
+        self.add_v_threshold(1, 4, 2, 4690)
+        self.add_v_threshold(2, 5, 2, 7180)
+        self.add_v_threshold(3, 6, 2, 11000)
+        self.add_v_threshold(4, 7, 2, 0)
+        self.add_v_threshold(5, 8, 2, 0xFFFF)
+        self.add_v_threshold(6, 9, 3, 550)
+        self.add_v_threshold(7, 12, 1, 0xFFFF)
         self.add_key(Settings.OTA, False)
         self.add_key(Settings.GITHUB_TOKEN, '')
         self.add_key(Settings.BLUETOOTH_NAME, 'IOTesting board')
+        self.add_key(Settings.SERIAL, '1')
 
     def __getitem__(self, key):
         return self.get_value(key)
@@ -130,6 +142,9 @@ class Settings:
             f.write(enc.encrypt(data_bytes))
             f.close()
 
+        del enc
+        del ucryptolib
+
     @staticmethod
     def decrypt(data_bytes: bytes) -> str:
         from ucryptolib import aes
@@ -137,6 +152,8 @@ class Settings:
         data_bytes = enc.decrypt(data_bytes)
         data_bytes = data_bytes.decode('utf8')
         data_bytes = data_bytes.rstrip('\0')
+        del enc
+        del aes
         return data_bytes
 
     @staticmethod
@@ -146,7 +163,10 @@ class Settings:
         # padding
         data_bytes = text_str.encode('utf8')
         data_bytes = data_bytes + b'\x00' * ((16 - (len(data_bytes) % 16)) % 16)
-        return enc.encrypt(data_bytes)
+        data_bytes = enc.encrypt(data_bytes)
+        del enc
+        del aes
+        return data_bytes
 
     @staticmethod
     def decrypt_test():
@@ -163,6 +183,16 @@ class Settings:
         with open('saved_settings.hex2', mode='wt') as f:
             f.write(data_bytes)
             f.close()
+        del enc
+        del ucryptolib
+
+    def main_hw_ver(self) -> int:
+        hw_rev = self.get_value(Settings.HW_REV)
+        if hw_rev is None or len(hw_rev) == 0:
+            return 1
+        else:
+            return int(hw_rev[0])
+
 
 def get_settings():
     global __settings

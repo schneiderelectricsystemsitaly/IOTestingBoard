@@ -11,6 +11,7 @@ from .constants import R_OPEN, R_MAX
 
 if get_settings().main_hw_ver() == 1:
     from .boardcfg import BOARD, set_rgb
+
     # Board 2 has a faulty pin32 replaced by pin 15 (HW REV 1.1)
     if get_settings().get_value(Settings.SERIAL) == "2":
         BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
@@ -36,9 +37,15 @@ async def __animate_leds() -> None:
     error = False
     cpt = 0
     current_state = get_state()
-    meter_pattern = [165]  # light green
-    _parallel_pattern = const((165, 165, 210, 165, 210, 165, 165, 165, 165))  # 2 fast blinks
-    _resistor_pattern = const((165, 165, 165, 210, 210, 210, 165, 165, 165))  # 1 slow blink
+
+    if get_settings().main_hw_ver() == 1:
+        meter_pattern = [165]  # light green
+        _parallel_pattern = (165, 165, 210, 165, 210, 165, 165, 165, 165)  # 2 fast blinks
+        _resistor_pattern = (165, 165, 165, 210, 210, 210, 165, 165, 165)  # 1 slow blink
+    else:
+        meter_pattern = [0]  # off
+        _parallel_pattern = (0, 0, 210, 0, 210, 0, 0, 0, 0)  # 2 fast blinks
+        _resistor_pattern = (0, 0, 0, 210, 210, 210, 0, 0, 0)  # 1 slow blink
     _error_pattern = const((190, 190, 0, 0))
 
     while True:
@@ -133,6 +140,26 @@ async def __sleep_check() -> None:
         await asyncio.sleep_ms(_CHECK_LOOP_SLEEP_MS)
 
 
+async def __gpio_debug() -> None:
+    prev = {}
+    while True:
+        for i in range(0, 34):
+            if i == 5:  # built in
+                continue
+            try:
+                a = Pin(i)
+                curr = a.value()
+                if not i in prev:
+                    prev[i] = curr
+                    print('\tGPIO', i, '=', curr)
+                if curr != prev[i]:
+                    print('\tChange GPIO', i, ":", prev[i], '=>', curr)
+                    prev[i] = curr
+            except:
+                pass
+        await asyncio.sleep_ms(1000)
+
+
 async def __test_loop() -> None:
     test_cycle = list(range(0, 12000, 250))
     test_cycle.append(R_MAX)
@@ -176,7 +203,7 @@ async def main() -> None:
     print('HW_REV', settings.get_value(Settings.HW_REV),
           'SERIAL', settings.get_value(Settings.SERIAL),
           'debug mode', settings.get_value(Settings.DEBUG_MODE))
-    
+
     if not settings.get_value(Settings.DEBUG_MODE):
         # precompute possible R values
         compute_all_r(settings)
@@ -195,5 +222,7 @@ async def main() -> None:
         await enable_wifi()
         await enable_webrepl()
         print('Debug mode...')
+        t5 = asyncio.create_task(__gpio_debug())
         while True:
             await asyncio.sleep_ms(100)
+

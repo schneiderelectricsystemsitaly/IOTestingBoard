@@ -26,9 +26,8 @@ BOARD['WAKE_SW'] = Pin(14, Pin.IN, pull=Pin.PULL_DOWN)
 BOARD['PUSHBUTTON'] = Pushbutton(BOARD['WAKE_SW'], suppress=True)
 BOARD['BUILTIN_LED'] = Pin(5, Pin.OUT, drive=Pin.DRIVE_0, pull=Pin.PULL_UP, hold=False)
 
-from neopixel import NeoPixel
-
-BOARD['NEOPIXEL'] = NeoPixel(Pin(25, Pin.OUT), 1)
+from apa106 import APA106
+BOARD['NEOPIXEL'] = APA106(Pin(25, Pin.OUT), 1)
 
 # RESISTOR NETWORK CONFIGURATION
 # Mapping to pins through optocouplers (DRIVE_1 required to drive the optocoupler LED)
@@ -56,8 +55,11 @@ last_rgb_value = (0, 0, 0)
 
 def set_rgb(rgb: tuple) -> tuple:
     global last_rgb_value
+    BRIGHTNESS = 0.25
     previous = last_rgb_value
-    BOARD['NEOPIXEL'][0] = rgb
+    BOARD['NEOPIXEL'][0] = (round(rgb[0]*BRIGHTNESS),
+                            round(rgb[1]*BRIGHTNESS),
+                            round(rgb[2]*BRIGHTNESS))
     BOARD['NEOPIXEL'].write()
     last_rgb_value = rgb
     return previous
@@ -65,3 +67,4 @@ def set_rgb(rgb: tuple) -> tuple:
 
 # Set orange during startup
 set_rgb((255, 94, 5))
+
