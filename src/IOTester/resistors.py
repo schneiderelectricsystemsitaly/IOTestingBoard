@@ -131,7 +131,7 @@ def __decade_configuration(desired_r: int, series_r: int) -> tuple:
         else:
             actual_r += BOARD['R_VALUES'][idx]
 
-    return int(actual_r), bitmask, 1  # Last member must be 1 to connect R network to GND
+    return int(actual_r), bitmask, 0  # Last member must be 0 to connect R network to GND
 
 
 def __print_configurations(av_values: dict, u_max: int = 24):
