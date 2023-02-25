@@ -214,9 +214,10 @@ async def main() -> None:
         t2 = asyncio.create_task(__test_loop())
         t3 = asyncio.create_task(__sleep_check())
         t4 = asyncio.create_task(__meter_commands_check())
+        #t5 = asyncio.create_task(__gpio_debug())
 
         print('Ready...')
-        await asyncio.gather(t1, t2, t3, t4)
+        await asyncio.gather(t1, t2, t3, t4, t5)
     else:
         settings.add_key(Settings.DEBUG_MODE, False)
         await enable_wifi()
