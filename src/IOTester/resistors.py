@@ -110,6 +110,10 @@ def __decade_configuration(desired_r: int, series_r: int) -> tuple:
        The output of the function is a tuple (equivalent resistor value in ohms, output bitmask for optocouplers, 1)
        """
     r_val = sorted(BOARD['R_VALUES'], reverse=True)
+
+    # Round to closest multiple of the decade
+    desired_r = round(desired_r / r_val[0]) * r_val[0]
+
     setpoint = desired_r - series_r
     selected = []
 
