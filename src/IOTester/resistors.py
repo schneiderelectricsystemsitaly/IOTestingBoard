@@ -112,7 +112,7 @@ def __decade_configuration(desired_r: int, series_r: int) -> tuple:
     r_val = sorted(BOARD['R_VALUES'], reverse=True)
 
     # Round to closest multiple of the decade
-    desired_r = round(desired_r / r_val[0]) * r_val[0]
+    desired_r = round(round(desired_r / r_val[-1]) * r_val[-1])
 
     setpoint = desired_r - series_r
     selected = []
