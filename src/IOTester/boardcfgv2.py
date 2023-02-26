@@ -47,7 +47,7 @@ BOARD['R_SERIES'] = const(500)  # Unlike HW REV1, this resistor is always in the
 
 # Resistor divider for Vsense
 BOARD['R1'] = const(1_500_000)
-BOARD['R2'] = const(820_000)
+BOARD['R2'] = const(82_000)
 assert (len(BOARD['RESISTORS']) == len(BOARD['R_VALUES']))
 
 last_rgb_value = (0, 0, 0)

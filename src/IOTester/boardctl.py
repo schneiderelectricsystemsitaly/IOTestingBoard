@@ -263,7 +263,6 @@ async def board_hw_init() -> bool:
     __set_digital_pin('KSET_CMD', False)
     __set_digital_pin('KRESET_CMD', False)
 
-    BOARD['PUSHBUTTON'].long_func(toggle_bluetooth)
     BOARD['PUSHBUTTON'].release_func(toggle_relay)
     BOARD['PUSHBUTTON'].double_func(toggle_vmeter_load)
 
@@ -325,8 +324,11 @@ async def get_vmeter() -> float:
         value += BOARD['VSENSE_ADC'].read_uv()
         await asyncio.sleep_ms(1)
     value = value / 5
+    value = value / k_divider(BOARD['R1'], BOARD['R2']) / 1000000.0
+    if get_state().VERBOSE:
+        print('VSENSE=', value)
     # precision of ADC insufficient for decimal points anyway
-    return round(value / k_divider(BOARD['R1'], BOARD['R2']) / 1000000.0)
+    return round(value)
 
 
 async def get_battery_percent() -> int:

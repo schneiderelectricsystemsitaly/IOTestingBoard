@@ -20,6 +20,7 @@ def update_meter_commands(allowed: bool) -> BoardState:
     if __state.meter_commands != allowed:
         __fun_notify()
     __state.meter_commands = allowed
+    print('Commands by meter =', allowed)
     return get_state()
 
 
