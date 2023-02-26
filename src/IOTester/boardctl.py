@@ -286,6 +286,7 @@ async def board_hw_init() -> bool:
 
     if defaults[Settings.BLUETOOTH_ENABLED]:
         asyncio.create_task(enable_bt_with_retry())
+        await asyncio.sleep_ms(1)
     else:
         await disable_bt()
 

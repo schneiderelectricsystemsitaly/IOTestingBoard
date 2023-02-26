@@ -98,6 +98,7 @@ async def __meter_commands_check() -> None:
         # execute only if in correct mode with enabled meter commands
         if state.meter_commands and state.relay == IOTester.state.RelayState.resistor:
             voltage = await get_vmeter()
+            # to filter transient voltages, repeat the reading after while
             await asyncio.sleep_ms(_METER_CHECK_LOOP_SLEEP_MS)
             voltage2 = await get_vmeter()
             if voltage > 1 and voltage == voltage2:  # two equal consecutive reads to avoid getting intermediate V
@@ -115,7 +116,8 @@ async def __meter_commands_check() -> None:
 
         if additional_delay:
             await asyncio.sleep_ms(_DELAY_BETWEEN_COMMANDS)
-
+        else:
+            await asyncio.sleep_ms(_METER_CHECK_LOOP_SLEEP_MS)
 
 # micropython.native
 async def __sleep_check() -> None:
@@ -213,7 +215,6 @@ async def main() -> None:
         t2 = asyncio.create_task(__test_loop())
         t3 = asyncio.create_task(__sleep_check())
         t4 = asyncio.create_task(__meter_commands_check())
-        #t5 = asyncio.create_task(__gpio_debug())
 
         print('Ready...')
         await asyncio.gather(t1, t2, t3, t4)
@@ -222,7 +223,6 @@ async def main() -> None:
         await enable_wifi()
         await enable_webrepl()
         print('Debug mode...')
-        t5 = asyncio.create_task(__gpio_debug())
+        asyncio.create_task(__gpio_debug())
         while True:
             await asyncio.sleep_ms(100)
-
