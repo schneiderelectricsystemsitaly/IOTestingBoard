@@ -11,10 +11,6 @@ from .constants import R_OPEN, R_MAX
 
 if get_settings().main_hw_ver() == 1:
     from .boardcfg import BOARD, set_rgb
-
-    # Board 2 has a faulty pin32 replaced by pin 15 (HW REV 1.1)
-    if get_settings().get_value(Settings.SERIAL) == "2":
-        BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
 else:
     from .boardcfgv2 import BOARD, set_rgb
 
@@ -46,7 +42,7 @@ async def __animate_leds() -> None:
         meter_pattern = [0]  # off
         _parallel_pattern = (0, 0, 210, 0, 210, 0, 0, 0, 0)  # 2 fast blinks
         _resistor_pattern = (0, 0, 0, 210, 210, 210, 0, 0, 0)  # 1 slow blink
-    _error_pattern = const((190, 190, 0, 0))
+    _error_pattern = (190, 190, 0, 0)
 
     while True:
         green_val = 0
@@ -119,6 +115,7 @@ async def __meter_commands_check() -> None:
         else:
             await asyncio.sleep_ms(_METER_CHECK_LOOP_SLEEP_MS)
 
+
 # micropython.native
 async def __sleep_check() -> None:
     _CHECK_LOOP_SLEEP_MS = const(2000)
@@ -158,6 +155,26 @@ async def __gpio_debug() -> None:
                     prev[i] = curr
             except:
                 pass
+        await asyncio.sleep_ms(1000)
+
+
+async def __gpio_outputs() -> None:
+    current = False
+    pins = sorted((0,2,15,4,16,17,5,18,19,21,22,23,13,12,14,27,26,25,33,32,34))
+    while True:
+        for i in pins:
+            if i == 5:  # built in
+                continue
+            try:
+                a = Pin(i, Pin.OUT)
+                if current:
+                    a.on()
+                else:
+                    a.off()
+                print('\tGPIO', i, '=', a.value(),'setpoint', current)
+            except:
+                pass
+        current = not current
         await asyncio.sleep_ms(1000)
 
 
@@ -205,6 +222,22 @@ async def main() -> None:
           'SERIAL', settings.get_value(Settings.SERIAL),
           'debug mode', settings.get_value(Settings.DEBUG_MODE))
 
+    # Board 2 has a faulty pin32 replaced by pin 15 (HW REV 1.1)
+    if get_settings().get_value(Settings.SERIAL) == "2":
+        BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
+
+    if get_settings().get_value(Settings.SERIAL) == "4":
+        # Board 4 has faulty pin 25 replaced by pin 27 (HW REV 2.0b)
+        from apa106 import APA106
+        BOARD['NEOPIXEL'] = APA106(Pin(27, Pin.OUT), 1)
+        set_rgb((255, 94, 5))
+        # Board 4 has a faulty pin 32 replaced by pin 15 (HW REV 2.0b)
+        old = Pin(32, Pin.IN)
+        BOARD['KSET_CMD'] = Pin(15, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
+        # Board 4 has a faulty pin 33 replaced by pin 2 (HW REV 2.0b)
+        old = Pin(33, Pin.IN)
+        BOARD['KRESET_CMD'] = Pin(2, Pin.OUT, drive=Pin.DRIVE_3, pull=Pin.PULL_DOWN)
+
     if not settings.get_value(Settings.DEBUG_MODE):
         # precompute possible R values
         compute_all_r(settings)
@@ -223,6 +256,8 @@ async def main() -> None:
         await enable_wifi()
         await enable_webrepl()
         print('Debug mode...')
-        asyncio.create_task(__gpio_debug())
+        #asyncio.create_task(__gpio_debug())
+        asyncio.create_task(__gpio_outputs())
         while True:
             await asyncio.sleep_ms(100)
+
