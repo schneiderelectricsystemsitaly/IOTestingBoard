@@ -128,20 +128,20 @@ async def toggle_bluetooth() -> None:
         await disable_bt()
 
 
-async def __client_task(connection) -> None:
+async def __client_task(connection:  aioble.peripheral) -> None:
     global __clients
 
     if not connection:
         __clients.remove(asyncio.current_task())
         return
 
-    print(f"BT connection #{len(__clients)} task: from ", connection.device)
+    print("BT connection #", len(__clients), "task: from ", connection.device)
     update_bt_state(BluetoothState.enabled_with_client)
     try:
         await connection.disconnected(timeout_ms=None)
     except Exception as e:
-        print(time.localtime(), f'client_task: {repr(e)}')
-    print(time.localtime(), f"Disconnection of ", connection.device)
+        print(time.localtime(), 'client_task:', repr(e))
+    print(time.localtime(), "Disconnection of ", connection.device)
 
     __clients.remove(asyncio.current_task())
     if len(__clients) == 0:
@@ -205,7 +205,7 @@ async def disable_bt() -> None:
             try:
                 t.cancel()
             except Exception as e:
-                print(f'Task {t} : {repr(e)}')
+                print('Task', t, repr(e))
                 pass
 
     await asyncio.sleep_ms(20)
@@ -214,7 +214,7 @@ async def disable_bt() -> None:
         try:
             t.cancel()
         except Exception as e:
-            print(f'Task {t} : {repr(e)}')
+            print('Task', t, repr(e))
             pass
 
     __task_adv = None
@@ -229,7 +229,7 @@ async def disable_bt() -> None:
     gc.collect()
 
 
-async def __board_command_loop(board_command_char) -> None:
+async def __board_command_loop(board_command_char: aioble.Characteristic) -> None:
     global __bt_stop_flag
     if is_verbose():
         print('Board command task starting...')
@@ -286,7 +286,7 @@ def __get_notification_data() -> bytearray:
     return values
 
 
-async def __board_status_loop(bsc) -> None:
+async def __board_status_loop(bsc: aioble.Characteristic) -> None:
     global __bt_stop_flag, __last_notification_ms
     if is_verbose():
         print('Board status task starting...')
@@ -306,7 +306,7 @@ async def __board_status_loop(bsc) -> None:
     print('\tBoard status task terminating.')
 
 
-async def __battery_loop(battery_char) -> None:
+async def __battery_loop(battery_char: aioble.Characteristic) -> None:
     global __bt_stop_flag, __last_notification_ms
     if is_verbose():
         print('Board battery task starting...')
