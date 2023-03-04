@@ -128,7 +128,7 @@ async def toggle_bluetooth() -> None:
         await disable_bt()
 
 
-async def __client_task(connection:  aioble.peripheral) -> None:
+async def __client_task(connection: aioble.peripheral) -> None:
     global __clients
 
     if not connection:

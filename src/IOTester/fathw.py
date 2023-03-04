@@ -160,7 +160,7 @@ async def __gpio_debug() -> None:
 
 async def __gpio_outputs() -> None:
     current = False
-    pins = sorted((0,2,15,4,16,17,5,18,19,21,22,23,13,12,14,27,26,25,33,32,34))
+    pins = sorted((0, 2, 15, 4, 16, 17, 5, 18, 19, 21, 22, 23, 13, 12, 14, 27, 26, 25, 33, 32, 34))
     while True:
         for i in pins:
             if i == 5:  # built in
@@ -171,7 +171,7 @@ async def __gpio_outputs() -> None:
                     a.on()
                 else:
                     a.off()
-                print('\tGPIO', i, '=', a.value(),'setpoint', current)
+                print('\tGPIO', i, '=', a.value(), 'setpoint', current)
             except:
                 pass
         current = not current
@@ -256,8 +256,7 @@ async def main() -> None:
         await enable_wifi()
         await enable_webrepl()
         print('Debug mode...')
-        #asyncio.create_task(__gpio_debug())
+        # asyncio.create_task(__gpio_debug())
         asyncio.create_task(__gpio_outputs())
         while True:
             await asyncio.sleep_ms(100)
-
