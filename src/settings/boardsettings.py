@@ -51,7 +51,7 @@ class Settings:
         if Settings.GITHUB_TOKEN not in self._db:
             self.add_key(Settings.GITHUB_TOKEN, '')
         if Settings.BLUETOOTH_NAME not in self._db:
-            self.add_key(Settings.BLUETOOTH_NAME, 'IOTesting')
+            self.add_key(Settings.BLUETOOTH_NAME, 'IOTester')
         if Settings.SERIAL not in self._db:
             self.add_key(Settings.SERIAL, '1')
         if Settings.HW_REV not in self._db:
