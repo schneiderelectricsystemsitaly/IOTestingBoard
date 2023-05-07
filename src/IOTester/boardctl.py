@@ -255,7 +255,7 @@ async def toggle_vmeter_load() -> bool:
 
 
 async def board_hw_init() -> bool:
-    from .boardbt import (toggle_bluetooth, enable_bt_with_retry, disable_bt)
+    from .boardbt import (enable_bt_with_retry, disable_bt)
     __print_wakeup_reason()
     print(f'Machine reset cause: {machine.reset_cause()}')
 
