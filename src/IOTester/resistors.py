@@ -35,7 +35,7 @@ def __parallel_r(r1: float, r2: float) -> int:
     if r1 == 0 or r2 == 0:
         return 0
 
-    return int(1.0/(1.0/r1 + 1.0/r2))
+    return int(1.0 / (1.0 / r1 + 1.0 / r2))
 
 
 def __num_bits_set(bitmask) -> int:
