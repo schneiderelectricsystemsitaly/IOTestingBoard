@@ -51,10 +51,13 @@ def __get_hardware_revision() -> str:
 def __sw_get_version(directory, version_file_name='.version') -> str:
     # see ota_updater.py
     from os import listdir
-    if version_file_name in listdir(directory):
-        with open(directory + '/' + version_file_name) as f:
-            version = f.read()
-            return version
+    try:
+        if version_file_name in listdir(directory):
+            with open(directory + '/' + version_file_name) as f:
+                version = f.read()
+                return version
+    except OSError:
+        pass
     return '0.0'
 
 

@@ -9,20 +9,34 @@
 # Requirements
 
 ## Hardware requirements
-* ESP32 board with Micropython 1.20, I used LOLIN D32 (see https://www.wemos.cc/en/latest/d32/d32.html). Chip must have >= 4 MB Flash.
+
+* ESP32 board with Micropython 1.20, I used LOLIN D32 (see https://www.wemos.cc/
+en/latest/d32/d32.html). Chip must have >= 4 MB Flash.
 * PCB with other components for R generation (see below for hardware folder and BOM)
 * 3.7V Li-Ion battery (7.4 Wh gives >20 hours autonomy), power consumption approx 300 mWh when active
 * Hammond Manufacturing 1553C enclosure, 4 female 4mm banana plugs
 ![board assembly](https://user-images.githubusercontent.com/6236243/210255944-00ad9902-d084-4316-a0a8-11a4b11ba48b.png)
 
 ## Firmware requirements
+
 * Micropython 1.20 (ESP32 standard firmware from https://micropython.org/download/esp32/ )
+
 * aioble (can be installed to the lib folder of the flash memory using MPREMOTE tool)
+
 ```shell
 mpremote connect COMx mip install aioble
 ```
+
 * ota_update (forked from https://github.com/rdehuyss/micropython-ota-updater with bugfix for semantic versioning comparison bug)
+
 * to setup a new board from scratch, restore a BIN image from fw_img, then proceed to OTA upgrade.
+
+* Alternative setup, flash micropython on ESP32, connect board to WiFim then:
+
+```python
+import mip
+mip.install("github:schneiderelectricsystemsitaly/IOTestingBoard/package.json")
+```
 
 ## Development environment
 * Python 3.8
